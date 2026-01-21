@@ -11,14 +11,20 @@ trigger: always_on
   - 행정구역(시/군/구) 기반 인플루언서 랭킹 서비스
   - 지도 선택 → 바텀 시트(Bottom Sheet) → 리스트 확인의 2-Depth 구조
   - 인스타그램 ID 마스킹 및 광고 시청 후 리다이렉션 수익 모델
-- **현재 단계:** MVP 초기 개발 (프로젝트 세팅 및 코어 UI 골격 완성)
+- **현재 단계:** MVP 초기 개발 
 
 ## 2. 기술 스택 (Tech Stack)
-- **Core:** React (Vite), TypeScript
+- **Core:** React 18+ (Vite), TypeScript
 - **State Management:** Zustand (Riverpod 대체)
 - **Styling:** Tailwind CSS **v3.4.17** (v4.0 사용 금지 - 설정 충돌 방지)
 - **Routing:** React Router Dom
 - **Build Tool:** Vite (Node.js v20 LTS 권장)
+Deploy: Static Web App (Vercel/Netlify 등) → App-in-Toss Webview
+
+## 2-1 개발 배포 대상
+- 토스앱의 인앱토스(미니앱) 
+- 반응형 웹앱으로 만들어야함
+
 
 ## 3. 앱인토스(App-in-Toss) 환경 특이사항
 이 서비스는 모바일 브라우저가 아닌 **토스 앱 내부**에서 실행됩니다. 다음 사항을 준수해야 합니다.
@@ -32,6 +38,10 @@ trigger: always_on
 - **Group A (광역시):** `구/군` 단위로 쪼갬 (예: 부산 -> 해운대구, 기장군)
 - **Group B (8도):** `시/군` 단위로 통합 (예: 경기도 성남시 - 분당구/수정구 구분 안 함)
 - **Group C (예외):** 세종(단일), 제주(제주시/서귀포시 2개)
+
+## 4.1 사용자 검증
+-- 뚜존쿠 맵처럼 등록하고 싶은 인플루언서는 지역을 설정하고 본인 링크를 첨부, 인스타에 올라가있는(개발자 계정) 관리자 계정을 팔로우 하고 DM을 보내면 사용자 인증 완료, 개발자가 직접 승인을 하면 그때부터 노출 시작 
+
 
 ## 5. 설치 및 실행 가이드
 ```bash
