@@ -95,10 +95,10 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
 
   return (
     <div
-      className="w-full h-full flex flex-col items-center bg-[#F2F4F6] overflow-hidden relative"
+      className="w-full h-full flex flex-col items-center bg-[#F2F4F6] overflow-auto relative touch-auto"
       onClick={handleBackgroundClick} // 배경 클릭 시 줌 아웃
     >
-      <header className="pt-12 pb-2 text-center z-10 pointer-events-none">
+      <header className="pt-12 pb-2 text-center z-10 pointer-events-none flex-none">
         <h1 className="text-[22px] font-bold text-[#191F28] mb-1">인플루언서 맵</h1>
         <p className="text-[14px] text-[#4E5968]">
           {selectedProvince
@@ -107,10 +107,10 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
         </p>
       </header>
 
-      <div className="relative w-full max-w-[400px] aspect-[1/1.2] flex items-center justify-center p-6 -mt-4">
+      <div className="relative w-full max-w-[400px] aspect-[1/1.2] flex items-center justify-center p-6 -mt-4 flex-none">
         <svg
           viewBox="0 0 300 400"
-          className="w-full h-full"
+          className="w-full h-full overflow-visible"
           style={{ filter: 'drop-shadow(0px 8px 16px rgba(0, 0, 0, 0.04))' }}
         >
           <motion.g
