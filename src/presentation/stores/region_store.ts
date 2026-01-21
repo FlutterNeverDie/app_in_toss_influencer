@@ -3,6 +3,7 @@ import { create } from 'zustand';
 // 1. 상태(State) 정의
 interface RegionState {
   isSheetOpen: boolean;          // 바텀 시트 열림 여부
+  isDrawerOpen: boolean;         // 사이드바 메뉴 열림 여부
   selectedProvince: string;      // 광역 (예: 'seoul', 'gyeonggi')
   selectedDistrict: string | null; // 기초 (예: 'gangnam', 'bundang')
 }
@@ -11,6 +12,8 @@ interface RegionState {
 interface RegionActions {
   openSheet: () => void;
   closeSheet: () => void;
+  openDrawer: () => void;
+  closeDrawer: () => void;
   selectProvince: (province: string) => void;
   selectDistrict: (district: string) => void;
 }
@@ -19,12 +22,15 @@ interface RegionActions {
 export const useRegionStore = create<RegionState & RegionActions>((set) => ({
   // 초기값: 서울 강남구를 기본으로 잡거나, 아예 선택 안 된 상태로 시작
   isSheetOpen: false,
+  isDrawerOpen: false,
   selectedProvince: 'seoul',
   selectedDistrict: null,
 
   // 액션 구현
   openSheet: () => set({ isSheetOpen: true }),
   closeSheet: () => set({ isSheetOpen: false }),
+  openDrawer: () => set({ isDrawerOpen: true }),
+  closeDrawer: () => set({ isDrawerOpen: false }),
 
   selectProvince: (province) => set({
     selectedProvince: province,

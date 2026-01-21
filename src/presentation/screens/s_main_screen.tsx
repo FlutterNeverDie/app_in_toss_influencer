@@ -1,24 +1,60 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Menu } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { KoreaMapWidget } from '../widgets/w_korea_map';
 import { RegionSelectorSheet } from '../widgets/w_region_selector_sheet';
+import { DrawerMenu } from '../widgets/w_drawer_menu';
 import { PROVINCE_DISPLAY_NAMES, REGION_DATA } from '../../data/constants/regions';
+import { InfluencerService } from '../../data/services/influencer_service';
+import type { Influencer } from '../../data/models/m_influencer';
 
 /**
  * 인플루언서 맵 메인 화면
  * 전체적인 레이아웃 관리 및 지도/리스트 연동
  */
 export const MainScreen = () => {
-  const { selectedProvince, selectedDistrict, openSheet } = useRegionStore();
+  const { selectedProvince, selectedDistrict, openSheet, openDrawer } = useRegionStore();
+  const [influencers, setInfluencers] = useState<Influencer[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const provinceName = PROVINCE_DISPLAY_NAMES[selectedProvince];
   const districtName = REGION_DATA[selectedProvince]?.find(d => d.id === selectedDistrict)?.name;
+
+  // 데이터 로딩
+  useEffect(() => {
+    const fetchData = async () => {
+      if (selectedProvince && selectedDistrict) {
+        setIsLoading(true);
+        const data = await InfluencerService.fetchInfluencersByRegion(selectedProvince, selectedDistrict);
+        setInfluencers(data);
+        setIsLoading(false);
+      } else {
+        setInfluencers([]);
+      }
+    };
+    fetchData();
+  }, [selectedProvince, selectedDistrict]);
+
+  // ID 마스킹 함수 (antigravity -> anti***)
+  const maskInstagramId = (id: string) => {
+    if (id.length <= 4) return id;
+    return id.substring(0, 4) + '***';
+  };
 
   return (
     <div className="relative w-full h-screen bg-[#F2F4F6] overflow-hidden flex flex-col">
 
       {/* 1. 상단: 지도 영역 (메인) */}
       <div className="flex-1 relative">
+        {/* 메뉴 버튼 (Absolute Position) */}
+        <button
+          onClick={openDrawer}
+          className="absolute top-12 left-6 z-20 p-2 -ml-2 rounded-full hover:bg-black/5 transition-colors"
+        >
+          <Menu size={24} className="text-[#191F28]" />
+        </button>
+
         <KoreaMapWidget />
       </div>
 
@@ -50,16 +86,62 @@ export const MainScreen = () => {
 
         {selectedDistrict ? (
           <div className="space-y-4 pointer-events-none">
-            {/* 리스트 가상 데이터 (나중에 Supabase 연동) */}
-            <div className="flex items-center justify-between p-4 bg-[#F9FAFB] rounded-[16px]">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden" />
-                <div>
-                  <div className="text-[16px] font-bold text-[#333D4B]">준비 중...</div>
-                  <div className="text-[13px] text-[#8B95A1]">곧 데이터가 공개됩니다</div>
+            {isLoading ? (
+              /* 로딩 스켈레톤 */
+              <div className="flex items-center gap-3 p-4 bg-[#F9FAFB] rounded-[16px]">
+                <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse" />
+                <div className="space-y-2">
+                  <div className="w-24 h-4 bg-gray-200 rounded animate-pulse" />
+                  <div className="w-16 h-3 bg-gray-200 rounded animate-pulse" />
                 </div>
               </div>
-            </div>
+            ) : influencers.length > 0 ? (
+              /* 실제 데이터 리스트 */
+              influencers.map((influencer) => (
+                <div
+                  key={influencer.id}
+                  className="flex items-center justify-between p-4 bg-[#F9FAFB] rounded-[16px]"
+                >
+                  <div className="flex items-center gap-3">
+                    {/* 프로필 이미지 (No-Storage Policy 준수) */}
+                    <div className="w-12 h-12 rounded-full overflow-hidden border border-[#E5E8EB]">
+                      <img
+                        src={influencer.image_url}
+                        alt="Profile"
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // 이미지 로드 실패 시 기본 색상으로 대체
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).parentElement!.style.backgroundColor = '#F2F4F6';
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <div className="text-[16px] font-bold text-[#333D4B]">
+                        {maskInstagramId(influencer.instagram_id)}
+                      </div>
+                      <div className="text-[13px] text-[#8B95A1]">
+                        좋아요 {influencer.like_count.toLocaleString()}개
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              /* 데이터 없음 */
+              <div className="flex items-center justify-between p-4 bg-[#F9FAFB] rounded-[16px]">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center text-gray-400 text-xs">
+                    ?
+                  </div>
+                  <div>
+                    <div className="text-[16px] font-bold text-[#333D4B]">아직 등록된 인플루언서가 없어요</div>
+                    <div className="text-[13px] text-[#8B95A1]">가장 먼저 등록해 보세요!</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="py-8 text-center bg-[#F9FAFB] rounded-[24px] pointer-events-none">
@@ -70,6 +152,9 @@ export const MainScreen = () => {
 
       {/* 3. 오버레이: 지역 선택 바텀 시트 */}
       <RegionSelectorSheet />
+
+      {/* 4. 오버레이: 사이드바 메뉴 (Drawer) */}
+      <DrawerMenu />
     </div>
   );
 };
