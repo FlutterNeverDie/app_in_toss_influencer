@@ -253,12 +253,12 @@ export const RegionSelectorSheet = () => {
                   <div className="flex-1 overflow-y-auto bg-white px-5 py-2">
                     <div className="sticky top-0 bg-white/95 backdrop-blur-sm z-10 py-4 mb-3">
                       <span className="text-[14px] text-[#4E5968] font-bold px-1 tracking-tight">
-                        {PROVINCE_DISPLAY_NAMES[selectedProvince]}
+                        {selectedProvince ? PROVINCE_DISPLAY_NAMES[selectedProvince] : '지역 선택'}
                       </span>
                     </div>
 
                     <ul className="space-y-0 pb-10">
-                      {REGION_DATA[selectedProvince]?.map((dist) => {
+                      {(selectedProvince ? REGION_DATA[selectedProvince] : []).map((dist: { id: string; name: string }) => {
                         const isSelected = selectedDistrict === dist.id;
                         return (
                           <motion.li
