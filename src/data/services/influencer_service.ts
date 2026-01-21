@@ -9,13 +9,17 @@ export const InfluencerService = {
      */
     async fetchInfluencersByRegion(provinceId: string, districtId: string): Promise<Influencer[]> {
         try {
-            const regionId = `${provinceId}_${districtId}`;
-            console.log('Fetching influencers for regionId:', regionId);
+            console.log(`Fetching influencers for ${provinceId} ${districtId}`);
+
+            // Schema: province_id, district_id 사용
             const { data, error } = await supabase
-                .from('influencers') // corrected table name
+                .from('influencer') // User confirmed table name is 'influencer'
                 .select('*')
-                .eq('region_id', regionId)
+                .eq('province_id', provinceId)
+                .eq('district_id', districtId)
+                // .eq('status', 'approved') // Pending 상태도 보이게 임시 주석 처리
                 .order('like_count', { ascending: false });
+
             console.log('Fetched count:', data?.length ?? 0);
 
             if (error) {
@@ -37,6 +41,7 @@ export const InfluencerService = {
         const { data, error } = await supabase
             .from('influencer')
             .select('*')
+            // .eq('status', 'approved')
             .order('like_count', { ascending: false })
             .limit(20);
 

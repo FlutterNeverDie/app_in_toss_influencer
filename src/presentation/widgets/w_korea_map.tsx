@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import { TransformWrapper, TransformComponent, type ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import { useRegionStore } from '../stores/region_store';
 import { PROVINCE_DISPLAY_NAMES, REGION_DATA } from '../../data/constants/regions';
 import { MAP_COLORS } from '../../data/constants/map_paths';
@@ -16,6 +16,14 @@ interface KoreaMapWidgetProps {
 
 export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
   const { selectedProvince, selectProvince, selectDistrict } = useRegionStore();
+  const transformRef = useRef<ReactZoomPanPinchRef>(null);
+
+  // 1. 상세 지역 진입/이탈 시 줌 상태 초기화 (항상 화면 중앙 정렬)
+  useEffect(() => {
+    if (transformRef.current) {
+      transformRef.current.resetTransform();
+    }
+  }, [selectedProvince]);
 
   const handleDistrictClick = (districtId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -108,6 +116,7 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
           wheel={{ step: 0.1 }}
           zoomAnimation={{ animationType: "easeOut" }}
           doubleClick={{ disabled: true }} // 더블 클릭 줌 방지 (배경 클릭과 충돌 가능성)
+          ref={transformRef}
         >
           {({ resetTransform }) => (
             <div

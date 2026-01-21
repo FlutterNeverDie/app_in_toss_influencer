@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { isSupabaseConfigured } from '../../lib/supabase';
-import { motion, useDragControls } from 'framer-motion';
+import { motion, useDragControls, AnimatePresence } from 'framer-motion';
 import { Menu, Search, ChevronDown, Map } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { KoreaMapWidget } from '../widgets/w_korea_map';
@@ -21,6 +21,17 @@ export const MainScreen = () => {
 
   // 드래그 제스처 컨트롤
   const dragControls = useDragControls();
+
+  // 토스트 메시지 상태
+  const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+
+  const showToast = (message: string) => {
+    setToast({ message, visible: true });
+    // 3초 후 자동으로 사라짐
+    setTimeout(() => {
+      setToast(prev => ({ ...prev, visible: false }));
+    }, 3000);
+  };
 
   const provinceName = selectedProvince ? PROVINCE_DISPLAY_NAMES[selectedProvince] : '';
   const districtName = (selectedProvince && selectedDistrict)
@@ -51,6 +62,21 @@ export const MainScreen = () => {
 
   return (
     <div className="relative w-full h-full bg-[#F2F4F6] overflow-hidden flex flex-col">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast.visible && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: 20, x: '-50%' }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            className="fixed bottom-10 left-1/2 z-[9999] bg-gray-800/90 backdrop-blur-md text-white px-5 py-3 rounded-full text-[14px] font-medium shadow-lg pointer-events-none whitespace-nowrap"
+          >
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* 1. 상단: 지도 영역 (메인) - 전체 높이 사용 */}
       <div className="absolute inset-0 z-0">
         {/* 메뉴 버튼 */}
@@ -178,7 +204,12 @@ export const MainScreen = () => {
               influencers.map((influencer) => (
                 <div
                   key={influencer.id}
-                  className="flex items-center justify-between rounded-[16px] bg-[#F9FAFB] p-4"
+                  onClick={() => {
+                    // DB 변경 없이 ID로 바로 링크 생성
+                    const profileUrl = `https://www.instagram.com/${influencer.instagram_id}`;
+                    window.open(profileUrl, '_blank');
+                  }}
+                  className="flex items-center justify-between rounded-[16px] bg-[#F9FAFB] p-4 cursor-pointer hover:bg-gray-100 transition-colors active:scale-[0.98]"
                 >
                   <div className="flex items-center gap-3">
                     {/* 프로필 이미지 (No-Storage Policy 준수) */}
