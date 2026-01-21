@@ -165,7 +165,7 @@ export const RegionSelectorSheet = () => {
                           className="flex items-center justify-between px-6 py-4 bg-white rounded-[24px] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-[#F2F4F6] transition-all active:bg-[#F2F4F6]"
                         >
                           <div className="flex flex-col">
-                            <span className="text-[19px] font-bold text-[#191F28]">
+                            <span className="text-[16px] font-bold text-[#191F28]">
                               {result.name}
                             </span>
                             <span className="text-[13px] text-[#8B95A1] mt-0.5">
@@ -212,7 +212,7 @@ export const RegionSelectorSheet = () => {
                           {isSelected && (
                             <motion.div
                               layoutId="activeProvinceIndicator"
-                              className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-7 bg-[#3182F6] rounded-r-full"
+                              className="absolute left-0 inset-y-0 w-1.5 bg-[#3182F6] rounded-r-full"
                             />
                           )}
                           <span className="truncate">
