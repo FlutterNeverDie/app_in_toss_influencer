@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { isSupabaseConfigured } from '../../lib/supabase';
-import { motion } from 'framer-motion';
+import { motion, useDragControls } from 'framer-motion';
 import { Menu, Search, ChevronDown } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { KoreaMapWidget } from '../widgets/w_korea_map';
@@ -18,6 +18,9 @@ export const MainScreen = () => {
   const { selectedProvince, selectedDistrict, openSheet, openDrawer, selectDistrict } = useRegionStore();
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // 드래그 제스처 컨트롤
+  const dragControls = useDragControls();
 
   const provinceName = selectedProvince ? PROVINCE_DISPLAY_NAMES[selectedProvince] : '';
   const districtName = (selectedProvince && selectedDistrict)
@@ -66,19 +69,31 @@ export const MainScreen = () => {
         initial={false}
         animate={{
           height: selectedDistrict ? '92%' : 'auto', // 92% 까지만 올라와서 뒤에 지도 살짝 보이게
+          y: 0
+        }}
+        drag="y"
+        dragControls={dragControls}
+        dragListener={false} // 내부 스크롤 충돌 방지: 핸들 부분만 드래그 가능하게
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={0.1} // 약간의 탄성
+        onDragEnd={(_, info) => {
+          if (info.offset.y > 100 || info.velocity.y > 500) {
+            selectDistrict(null); // 아래로 드래그 시 닫기
+          }
         }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
         className={`
           absolute bottom-0 left-0 right-0 z-10 
           bg-white rounded-t-[32px] shadow-[0_-8px_30px_rgba(0,0,0,0.1)] 
-          flex flex-col overflow-hidden
+          flex flex-col overflow-hidden touch-none
           ${selectedDistrict ? 'shadow-2xl' : ''}
         `}
       >
-        {/* 드래그 핸들 / 닫기 영역 */}
+        {/* 드래그 핸들 / 닫기 영역 (이 부분을 잡고 드래그 가능) */}
         <div
-          className="flex-none p-4 flex justify-center items-center cursor-pointer active:bg-gray-50"
-          onClick={() => selectedDistrict && selectDistrict(null)} // 누르면 닫힘
+          className="flex-none p-4 flex justify-center items-center cursor-pointer active:bg-gray-50 pt-5"
+          onPointerDown={(e) => dragControls.start(e)}
+          onClick={() => selectedDistrict && selectDistrict(null)}
         >
           {selectedDistrict ? (
             <ChevronDown className="text-gray-300" />
@@ -87,8 +102,11 @@ export const MainScreen = () => {
           )}
         </div>
 
-        {/* 컨텐츠 헤더 */}
-        <div className="flex-none px-8 pb-6">
+        {/* 컨텐츠 헤더 (이 부분도 드래그 가능하게 할지? UX상 헤더까지는 드래그 영역으로 두는 게 편함) */}
+        <div
+          className="flex-none px-8 pb-6"
+          onPointerDown={(e) => dragControls.start(e)}
+        >
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-[22px] font-bold text-[#191F28] leading-tight">
               {selectedDistrict
