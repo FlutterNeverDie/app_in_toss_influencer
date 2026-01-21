@@ -19,8 +19,10 @@ export const MainScreen = () => {
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const provinceName = PROVINCE_DISPLAY_NAMES[selectedProvince];
-  const districtName = REGION_DATA[selectedProvince]?.find(d => d.id === selectedDistrict)?.name;
+  const provinceName = selectedProvince ? PROVINCE_DISPLAY_NAMES[selectedProvince] : '';
+  const districtName = (selectedProvince && selectedDistrict)
+    ? REGION_DATA[selectedProvince]?.find(d => d.id === selectedDistrict)?.name
+    : '';
 
   // 데이터 로딩
   useEffect(() => {
@@ -61,7 +63,13 @@ export const MainScreen = () => {
 
       {/* 2. 하단: 인플루언서 리스트 프리뷰 (Toss Style) */}
       <motion.div
-        className="flex-none bg-white rounded-t-[32px] shadow-[0_-8px_30px_rgba(0,0,0,0.04)] z-10 p-8 pb-12"
+        initial={false}
+        animate={{
+          height: selectedDistrict ? '60vh' : 'auto',
+          paddingBottom: selectedDistrict ? 0 : 48
+        }}
+        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+        className="flex-none bg-white rounded-t-[32px] shadow-[0_-8px_30px_rgba(0,0,0,0.04)] z-10 p-8 w-full overflow-hidden flex flex-col"
       >
         <div className="w-12 h-1.5 bg-[#E5E8EB] rounded-full mx-auto mb-8" />
 
@@ -88,7 +96,7 @@ export const MainScreen = () => {
         </div>
 
         {selectedDistrict ? (
-          <div className="pointer-events-none space-y-4">
+          <div className="flex-1 overflow-y-auto space-y-4 pb-8 scrollbar-hide">
             {!isSupabaseConfigured && (
               <div className="flex items-center gap-3 rounded-[16px] border border-amber-200 bg-amber-50 p-4">
                 <div className="text-2xl">⚠️</div>

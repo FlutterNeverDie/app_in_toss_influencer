@@ -81,6 +81,7 @@ export const RegionSelectorSheet = () => {
     selectDistrict(districtId);
     setSearchQuery('');
     setIsSearching(false);
+    closeSheet();
   };
 
   // 드래그 종료 시 닫기 로직
@@ -262,7 +263,10 @@ export const RegionSelectorSheet = () => {
                         return (
                           <motion.li
                             key={dist.id}
-                            onClick={() => selectDistrict(dist.id)}
+                            onClick={() => {
+                              selectDistrict(dist.id);
+                              closeSheet();
+                            }}
                             whileTap={{ scale: 0.98 }}
                             className={`
                               flex items-center justify-between px-6 py-6 cursor-pointer transition-all
