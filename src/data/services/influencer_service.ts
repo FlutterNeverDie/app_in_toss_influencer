@@ -9,12 +9,14 @@ export const InfluencerService = {
      */
     async fetchInfluencersByRegion(provinceId: string, districtId: string): Promise<Influencer[]> {
         try {
+            const regionId = `${provinceId}_${districtId}`;
+            console.log('Fetching influencers for regionId:', regionId);
             const { data, error } = await supabase
-                .from('influencer')
+                .from('influencers') // corrected table name
                 .select('*')
-                .eq('province_id', provinceId)
-                .eq('district_id', districtId)
+                .eq('region_id', regionId)
                 .order('like_count', { ascending: false });
+            console.log('Fetched count:', data?.length ?? 0);
 
             if (error) {
                 console.error('Error fetching influencers:', error);
