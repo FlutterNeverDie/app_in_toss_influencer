@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --toss-blue: #3182f6;
+  --toss-grey-100: #f2f4f6;
+  --toss-grey-900: #191f28;
+  
+  /* Safe Area Variables */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@layer base {
+  body {
+    @apply antialiased text-[#191F28] bg-[#F2F4F6];
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  /* Scrollbar Hide */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.safe-area-pt {
+  padding-top: var(--safe-area-top);
+}
+
+.safe-area-pb {
+  padding-bottom: var(--safe-area-bottom);
+}
+
+.safe-area-mb {
+  margin-bottom: var(--safe-area-bottom);
+}

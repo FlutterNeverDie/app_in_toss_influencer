@@ -11,30 +11,28 @@ export interface RegionData {
 
 // UI 표시를 위한 광역 자치단체 한글 명칭 매핑
 export const PROVINCE_DISPLAY_NAMES: Record<string, string> = {
-    seoul: '서울특별시',
-    busan: '부산광역시',
-    daegu: '대구광역시',
-    incheon: '인천광역시',
-    gwangju: '광주광역시',
-    daejeon: '대전광역시',
-    ulsan: '울산광역시',
-    sejong: '세종특별자치시',
-    gyeonggi: '경기도',
-    gangwon: '강원특별자치도',
+    seoul: '서울',
+    busan: '부산',
+    daegu: '대구',
+    incheon: '인천',
+    gwangju: '광주',
+    daejeon: '대전',
+    ulsan: '울산',
+    sejong: '세종',
+    gyeonggi_south: '경기(남)',
+    gyeonggi_north: '경기(북)',
+    gangwon: '강원도',
     chungbuk: '충청북도',
     chungnam: '충청남도',
-    jeonbuk: '전북특별자치도',
+    jeonbuk: '전라북도',
     jeonnam: '전라남도',
     gyeongbuk: '경상북도',
     gyeongnam: '경상남도',
-    jeju: '제주특별자치도',
+    jeju: '제주도',
 };
 
 // 전국 행정구역 데이터 (2-Depth 구조)
 export const REGION_DATA: RegionData = {
-    // =========================================================
-    // GROUP A: 수도권 및 광역시 (구/군 단위)
-    // =========================================================
     seoul: [
         { id: 'gangnam', name: '강남구' },
         { id: 'seocho', name: '서초구' },
@@ -124,40 +122,38 @@ export const REGION_DATA: RegionData = {
         { id: 'dong', name: '동구' },
         { id: 'ulju', name: '울주군' },
     ],
-
-    // =========================================================
-    // GROUP B: 8도 (시/군 단위 통합)
-    // =========================================================
-    gyeonggi: [
+    gyeonggi_south: [
         { id: 'suwon', name: '수원시' },
         { id: 'seongnam', name: '성남시' },
         { id: 'yongin', name: '용인시' },
-        { id: 'goyang', name: '고양시' },
         { id: 'bucheon', name: '부천시' },
         { id: 'ansan', name: '안산시' },
         { id: 'anyang', name: '안양시' },
-        { id: 'namyangju', name: '남양주시' },
         { id: 'hwaseong', name: '화성시' },
         { id: 'pyeongtaek', name: '평택시' },
-        { id: 'uijeongbu', name: '의정부시' },
         { id: 'siheung', name: '시흥시' },
-        { id: 'paju', name: '파주시' },
         { id: 'gimpo', name: '김포시' },
         { id: 'gwangmyeong', name: '광명시' },
         { id: 'gwangju', name: '광주시' },
         { id: 'gunpo', name: '군포시' },
         { id: 'ocheon', name: '오산시' },
         { id: 'icheon', name: '이천시' },
-        { id: 'yangju', name: '양주시' },
         { id: 'anseong', name: '안성시' },
-        { id: 'guri', name: '구리시' },
-        { id: 'pocheon', name: '포천시' },
         { id: 'uiwang', name: '의왕시' },
         { id: 'hanam', name: '하남시' },
         { id: 'yeoju', name: '여주시' },
         { id: 'yangpyeong', name: '양평군' },
-        { id: 'dongducheon', name: '동두천시' },
         { id: 'gwacheon', name: '과천시' },
+    ],
+    gyeonggi_north: [
+        { id: 'goyang', name: '고양시' },
+        { id: 'namyangju', name: '남양주시' },
+        { id: 'uijeongbu', name: '의정부시' },
+        { id: 'paju', name: '파주시' },
+        { id: 'yangju', name: '양주시' },
+        { id: 'guri', name: '구리시' },
+        { id: 'pocheon', name: '포천시' },
+        { id: 'dongducheon', name: '동두천시' },
         { id: 'gapyeong', name: '가평군' },
         { id: 'yeoncheon', name: '연천군' },
     ],
@@ -229,7 +225,7 @@ export const REGION_DATA: RegionData = {
     ],
     jeonnam: [
         { id: 'mokpo', name: '목포시' },
-        { id: 'yeosu', name: '여주시' },
+        { id: 'yeosu', name: '여수시' },
         { id: 'suncheon', name: '순천시' },
         { id: 'naju', name: '나주시' },
         { id: 'gwangyang', name: '광양시' },
@@ -295,10 +291,6 @@ export const REGION_DATA: RegionData = {
         { id: 'geochang', name: '거창군' },
         { id: 'hapcheon', name: '합천군' },
     ],
-
-    // =========================================================
-    // GROUP C: 예외 지역 (세종, 제주)
-    // =========================================================
     sejong: [
         { id: 'all', name: '세종특별자치시' }
     ],
