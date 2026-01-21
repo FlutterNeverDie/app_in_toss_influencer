@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageCircle, HelpCircle, UserPlus, ChevronDown, ChevronUp } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';

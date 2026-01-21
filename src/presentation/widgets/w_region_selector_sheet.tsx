@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Search as SearchIcon, ArrowLeft } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';

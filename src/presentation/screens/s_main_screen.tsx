@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isSupabaseConfigured } from '../../lib/supabase';
 import { motion } from 'framer-motion';
 import { Menu } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
@@ -85,14 +86,25 @@ export const MainScreen = () => {
         </div>
 
         {selectedDistrict ? (
-          <div className="space-y-4 pointer-events-none">
+          <div className="pointer-events-none space-y-4">
+            {!isSupabaseConfigured && (
+              <div className="flex items-center gap-3 rounded-[16px] border border-amber-200 bg-amber-50 p-4">
+                <div className="text-2xl">⚠️</div>
+                <div>
+                  <div className="text-[15px] font-bold text-amber-900">Supabase 연결 필요</div>
+                  <div className="text-[13px] text-amber-700">
+                    .env 파일의 VITE_SUPABASE_URL 설정을 확인해주세요
+                  </div>
+                </div>
+              </div>
+            )}
             {isLoading ? (
               /* 로딩 스켈레톤 */
-              <div className="flex items-center gap-3 p-4 bg-[#F9FAFB] rounded-[16px]">
-                <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse" />
+              <div className="flex items-center gap-3 rounded-[16px] bg-[#F9FAFB] p-4">
+                <div className="h-12 w-12 animate-pulse rounded-full bg-gray-200" />
                 <div className="space-y-2">
-                  <div className="w-24 h-4 bg-gray-200 rounded animate-pulse" />
-                  <div className="w-16 h-3 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+                  <div className="h-3 w-16 animate-pulse rounded bg-gray-200" />
                 </div>
               </div>
             ) : influencers.length > 0 ? (
@@ -100,20 +112,21 @@ export const MainScreen = () => {
               influencers.map((influencer) => (
                 <div
                   key={influencer.id}
-                  className="flex items-center justify-between p-4 bg-[#F9FAFB] rounded-[16px]"
+                  className="flex items-center justify-between rounded-[16px] bg-[#F9FAFB] p-4"
                 >
                   <div className="flex items-center gap-3">
                     {/* 프로필 이미지 (No-Storage Policy 준수) */}
-                    <div className="w-12 h-12 rounded-full overflow-hidden border border-[#E5E8EB]">
+                    <div className="h-12 w-12 overflow-hidden rounded-full border border-[#E5E8EB]">
                       <img
                         src={influencer.image_url}
                         alt="Profile"
                         referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover"
+                        className="h-full w-full object-cover"
                         onError={(e) => {
                           // 이미지 로드 실패 시 기본 색상으로 대체
-                          (e.target as HTMLImageElement).style.display = 'none';
-                          (e.target as HTMLImageElement).parentElement!.style.backgroundColor = '#F2F4F6';
+                          ; (e.target as HTMLImageElement).style.display = 'none'
+                            ; (e.target as HTMLImageElement).parentElement!.style.backgroundColor =
+                              '#F2F4F6'
                         }}
                       />
                     </div>
@@ -130,14 +143,20 @@ export const MainScreen = () => {
               ))
             ) : (
               /* 데이터 없음 */
-              <div className="flex items-center justify-between p-4 bg-[#F9FAFB] rounded-[16px]">
+              <div className="flex items-center justify-between rounded-[16px] bg-[#F9FAFB] p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center text-gray-400 text-xs">
+                  <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-gray-200 text-xs text-gray-400">
                     ?
                   </div>
                   <div>
-                    <div className="text-[16px] font-bold text-[#333D4B]">아직 등록된 인플루언서가 없어요</div>
-                    <div className="text-[13px] text-[#8B95A1]">가장 먼저 등록해 보세요!</div>
+                    <div className="text-[16px] font-bold text-[#333D4B]">
+                      아직 등록된 인플루언서가 없어요
+                    </div>
+                    {!isSupabaseConfigured ? (
+                      <div className="text-[13px] text-amber-600">설정을 완료하면 데이터가 보입니다</div>
+                    ) : (
+                      <div className="text-[13px] text-[#8B95A1]">가장 먼저 등록해 보세요!</div>
+                    )}
                   </div>
                 </div>
               </div>

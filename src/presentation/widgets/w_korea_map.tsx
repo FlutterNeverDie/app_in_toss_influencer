@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { motion } from 'framer-motion';
 import { useRegionStore } from '../stores/region_store';
 import { PROVINCE_DISPLAY_NAMES } from '../../data/constants/regions';
