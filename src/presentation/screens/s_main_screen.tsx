@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { motion } from 'framer-motion';
-import { Menu } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { KoreaMapWidget } from '../widgets/w_korea_map';
 import { RegionSelectorSheet } from '../widgets/w_region_selector_sheet';
@@ -61,23 +61,25 @@ export const MainScreen = () => {
 
       {/* 2. 하단: 인플루언서 리스트 프리뷰 (Toss Style) */}
       <motion.div
-        onClick={openSheet}
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        onDragEnd={(_, info) => {
-          if (info.offset.y < -50) openSheet();
-        }}
-        whileTap={{ scale: 0.99 }}
-        className="flex-none bg-white rounded-t-[32px] shadow-[0_-8px_30px_rgba(0,0,0,0.04)] z-10 p-8 pb-12 cursor-pointer touch-none"
+        className="flex-none bg-white rounded-t-[32px] shadow-[0_-8px_30px_rgba(0,0,0,0.04)] z-10 p-8 pb-12"
       >
         <div className="w-12 h-1.5 bg-[#E5E8EB] rounded-full mx-auto mb-8" />
 
-        <div className="mb-6 pointer-events-none">
-          <h2 className="text-[22px] font-bold text-[#191F28] leading-tight">
-            {selectedDistrict
-              ? <><span className="text-[#3182F6]">{districtName}</span> 핫플 랭킹</>
-              : '어느 지역이 궁금하세요?'}
-          </h2>
+        <div className="mb-6">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-[22px] font-bold text-[#191F28] leading-tight">
+              {selectedDistrict
+                ? <><span className="text-[#3182F6]">{districtName}</span> 핫플 랭킹</>
+                : '어느 지역이 궁금하세요?'}
+            </h2>
+            <button
+              onClick={openSheet}
+              className="p-2 -mr-2 text-[#4E5968] hover:bg-gray-100 rounded-full transition-colors"
+              aria-label="지역 검색"
+            >
+              <Search size={24} />
+            </button>
+          </div>
           <p className="text-[#4E5968] text-[15px] mt-1">
             {selectedDistrict
               ? `${provinceName} ${districtName}의 인기 인플루언서입니다`
