@@ -15,23 +15,23 @@ export const KoreaMapWidget = () => {
   // SVG 내에서 각 지역의 위치를 정의 (토스 스타일의 세련된 격자형 배치)
   const getProvincePosition = (key: string) => {
     const layout: Record<string, { x: number; y: number }> = {
-      seoul: { x: 80, y: 70 },
-      gyeonggi_north: { x: 80, y: 35 }, // 서울 위
-      gyeonggi_south: { x: 80, y: 105 }, // 서울 아래
-      incheon: { x: 30, y: 70 },
+      seoul: { x: 80, y: 65 },
+      gyeonggi_north: { x: 80, y: 25 }, // 서울 위
+      gyeonggi_south: { x: 80, y: 100 }, // 서울 아래
+      incheon: { x: 20, y: 70 },
       gangwon: { x: 155, y: 60 },
       chungbuk: { x: 135, y: 135 },
       chungnam: { x: 50, y: 165 },
       daejeon: { x: 100, y: 185 },
-      sejong: { x: 70, y: 135 },
-      jeonbuk: { x: 60, y: 235 },
-      jeonnam: { x: 50, y: 295 },
-      gwangju: { x: 40, y: 255 },
+      sejong: { x: 70, y: 132 },
+      jeonbuk: { x: 80, y: 220 },
+      jeonnam: { x: 75, y: 310 },
+      gwangju: { x: 35, y: 265 },
       gyeongbuk: { x: 185, y: 165 },
       gyeongnam: { x: 165, y: 245 },
       daegu: { x: 195, y: 205 },
-      ulsan: { x: 225, y: 225 },
-      busan: { x: 215, y: 265 },
+      ulsan: { x: 225, y: 245 },
+      busan: { x: 215, y: 285 },
       jeju: { x: 80, y: 365 },
     };
     return layout[key] || { x: 0, y: 0 };

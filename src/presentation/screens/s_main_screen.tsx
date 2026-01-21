@@ -32,6 +32,7 @@ export const MainScreen = () => {
         }}
         whileTap={{ scale: 0.99 }}
         className="flex-none bg-white rounded-t-[32px] shadow-[0_-8px_30px_rgba(0,0,0,0.04)] z-10 p-8 pb-12 cursor-pointer touch-none"
+      >
         <div className="w-12 h-1.5 bg-[#E5E8EB] rounded-full mx-auto mb-8" />
 
         <div className="mb-6 pointer-events-none">
