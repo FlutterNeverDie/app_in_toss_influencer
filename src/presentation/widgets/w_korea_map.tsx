@@ -109,7 +109,7 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
           zoomAnimation={{ animationType: "easeOut" }}
           doubleClick={{ disabled: true }} // 더블 클릭 줌 방지 (배경 클릭과 충돌 가능성)
         >
-          {({ zoomIn, zoomOut, resetTransform, ...rest }) => (
+          {({ resetTransform }) => (
             <div
               className="w-full h-full flex items-center justify-center cursor-move"
               onClick={() => handleBackgroundClick(resetTransform)}
