@@ -21,14 +21,35 @@ export const RegionSelectorSheet = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLUListElement>(null);
 
-  // 시트가 열릴 때 상태 초기화
+  // 시트가 열릴 때 상태 초기화 및 스크롤 동기화
   useEffect(() => {
     if (isSheetOpen) {
       setSearchQuery('');
       setIsSearching(false);
+
+      // 약간의 지연 후 선택된 지역으로 스크롤 (애니메이션 완료 시점 고려)
+      setTimeout(() => {
+        if (sidebarRef.current) {
+          const activeItem = sidebarRef.current.querySelector('[data-selected="true"]');
+          if (activeItem) {
+            activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }, 300);
     }
   }, [isSheetOpen]);
+
+  // 지역 선택이 바뀔 때도 스크롤 동기화
+  useEffect(() => {
+    if (isSheetOpen && sidebarRef.current) {
+      const activeItem = sidebarRef.current.querySelector('[data-selected="true"]');
+      if (activeItem) {
+        activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [selectedProvince, isSheetOpen]);
 
   // 전체 지역 데이터 플랫하게 변환 (검색 효율성을 위해)
   const allDistricts = useMemo(() => {
@@ -193,7 +214,10 @@ export const RegionSelectorSheet = () => {
                 /* 기본 2-Depth 레이아웃 */
                 <>
                   {/* 왼쪽: 광역 리스트 */}
-                  <ul className="w-[125px] bg-[#F9FAFB] overflow-y-auto scrollbar-hide py-2 border-r border-[#E5E8EB]">
+                  <ul
+                    ref={sidebarRef}
+                    className="w-[125px] bg-[#F9FAFB] overflow-y-auto scrollbar-hide py-2 border-r border-[#E5E8EB]"
+                  >
                     {Object.keys(REGION_DATA).map((provKey) => {
                       const isSelected = selectedProvince === provKey;
                       const displayName = PROVINCE_DISPLAY_NAMES[provKey];
@@ -201,6 +225,7 @@ export const RegionSelectorSheet = () => {
                       return (
                         <li
                           key={provKey}
+                          data-selected={isSelected}
                           onClick={() => selectProvince(provKey)}
                           className={`
                             relative px-6 py-6 text-[16px] cursor-pointer transition-all
