@@ -15,12 +15,12 @@ interface RegionActions {
   openDrawer: () => void;
   closeDrawer: () => void;
   selectProvince: (province: string | null) => void;
-  selectDistrict: (district: string) => void;
+  selectDistrict: (district: string | null) => void;
 }
 
 // 3. 스토어 생성
 export const useRegionStore = create<RegionState & RegionActions>((set) => ({
-  // 초기값: 선택 안 된 상태로 시작
+  // ... (초기값)
   isSheetOpen: false,
   isDrawerOpen: false,
   selectedProvince: null,
@@ -35,11 +35,10 @@ export const useRegionStore = create<RegionState & RegionActions>((set) => ({
   selectProvince: (province) => set({
     selectedProvince: province,
     selectedDistrict: null, // 광역 바뀌면 기초 초기화
-    // isSheetOpen: true  <-- 삭제: 이제 그리드 뷰가 대신 뜨므로 시트 자동 오픈 안함
   }),
 
   selectDistrict: (district) => set({
     selectedDistrict: district,
-    isSheetOpen: false // 구 선택 완료 시 시트 닫기 (이건 유지 or 삭제? 메인화면 리스트 확장을 위해 false 유지)
+    isSheetOpen: false
   }),
 }));

@@ -6,13 +6,22 @@
   --toss-blue: #3182f6;
   --toss-grey-100: #f2f4f6;
   --toss-grey-900: #191f28;
-  
+
   /* Safe Area Variables */
   --safe-area-top: env(safe-area-inset-top, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @layer base {
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
   body {
     @apply antialiased text-[#191F28] bg-[#F2F4F6];
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;

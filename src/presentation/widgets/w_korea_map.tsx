@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import { useRegionStore } from '../stores/region_store';
 import { PROVINCE_DISPLAY_NAMES, REGION_DATA } from '../../data/constants/regions';
@@ -7,8 +8,24 @@ import { MAP_COLORS } from '../../data/constants/map_paths';
 /**
  * 대한민국 지도 위젯 (Premium SVG Version)
  */
-export const KoreaMapWidget = () => {
+// ... imports
+
+interface KoreaMapWidgetProps {
+  onDistrictClick?: (provinceId: string, districtId: string) => void;
+}
+
+export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
   const { selectedProvince, selectProvince, selectDistrict } = useRegionStore();
+  // ...
+  const handleDistrictClick = (districtId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDistrictClick && selectedProvince) {
+      onDistrictClick(selectedProvince, districtId);
+    } else {
+      selectDistrict(districtId);
+    }
+  };
+  // ...
 
   const provinces = Object.keys(PROVINCE_DISPLAY_NAMES);
 
@@ -73,11 +90,8 @@ export const KoreaMapWidget = () => {
     }
   };
 
-  const handleDistrictClick = (districtId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    selectDistrict(districtId);
-    // 메인 화면에서 시트가 자동으로 열림 (RegionStore 상태 변경 감지)
-  };
+  // ...
+
 
   return (
     <div

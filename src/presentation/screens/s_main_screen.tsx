@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { motion } from 'framer-motion';
-import { Menu, Search } from 'lucide-react';
+import { Menu, Search, ChevronDown } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { KoreaMapWidget } from '../widgets/w_korea_map';
 import { RegionSelectorSheet } from '../widgets/w_region_selector_sheet';
@@ -15,7 +15,7 @@ import type { Influencer } from '../../data/models/m_influencer';
  * 전체적인 레이아웃 관리 및 지도/리스트 연동
  */
 export const MainScreen = () => {
-  const { selectedProvince, selectedDistrict, openSheet, openDrawer } = useRegionStore();
+  const { selectedProvince, selectedDistrict, openSheet, openDrawer, selectDistrict } = useRegionStore();
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,6 +27,7 @@ export const MainScreen = () => {
   // 데이터 로딩
   useEffect(() => {
     const fetchData = async () => {
+      // (기존 로직)
       if (selectedProvince && selectedDistrict) {
         setIsLoading(true);
         const data = await InfluencerService.fetchInfluencersByRegion(selectedProvince, selectedDistrict);
@@ -39,18 +40,17 @@ export const MainScreen = () => {
     fetchData();
   }, [selectedProvince, selectedDistrict]);
 
-  // ID 마스킹 함수 (antigravity -> anti***)
+  // ID 마스킹 함수
   const maskInstagramId = (id: string) => {
     if (id.length <= 4) return id;
     return id.substring(0, 4) + '***';
   };
 
   return (
-    <div className="relative w-full h-screen bg-[#F2F4F6] overflow-hidden flex flex-col">
-
-      {/* 1. 상단: 지도 영역 (메인) */}
-      <div className="flex-1 relative">
-        {/* 메뉴 버튼 (Absolute Position) */}
+    <div className="relative w-full h-full bg-[#F2F4F6] overflow-hidden flex flex-col">
+      {/* 1. 상단: 지도 영역 (메인) - 전체 높이 사용 */}
+      <div className="absolute inset-0 z-0">
+        {/* 메뉴 버튼 */}
         <button
           onClick={openDrawer}
           className="absolute top-12 left-6 z-20 p-2 -ml-2 rounded-full hover:bg-black/5 transition-colors"
@@ -61,19 +61,34 @@ export const MainScreen = () => {
         <KoreaMapWidget />
       </div>
 
-      {/* 2. 하단: 인플루언서 리스트 프리뷰 (Toss Style) */}
+      {/* 2. 하단: 인플루언서 리스트 프리뷰 (Sheet Mode) */}
       <motion.div
         initial={false}
         animate={{
-          height: selectedDistrict ? '60vh' : 'auto',
-          paddingBottom: selectedDistrict ? 0 : 48
+          height: selectedDistrict ? '92%' : 'auto', // 92% 까지만 올라와서 뒤에 지도 살짝 보이게
         }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="flex-none bg-white rounded-t-[32px] shadow-[0_-8px_30px_rgba(0,0,0,0.04)] z-10 p-8 w-full overflow-hidden flex flex-col"
+        className={`
+          absolute bottom-0 left-0 right-0 z-10 
+          bg-white rounded-t-[32px] shadow-[0_-8px_30px_rgba(0,0,0,0.1)] 
+          flex flex-col overflow-hidden
+          ${selectedDistrict ? 'shadow-2xl' : ''}
+        `}
       >
-        <div className="w-12 h-1.5 bg-[#E5E8EB] rounded-full mx-auto mb-8" />
+        {/* 드래그 핸들 / 닫기 영역 */}
+        <div
+          className="flex-none p-4 flex justify-center items-center cursor-pointer active:bg-gray-50"
+          onClick={() => selectedDistrict && selectDistrict(null)} // 누르면 닫힘
+        >
+          {selectedDistrict ? (
+            <ChevronDown className="text-gray-300" />
+          ) : (
+            <div className="w-12 h-1.5 bg-[#E5E8EB] rounded-full" />
+          )}
+        </div>
 
-        <div className="mb-6">
+        {/* 컨텐츠 헤더 */}
+        <div className="flex-none px-8 pb-6">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-[22px] font-bold text-[#191F28] leading-tight">
               {selectedDistrict
@@ -83,7 +98,6 @@ export const MainScreen = () => {
             <button
               onClick={openSheet}
               className="p-2 -mr-2 text-[#4E5968] hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="지역 검색"
             >
               <Search size={24} />
             </button>
