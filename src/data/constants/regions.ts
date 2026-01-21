@@ -29,6 +29,7 @@ export const PROVINCE_DISPLAY_NAMES: Record<string, string> = {
     gyeongbuk: '경상북도',
     gyeongnam: '경상남도',
     jeju: '제주도',
+    ulleung: '울릉군',
 };
 
 // 전국 행정구역 데이터 (2-Depth 구조)
@@ -269,7 +270,6 @@ export const REGION_DATA: RegionData = {
         { id: 'yecheon', name: '예천군' },
         { id: 'bonghwa', name: '봉화군' },
         { id: 'uljin', name: '울진군' },
-        { id: 'ulleung', name: '울릉군' },
     ],
     gyeongnam: [
         { id: 'changwon', name: '창원시' },
@@ -298,4 +298,8 @@ export const REGION_DATA: RegionData = {
         { id: 'jeju', name: '제주시' },
         { id: 'seogwipo', name: '서귀포시' }
     ],
-};
+    ulleung: [
+        { id: 'ulleungdo', name: '울릉도' },
+        { id: 'dokdo', name: '독도(land of korea)' }
+    ],
+};  

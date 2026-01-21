@@ -33,6 +33,7 @@ export const KoreaMapWidget = () => {
       ulsan: { x: 225, y: 245 },
       busan: { x: 215, y: 285 },
       jeju: { x: 80, y: 365 },
+      ulleung: { x: 260, y: 135 },
     };
     return layout[key] || { x: 0, y: 0 };
   };
