@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { motion, useDragControls } from 'framer-motion';
-import { Menu, Search, ChevronDown } from 'lucide-react';
+import { Menu, Search, ChevronDown, Map } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { KoreaMapWidget } from '../widgets/w_korea_map';
 import { RegionSelectorSheet } from '../widgets/w_region_selector_sheet';
@@ -15,7 +15,7 @@ import type { Influencer } from '../../data/models/m_influencer';
  * 전체적인 레이아웃 관리 및 지도/리스트 연동
  */
 export const MainScreen = () => {
-  const { selectedProvince, selectedDistrict, openSheet, openDrawer, selectDistrict } = useRegionStore();
+  const { selectedProvince, selectedDistrict, openSheet, openDrawer, selectDistrict, selectProvince } = useRegionStore();
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -62,6 +62,20 @@ export const MainScreen = () => {
         </button>
 
         <KoreaMapWidget />
+
+        {/* 전국 지도로 돌아가기 버튼 (상세 지역 선택 시 표시) */}
+        {selectedProvince && (
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            onClick={() => selectProvince(null)}
+            className="absolute top-12 right-6 z-20 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-black/5 hover:bg-white transition-colors"
+          >
+            <Map size={14} className="text-[#4E5968]" />
+            <span className="text-[13px] font-semibold text-[#4E5968]">전국 지도</span>
+          </motion.button>
+        )}
       </div>
 
       {/* 2. 하단: 인플루언서 리스트 프리뷰 (Sheet Mode) */}
@@ -74,11 +88,22 @@ export const MainScreen = () => {
         drag="y"
         dragControls={dragControls}
         dragListener={false} // 내부 스크롤 충돌 방지: 핸들 부분만 드래그 가능하게
-        dragConstraints={{ top: 0, bottom: 0 }}
+        dragConstraints={{
+          top: selectedDistrict ? 0 : -window.innerHeight, // 선택 안 된 상태면 위로 올릴 수 있음
+          bottom: 0
+        }}
         dragElastic={0.1} // 약간의 탄성
         onDragEnd={(_, info) => {
-          if (info.offset.y > 100 || info.velocity.y > 500) {
-            selectDistrict(null); // 아래로 드래그 시 닫기
+          if (selectedDistrict) {
+            // 1. 결과 모드: 아래로 내리면 닫기
+            if (info.offset.y > 100 || info.velocity.y > 500) {
+              selectDistrict(null);
+            }
+          } else {
+            // 2. 대기 모드: 위로 올리면 검색 시트 열기
+            if (info.offset.y < -80 || info.velocity.y < -500) {
+              openSheet();
+            }
           }
         }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
@@ -102,30 +127,29 @@ export const MainScreen = () => {
           )}
         </div>
 
-        {/* 컨텐츠 헤더 (이 부분도 드래그 가능하게 할지? UX상 헤더까지는 드래그 영역으로 두는 게 편함) */}
-        <div
-          className="flex-none px-8 pb-6"
-          onPointerDown={(e) => dragControls.start(e)}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-[22px] font-bold text-[#191F28] leading-tight">
-              {selectedDistrict
-                ? <><span className="text-[#3182F6]">{districtName}</span> 핫플 랭킹</>
-                : '어느 지역이 궁금하세요?'}
-            </h2>
-            <button
-              onClick={openSheet}
-              className="p-2 -mr-2 text-[#4E5968] hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <Search size={24} />
-            </button>
+        {/* 컨텐츠 헤더 (결과 모드일 때만 표시) */}
+        {selectedDistrict && (
+          <div
+            className="flex-none px-8 pb-6"
+            onPointerDown={(e) => dragControls.start(e)}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-[22px] font-bold text-[#191F28] leading-tight">
+                <span className="text-[#3182F6]">{districtName}</span> 핫플 랭킹
+              </h2>
+              <button
+                onClick={openSheet}
+                className="p-2 -mr-2 text-[#4E5968] hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="지역 검색"
+              >
+                <Search size={24} />
+              </button>
+            </div>
+            <p className="text-[#4E5968] text-[15px] mt-1">
+              {provinceName} {districtName}의 인기 인플루언서입니다
+            </p>
           </div>
-          <p className="text-[#4E5968] text-[15px] mt-1">
-            {selectedDistrict
-              ? `${provinceName} ${districtName}의 인기 인플루언서입니다`
-              : '지도를 클릭하여 지역을 선택해주세요'}
-          </p>
-        </div>
+        )}
 
         {selectedDistrict ? (
           <div className="flex-1 overflow-y-auto space-y-4 pb-8 scrollbar-hide">
@@ -205,8 +229,24 @@ export const MainScreen = () => {
             )}
           </div>
         ) : (
-          <div className="py-8 text-center bg-[#F9FAFB] rounded-[24px] pointer-events-none">
-            <span className="text-[14px] text-[#8B95A1]">서울 강남구, 부산 해운대구...</span>
+          /* 대기 모드: 검색바 표시 (클릭/드래그 시 시트 열림) */
+          <div className="flex flex-col gap-3 pb-4 px-6">
+            <div className="flex items-end gap-2 px-1">
+              <h2 className="text-[20px] font-bold text-[#191F28]">
+                어느 지역이 궁금하세요?
+              </h2>
+              <span className="text-[13px] text-[#8B95A1] font-medium mb-1">
+                지도에서 직접 선택도 가능해요
+              </span>
+            </div>
+
+            <div
+              onClick={openSheet}
+              className="flex items-center gap-2 bg-[#F2F4F6] px-4 py-3.5 rounded-[16px] cursor-pointer hover:bg-[#E5E8EB] transition-colors"
+            >
+              <Search size={20} className="text-[#8B95A1]" />
+              <span className="text-[#ADB5BD] text-[16px] font-medium">지역 이름을 검색해보세요</span>
+            </div>
           </div>
         )}
       </motion.div>
