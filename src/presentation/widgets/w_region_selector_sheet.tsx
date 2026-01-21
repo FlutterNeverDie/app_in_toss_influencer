@@ -154,24 +154,25 @@ export const RegionSelectorSheet = () => {
             <div className="flex flex-1 overflow-hidden">
               {(searchQuery || isSearching) ? (
                 /* 검색 결과 레이아웃 */
-                <div className="flex-1 overflow-y-auto px-4 py-2 bg-white">
+                <div className="flex-1 overflow-y-auto px-5 py-3 bg-[#F9FAFB]">
                   {searchResults.length > 0 ? (
-                    <ul className="space-y-1 pb-10">
+                    <ul className="space-y-3 pb-10">
                       {searchResults.map((result) => (
-                        <li
+                        <motion.li
                           key={`${result.provinceId}-${result.districtId}`}
                           onClick={() => handleSearchResultClick(result.provinceId, result.districtId)}
-                          className="flex items-center justify-between px-5 py-4.5 rounded-[20px] cursor-pointer hover:bg-[#F2F4F6] active:scale-[0.98] transition-all"
+                          whileTap={{ scale: 0.98 }}
+                          className="flex items-center justify-between px-6 py-4 bg-white rounded-[24px] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-[#F2F4F6] transition-all active:bg-[#F2F4F6]"
                         >
                           <div className="flex flex-col">
-                            <span className="text-[17px] font-bold text-[#191F28]">
+                            <span className="text-[19px] font-bold text-[#191F28]">
                               {result.name}
                             </span>
                             <span className="text-[13px] text-[#8B95A1] mt-0.5">
                               {result.provinceName}
                             </span>
                           </div>
-                        </li>
+                        </motion.li>
                       ))}
                     </ul>
                   ) : searchQuery ? (
@@ -202,7 +203,7 @@ export const RegionSelectorSheet = () => {
                           key={provKey}
                           onClick={() => selectProvince(provKey)}
                           className={`
-                            relative px-6 py-5 text-[15px] cursor-pointer transition-all
+                            relative px-6 py-6 text-[16px] cursor-pointer transition-all
                             ${isSelected
                               ? 'bg-white text-[#3182F6] font-bold'
                               : 'text-[#8B95A1] hover:text-[#4E5968]'}
@@ -223,25 +224,26 @@ export const RegionSelectorSheet = () => {
                   </ul>
 
                   {/* 오른쪽: 기초 리스트 */}
-                  <div className="flex-1 overflow-y-auto bg-white px-4 py-2">
-                    <div className="sticky top-0 bg-white/95 backdrop-blur-sm z-10 py-3 mb-2">
-                      <span className="text-[14px] text-[#191F28] font-bold px-2">
+                  <div className="flex-1 overflow-y-auto bg-white px-5 py-2">
+                    <div className="sticky top-0 bg-white/95 backdrop-blur-sm z-10 py-4 mb-3">
+                      <span className="text-[14px] text-[#4E5968] font-bold px-1 tracking-tight">
                         {PROVINCE_DISPLAY_NAMES[selectedProvince]}
                       </span>
                     </div>
 
-                    <ul className="space-y-1 pb-10">
+                    <ul className="space-y-0 pb-10">
                       {REGION_DATA[selectedProvince]?.map((dist) => {
                         const isSelected = selectedDistrict === dist.id;
                         return (
-                          <li
+                          <motion.li
                             key={dist.id}
                             onClick={() => selectDistrict(dist.id)}
+                            whileTap={{ scale: 0.98 }}
                             className={`
-                              flex items-center justify-between px-5 py-4.5 rounded-[20px] cursor-pointer active:scale-[0.98] transition-all
+                              flex items-center justify-between px-6 py-6 cursor-pointer transition-all
                               ${isSelected
-                                ? 'bg-[#EBF4FF] text-[#3182F6]'
-                                : 'text-[#333D4B] hover:bg-[#F2F4F6]'}
+                                ? 'text-[#3182F6]'
+                                : 'text-[#333D4B] border-b border-[#F2F4F6] active:bg-[#F2F4F6]'}
                             `}
                           >
                             <span className={`text-[17px] ${isSelected ? 'font-bold' : 'font-medium'}`}>
@@ -255,7 +257,7 @@ export const RegionSelectorSheet = () => {
                                 <Check size={20} strokeWidth={3} />
                               </motion.div>
                             )}
-                          </li>
+                          </motion.li>
                         );
                       })}
                     </ul>
