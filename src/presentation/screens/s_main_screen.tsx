@@ -148,16 +148,28 @@ export const MainScreen = () => {
                     {` ${REGION_DATA[selectedProvince!].find(d => d.id === selectedDistrict)?.name}`}
                   </h2>
                   <p className="text-[#8B95A1] text-[14px] font-medium mt-1">
-                    인플루언서 총 {influencers.length}명을 찾았어요
+                    {isLoading ? '인플루언서를 찾고있습니다...' : `인플루언서 총 ${influencers.length}명을 찾았어요`}
                   </p>
                 </div>
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={openSheet}
-                  className="bg-[#F2F4F6] px-4 py-2.5 rounded-full text-[#4E5968] text-[14px] font-bold flex items-center gap-1.5"
-                >
-                  지역 변경
-                </motion.button>
+                <div className="flex gap-2">
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      triggerHaptic("tickWeak");
+                      selectProvince(null);
+                    }}
+                    className="bg-[#F2F4F6] px-4 py-2.5 rounded-full text-[#4E5968] text-[14px] font-bold flex items-center gap-1.5"
+                  >
+                    초기화
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={openSheet}
+                    className="bg-[#F2F4F6] px-4 py-2.5 rounded-full text-[#4E5968] text-[14px] font-bold flex items-center gap-1.5"
+                  >
+                    지역 변경
+                  </motion.button>
+                </div>
               </div>
 
               {/* 리스트 프리뷰 */}
