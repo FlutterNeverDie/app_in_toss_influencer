@@ -27,3 +27,6 @@ https://developers-apps-in-toss.toss.im/development/test/sandbox.html
 
 토스 미니앱 출시하기
 https://developers-apps-in-toss.toss.im/development/test/toss.html
+
+비게임 출시 가이드
+https://developers-apps-in-toss.toss.im/checklist/app-nongame.html

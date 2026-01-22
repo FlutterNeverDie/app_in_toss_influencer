@@ -136,7 +136,18 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
           ref={transformRef}
         >
           {({ resetTransform }) => {
-            const centroid = selectedProvince ? getDistrictCentroid(selectedProvince) : null;
+            // 2. 현재 활성화된 중심점 계산 (기초 지자체 우선, 없으면 광역 지자체 중심)
+            const activeCentroid = (() => {
+              if (!selectedProvince) return null;
+              if (selectedDistrict) {
+                const districts = REGION_DATA[selectedProvince];
+                const target = districts?.find(d => d.id === selectedDistrict);
+                if (target && target.x !== undefined && target.y !== undefined) {
+                  return { x: target.x, y: target.y };
+                }
+              }
+              return getDistrictCentroid(selectedProvince);
+            })();
 
             return (
               <div
@@ -147,131 +158,137 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                   wrapperClass="!w-full !h-full"
                   contentClass="!w-full !h-full flex items-center justify-center p-6"
                 >
-                  <svg
-                    viewBox="0 0 300 400"
-                    className="w-full h-full max-w-[500px] overflow-visible"
-                    style={{ filter: 'drop-shadow(0px 8px 16px rgba(0, 0, 0, 0.04))' }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <motion.g
+                  <div className="relative w-[300px] h-[400px]">
+                    {/* 1. 확대/이동하는 지도 레이어 (SVG + 핀 버튼) */}
+                    <motion.div
+                      className="w-full h-full relative"
                       animate={{
                         scale: selectedProvince ? 2.3 : 1,
-                        x: selectedProvince && centroid ? 150 - centroid.x * 2.3 : 0,
-                        y: selectedProvince && centroid ? 140 - centroid.y * 2.3 : -40,
+                        x: selectedProvince && activeCentroid ? 150 - activeCentroid.x * 2.3 : 0,
+                        y: selectedProvince && activeCentroid ? 180 - activeCentroid.y * 2.3 : -40,
                       }}
                       transition={{ type: "spring", damping: 25, stiffness: 180 }}
+                      style={{ transformOrigin: "0 0" }}
                     >
-                      {provinces.map((provKey) => {
-                        const pos = getProvincePosition(provKey);
-                        const isSelected = selectedProvince === provKey;
-
-                        return (
-                          <motion.g
-                            key={provKey}
-                            initial={false}
-                            whileHover={{ scale: isSelected ? 1 : 1.05 }}
-                            onClick={(e: any) => handleProvinceClick(provKey, e)}
-                            className="cursor-pointer"
-                          >
-                            <motion.rect
-                              x={pos.x - 24}
-                              y={pos.y - 14}
-                              width={48}
-                              height={28}
-                              rx={8}
-                              fill={isSelected ? MAP_COLORS.selected : MAP_COLORS.fill}
-                              stroke={isSelected ? MAP_COLORS.selected : '#E5E8EB'}
-                              strokeWidth={isSelected ? 0 : 1}
-                              animate={{
-                                fill: isSelected ? MAP_COLORS.selected : MAP_COLORS.fill,
-                                opacity: selectedProvince ? 0 : 1
-                              }}
-                              transition={{ duration: 0.2 }}
-                            />
-
-                            <motion.text
-                              x={pos.x}
-                              y={pos.y + 5}
-                              textAnchor="middle"
-                              className="select-none pointer-events-none"
-                              style={{
-                                fontSize: '10px',
-                                fontWeight: isSelected ? '700' : '600',
-                                fill: isSelected ? MAP_COLORS.selectedText : '#333D4B',
-                                fontFamily: 'Pretendard, -apple-system, sans-serif'
-                              }}
-                              animate={{
-                                opacity: selectedProvince ? 0 : 1
-                              }}
-                            >
-                              {formatProvinceName(PROVINCE_DISPLAY_NAMES[provKey])}
-                            </motion.text>
-                          </motion.g>
-                        );
-                      })}
-                    </motion.g>
-                  </svg>
-
-                  {/* 상세 지역 그리드/맵 오버레이 */}
-                  {selectedProvince && REGION_DATA[selectedProvince] && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="absolute inset-0 z-20 pointer-events-none"
-                    >
-                      {REGION_DATA[selectedProvince].some(d => d.x !== undefined) ? (
-                        <div className="relative w-full h-full pointer-events-auto">
-                          {REGION_DATA[selectedProvince].map((dist: any) => {
-                            const left = dist.x ? (dist.x / 300) * 100 : 50;
-                            const top = dist.y ? (dist.y / 400) * 100 : 50;
+                      <svg
+                        viewBox="0 0 300 400"
+                        className="w-full h-full overflow-visible"
+                        style={{ filter: 'drop-shadow(0px 8px 16px rgba(0, 0, 0, 0.04))' }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <g>
+                          {provinces.map((provKey) => {
+                            const pos = getProvincePosition(provKey);
+                            const isSelected = selectedProvince === provKey;
 
                             return (
-                              <motion.button
-                                key={dist.id}
-                                onClick={(e: any) => handleDistrictClick(dist.id, e)}
-                                initial={{ scale: 0, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{
-                                  type: "spring",
-                                  stiffness: 260,
-                                  damping: 20,
-                                  delay: Math.random() * 0.1
-                                }}
-                                style={{ left: `${left}%`, top: `${top}%` }}
-                                className={`absolute -translate-x-1/2 -translate-y-1/2 backdrop-blur-md border shadow-[0_2px_8px_rgba(0,0,0,0.08)] px-3 py-1.5 rounded-full text-[13px] font-bold transition-all z-10 whitespace-nowrap
-                                  ${selectedDistrict === dist.id
-                                    ? 'bg-[#3182F6] text-white border-[#3182F6] scale-110 shadow-[0_4px_12px_rgba(49,130,246,0.3)]'
-                                    : 'bg-white/90 text-[#333D4B] border-[#E5E8EB] hover:scale-110 hover:text-[#3182F6] hover:border-[#3182F6]'
-                                  }`}
+                              <motion.g
+                                key={provKey}
+                                initial={false}
+                                whileHover={{ scale: isSelected ? 1 : 1.05 }}
+                                onClick={(e: any) => handleProvinceClick(provKey, e)}
+                                className="cursor-pointer"
                               >
-                                {dist.name}
-                              </motion.button>
+                                <motion.rect
+                                  x={pos.x - 24}
+                                  y={pos.y - 14}
+                                  width={48}
+                                  height={28}
+                                  rx={8}
+                                  fill={isSelected ? MAP_COLORS.selected : MAP_COLORS.fill}
+                                  stroke={isSelected ? MAP_COLORS.selected : '#E5E8EB'}
+                                  strokeWidth={isSelected ? 0 : 1}
+                                  animate={{
+                                    fill: isSelected ? MAP_COLORS.selected : MAP_COLORS.fill,
+                                    opacity: selectedProvince ? 0 : 1
+                                  }}
+                                  transition={{ duration: 0.2 }}
+                                />
+
+                                <motion.text
+                                  x={pos.x}
+                                  y={pos.y + 5}
+                                  textAnchor="middle"
+                                  className="select-none pointer-events-none"
+                                  style={{
+                                    fontSize: '10px',
+                                    fontWeight: isSelected ? '700' : '600',
+                                    fill: isSelected ? MAP_COLORS.selectedText : '#333D4B',
+                                    fontFamily: 'Pretendard, -apple-system, sans-serif'
+                                  }}
+                                  animate={{
+                                    opacity: selectedProvince ? 0 : 1
+                                  }}
+                                >
+                                  {formatProvinceName(PROVINCE_DISPLAY_NAMES[provKey])}
+                                </motion.text>
+                              </motion.g>
                             );
                           })}
-                        </div>
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center p-8 pointer-events-none">
-                          <div className="flex flex-wrap justify-center gap-2 max-h-[300px] overflow-y-auto pointer-events-auto p-4 rounded-xl no-scrollbar">
-                            {REGION_DATA[selectedProvince].map((dist: any) => (
-                              <motion.button
-                                key={dist.id}
-                                onClick={(e: any) => handleDistrictClick(dist.id, e)}
-                                whileTap={{ scale: 0.95 }}
-                                className={`backdrop-blur-md border shadow-sm px-4 py-2.5 rounded-xl text-[14px] font-bold transition-colors
-                                  ${selectedDistrict === dist.id
-                                    ? 'bg-[#3182F6] text-white border-[#3182F6]'
-                                    : 'bg-white/90 border-white/50 text-[#333D4B] hover:bg-white hover:text-[#3182F6]'
-                                  }`}
-                              >
-                                {dist.name}
-                              </motion.button>
-                            ))}
+                        </g>
+                      </svg>
+
+                      {/* 좌표 기반 버튼 (지도가 배경과 함께 움직임) */}
+                      {selectedProvince && REGION_DATA[selectedProvince]?.some(d => d.x !== undefined) && (
+                        <div className="absolute inset-0 pointer-events-none">
+                          <div className="relative w-full h-full pointer-events-auto">
+                            {REGION_DATA[selectedProvince].map((dist: any) => {
+                              const left = dist.x ? (dist.x / 300) * 100 : 50;
+                              const top = dist.y ? (dist.y / 400) * 100 : 50;
+                              const isSelected = selectedDistrict === dist.id;
+
+                              return (
+                                <motion.button
+                                  key={dist.id}
+                                  onClick={(e: any) => handleDistrictClick(dist.id, e)}
+                                  initial={{ scale: 0, opacity: 0 }}
+                                  animate={{
+                                    scale: isSelected ? 0.5 : 0.43, // 역배율 적용 (2.3배 확대에 대응)
+                                    opacity: 1
+                                  }}
+                                  whileTap={{ scale: 0.4 }}
+                                  style={{ left: `${left}%`, top: `${top}%` }}
+                                  className={`absolute -translate-x-1/2 -translate-y-1/2 backdrop-blur-md border shadow-[0_2px_8px_rgba(0,0,0,0.08)] px-4 py-2 rounded-full text-[14px] font-bold transition-all z-10 whitespace-nowrap
+                                    ${isSelected
+                                      ? 'bg-[#3182F6] text-white border-[#3182F6] shadow-[0_4px_12px_rgba(49,130,246,0.3)]'
+                                      : 'bg-white/95 text-[#333D4B] border-[#E5E8EB] active:text-[#3182F6] active:border-[#3182F6]'
+                                    }`}
+                                >
+                                  {dist.name}
+                                </motion.button>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
                     </motion.div>
-                  )}
+
+                    {/* 2. 고정된 그리드 레이어 (좌표 없는 지역을 위한 폴백, 확대 안함) */}
+                    {selectedProvince && REGION_DATA[selectedProvince]?.every(d => d.x === undefined) && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute inset-0 z-30 flex items-center justify-center p-8 pointer-events-none"
+                      >
+                        <div className="flex flex-wrap justify-center gap-2 max-h-[300px] overflow-y-auto pointer-events-auto p-4 rounded-xl no-scrollbar bg-white/50 backdrop-blur-sm border border-white/30 shadow-lg">
+                          {REGION_DATA[selectedProvince].map((dist: any) => (
+                            <motion.button
+                              key={dist.id}
+                              onClick={(e: any) => handleDistrictClick(dist.id, e)}
+                              whileTap={{ scale: 0.95 }}
+                              className={`backdrop-blur-md border shadow-sm px-4 py-2.5 rounded-xl text-[14px] font-bold transition-colors
+                                ${selectedDistrict === dist.id
+                                  ? 'bg-[#3182F6] text-white border-[#3182F6]'
+                                  : 'bg-white/90 border-white/50 text-[#333D4B] hover:bg-white hover:text-[#3182F6]'
+                                }`}
+                            >
+                              {dist.name}
+                            </motion.button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
                 </TransformComponent>
               </div>
             );
