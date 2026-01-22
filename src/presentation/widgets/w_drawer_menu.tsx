@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, HelpCircle, UserPlus, ChevronDown, ChevronUp, Share2, User } from 'lucide-react';
+import { X, HelpCircle, UserPlus, ChevronDown, ChevronUp, Share2, User, ArrowLeft } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { useAuthStore } from '../stores/auth_store';
 import { FAQ_DATA } from '../../data/constants/faq';
@@ -25,14 +25,22 @@ const triggerHaptic = (type: "tickWeak" | "tap" | "tickMedium" | "success" = "ti
  */
 export const DrawerMenu = () => {
     const { isDrawerOpen, closeDrawer } = useRegionStore();
+    const [view, setView] = useState<'main' | 'faq'>('main');
     const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
+
+    // 메뉴가 닫힐 때 상태 리셋
+    useEffect(() => {
+        if (!isDrawerOpen) {
+            setTimeout(() => setView('main'), 300);
+        }
+    }, [isDrawerOpen]);
 
     const toggleFAQ = (index: number) => {
         triggerHaptic("tickWeak");
         setExpandedFAQ(expandedFAQ === index ? null : index);
     };
 
-    const { isLoggedIn, login, member } = useAuthStore();
+    const { isLoggedIn, login, logout, member } = useAuthStore();
     const [regInfo, setRegInfo] = useState<{
         status: 'pending' | 'approved' | 'rejected' | null;
         province_id?: string;
@@ -194,12 +202,24 @@ export const DrawerMenu = () => {
                         animate={{ x: 0 }}
                         exit={{ x: "-100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                        className="fixed inset-y-0 left-0 z-[111] w-[85%] max-w-[320px] bg-white shadow-2xl flex flex-col"
+                        className="fixed inset-y-0 left-0 z-[111] w-[85%] max-w-[320px] bg-white shadow-2xl flex flex-col pt-safe"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* 헤더 */}
                         <div className="flex items-center justify-between p-6 border-b border-[#F2F4F6]">
-                            <h2 className="text-[20px] font-bold text-[#191F28]">메뉴</h2>
+                            <div className="flex items-center gap-3">
+                                {view === 'faq' && (
+                                    <button
+                                        onClick={() => { triggerHaptic("tickWeak"); setView('main'); }}
+                                        className="p-1 hover:bg-[#F2F4F6] rounded-full transition-colors"
+                                    >
+                                        <ArrowLeft size={24} className="text-[#333D4B]" />
+                                    </button>
+                                )}
+                                <h2 className="text-[20px] font-bold text-[#191F28]">
+                                    {view === 'faq' ? '자주 묻는 질문' : '메뉴'}
+                                </h2>
+                            </div>
                             <button
                                 onClick={closeDrawer}
                                 className="p-2 -mr-2 hover:bg-[#F2F4F6] rounded-full transition-colors"
@@ -208,145 +228,180 @@ export const DrawerMenu = () => {
                             </button>
                         </div>
 
-                        {/* 컨텐츠 */}
-                        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-8">
-
-                            {/* 프로필 / 로그인 (TDS Style) */}
-                            <section>
-                                <div className="flex items-center gap-4 mb-4 bg-[#F9FAFB] p-5 rounded-[24px] border border-[#F2F4F6]">
-                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-[#ADB5BD] shadow-sm border border-[#F2F4F6]">
-                                        <User size={36} />
-                                    </div>
-                                    <div className="flex flex-col gap-0.5">
-                                        <h3 className="text-[19px] font-bold text-[#191F28] leading-tight">
-                                            {isLoggedIn ? '반가워요!' : '로그인 해주세요'}
-                                        </h3>
-                                        {!isLoggedIn && (
-                                            <p className="text-[14px] font-medium text-[#4E5968]">
-                                                더 많은 기능을 이용해보세요!
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                                {!isLoggedIn && (
-                                    <motion.button
-                                        whileTap={{ scale: 0.96 }}
-                                        onClick={handleLogin}
-                                        className="w-full py-4 bg-[#3182F6] text-white rounded-[18px] font-bold text-[16px] hover:bg-[#2563EB] transition-all shadow-[0_4px_12px_rgba(49,130,246,0.2)]"
+                        {/* 컨텐츠 (애니메이션 전환) */}
+                        <div className="flex-1 overflow-hidden relative">
+                            <AnimatePresence mode="wait">
+                                {view === 'main' ? (
+                                    <motion.div
+                                        key="main-view"
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -10 }}
+                                        className="absolute inset-0 overflow-y-auto px-6 py-4 space-y-8"
                                     >
-                                        토스로 로그인하기
-                                    </motion.button>
-                                )}
-                            </section>
-
-                            {/* 인플루언서 등록 / 관리 (상태에 따라 분기) */}
-                            {isLoggedIn && (
-                                <section>
-                                    <div className="bg-[#F2F4F6] rounded-[24px] p-6 border border-white">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <UserPlus size={20} className={regInfo.status === 'approved' ? 'text-[#00D082]' : 'text-[#3182F6]'} />
-                                            <h3 className="text-[16px] font-bold text-[#191F28]">
-                                                {regInfo.status === 'approved' ? '인플루언서 활동 중' : '인플루언서 등록하기'}
-                                            </h3>
-                                        </div>
-                                        <div className="text-[14px] font-medium text-[#4E5968] mb-1 leading-relaxed">
-                                            {regInfo.status === 'approved'
-                                                ? (
-                                                    <div className="flex flex-col gap-1">
-                                                        <p>현재 아래 지역 인지도에 노출되고 있습니다.</p>
-                                                        <div className="inline-flex items-center gap-1.5 text-[#00D082] font-bold mt-1">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-[#00D082] animate-pulse" />
-                                                            {getRegionName()}
-                                                        </div>
-                                                    </div>
-                                                )
-                                                : regInfo.status === 'pending'
-                                                    ? '신청하신 정보가 검수 중입니다. 조금만 기다려주세요!'
-                                                    : '나의 영향력을 지도에 표시해보세요. 등록은 100% 무료입니다!'}
-                                        </div>
-
-                                        {regInfo.status !== 'approved' && (
-                                            <motion.button
-                                                whileTap={{ scale: 0.96 }}
-                                                onClick={() => {
-                                                    triggerHaptic("tickWeak");
-                                                    useRegionStore.getState().openRegistrationModal();
-                                                }}
-                                                className={`w-full mt-4 py-3.5 rounded-[14px] font-bold text-[15px] transition-colors border ${regInfo.status === 'pending'
-                                                    ? 'bg-[#F2F8FF] text-[#3182F6] border-[#3182F6]'
-                                                    : 'bg-white text-[#3182F6] border-[#3182F6] hover:bg-[#F2F8FF]'
-                                                    }`}
-                                            >
-                                                {regInfo.status === 'pending' ? '검수 대기 중' : '지금 신청하기'}
-                                            </motion.button>
-                                        )}
-                                    </div>
-                                </section>
-                            )}
-
-                            {/* 자주 묻는 질문 (FAQ) */}
-                            <section>
-                                <div className="flex items-center gap-2 mb-4 px-1">
-                                    <HelpCircle size={20} className="text-[#333D4B]" />
-                                    <h3 className="text-[18px] font-bold text-[#191F28]">자주 묻는 질문</h3>
-                                </div>
-                                <div className="space-y-3">
-                                    {FAQ_DATA.map((item, index) => {
-                                        const isOpen = expandedFAQ === index;
-                                        return (
-                                            <div key={index} className="border border-[#F2F4F6] rounded-[20px] overflow-hidden bg-white">
-                                                <button
-                                                    onClick={() => toggleFAQ(index)}
-                                                    className="w-full flex items-center justify-between p-5 text-left active:bg-[#F9FAFB] transition-colors"
-                                                >
-                                                    <span className="text-[15px] font-bold text-[#333D4B] pr-4 leading-snug">
-                                                        {item.question}
-                                                    </span>
-                                                    {isOpen ? <ChevronUp size={20} className="text-[#8B95A1] flex-shrink-0" /> : <ChevronDown size={20} className="text-[#8B95A1] flex-shrink-0" />}
-                                                </button>
-                                                <AnimatePresence>
-                                                    {isOpen && (
-                                                        <motion.div
-                                                            initial={{ height: 0, opacity: 0 }}
-                                                            animate={{ height: "auto", opacity: 1 }}
-                                                            exit={{ height: 0, opacity: 0 }}
-                                                            className="overflow-hidden"
-                                                        >
-                                                            <div className="p-5 pt-0 bg-white text-[14px] font-medium text-[#4E5968] leading-relaxed border-t border-[#F2F4F6] border-dashed mt-0.5">
-                                                                <div className="pt-4">{renderAnswer(item.answer)}</div>
-                                                            </div>
-                                                        </motion.div>
+                                        {/* 프로필 / 로그인 */}
+                                        <section>
+                                            <div className="flex items-center gap-4 mb-4 bg-[#F9FAFB] p-5 rounded-[24px] border border-[#F2F4F6]">
+                                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-[#ADB5BD] shadow-sm border border-[#F2F4F6]">
+                                                    <User size={36} />
+                                                </div>
+                                                <div className="flex flex-col gap-0.5">
+                                                    <h3 className="text-[19px] font-bold text-[#191F28] leading-tight">
+                                                        {isLoggedIn ? '반가워요!' : '로그인 해주세요'}
+                                                    </h3>
+                                                    {!isLoggedIn && (
+                                                        <p className="text-[14px] font-medium text-[#4E5968]">
+                                                            더 많은 기능을 이용해보세요!
+                                                        </p>
                                                     )}
-                                                </AnimatePresence>
+                                                </div>
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            </section>
+                                            {!isLoggedIn && (
+                                                <motion.button
+                                                    whileTap={{ scale: 0.96 }}
+                                                    onClick={handleLogin}
+                                                    className="w-full py-4 bg-[#3182F6] text-white rounded-[18px] font-bold text-[16px] hover:bg-[#2563EB] transition-all shadow-[0_4px_12px_rgba(49,130,246,0.2)]"
+                                                >
+                                                    토스로 로그인하기
+                                                </motion.button>
+                                            )}
+                                        </section>
 
-                            {/* 친구에게 공유하기 (TDS Style) */}
-                            <section>
-                                <motion.button
-                                    whileTap={{ scale: 0.98 }}
-                                    onClick={handleShare}
-                                    className="w-full flex items-center justify-between p-5 bg-[#F9FAFB] rounded-[24px] hover:bg-[#F2F4F6] transition-all border border-[#F2F4F6]"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-sm border border-[#F2F4F6]">
-                                            <Share2 size={20} className="text-[#333D4B]" />
+                                        {/* 인플루언서 등록 / 관리 */}
+                                        {isLoggedIn && (
+                                            <section>
+                                                <div className="bg-[#F2F4F6] rounded-[24px] p-6 border border-white">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <UserPlus size={20} className={regInfo.status === 'approved' ? 'text-[#00D082]' : 'text-[#3182F6]'} />
+                                                        <h3 className="text-[16px] font-bold text-[#191F28]">
+                                                            {regInfo.status === 'approved' ? '인플루언서 활동 중' : '인플루언서 등록하기'}
+                                                        </h3>
+                                                    </div>
+                                                    <div className="text-[14px] font-medium text-[#4E5968] mb-1 leading-relaxed">
+                                                        {regInfo.status === 'approved'
+                                                            ? (
+                                                                <div className="flex flex-col gap-1">
+                                                                    <p>현재 아래 지역 인지도에 노출되고 있습니다.</p>
+                                                                    <div className="inline-flex items-center gap-1.5 text-[#00D082] font-bold mt-1">
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-[#00D082] animate-pulse" />
+                                                                        {getRegionName()}
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                            : regInfo.status === 'pending'
+                                                                ? '신청하신 정보가 검수 중입니다. 조금만 기다려주세요!'
+                                                                : '나의 영향력을 지도에 표시해보세요. 등록은 100% 무료입니다!'}
+                                                    </div>
+
+                                                    {regInfo.status !== 'approved' && (
+                                                        <motion.button
+                                                            whileTap={{ scale: 0.96 }}
+                                                            onClick={() => {
+                                                                triggerHaptic("tickWeak");
+                                                                useRegionStore.getState().openRegistrationModal();
+                                                            }}
+                                                            className={`w-full mt-4 py-3.5 rounded-[14px] font-bold text-[15px] transition-colors border ${regInfo.status === 'pending'
+                                                                ? 'bg-[#F2F8FF] text-[#3182F6] border-[#3182F6]'
+                                                                : 'bg-white text-[#3182F6] border-[#3182F6] hover:bg-[#F2F8FF]'
+                                                                }`}
+                                                        >
+                                                            {regInfo.status === 'pending' ? '검수 대기 중' : '지금 신청하기'}
+                                                        </motion.button>
+                                                    )}
+                                                </div>
+                                            </section>
+                                        )}
+
+                                        {/* 서비스 메뉴 리스트 (2-Depth) */}
+                                        <section className="space-y-1">
+                                            <button
+                                                onClick={() => { triggerHaptic("tickWeak"); setView('faq'); }}
+                                                className="w-full flex items-center justify-between p-4 hover:bg-[#F2F4F6] rounded-[16px] transition-colors group"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-[#F2F4F6] rounded-full flex items-center justify-center text-[#4E5968] group-hover:bg-white transition-colors border border-transparent group-hover:border-[#F2F4F6]">
+                                                        <HelpCircle size={20} />
+                                                    </div>
+                                                    <span className="text-[16px] font-bold text-[#333D4B]">자주 묻는 질문</span>
+                                                </div>
+                                                <ArrowLeft size={18} className="text-[#ADB5BD] rotate-180" />
+                                            </button>
+
+                                            <button
+                                                onClick={handleShare}
+                                                className="w-full flex items-center justify-between p-4 hover:bg-[#F2F4F6] rounded-[16px] transition-colors group"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-[#F2F4F6] rounded-full flex items-center justify-center text-[#4E5968] group-hover:bg-white transition-colors border border-transparent group-hover:border-[#F2F4F6]">
+                                                        <Share2 size={20} />
+                                                    </div>
+                                                    <span className="text-[16px] font-bold text-[#333D4B]">친구에게 공유하기</span>
+                                                </div>
+                                                <ArrowLeft size={18} className="text-[#ADB5BD] rotate-180" />
+                                            </button>
+                                        </section>
+
+                                        {isLoggedIn && (
+                                            <div className="pt-2">
+                                                <button
+                                                    onClick={() => {
+                                                        triggerHaptic("tickWeak");
+                                                        logout();
+                                                    }}
+                                                    className="w-full py-4 text-[14px] text-[#8B95A1] font-medium hover:text-[#4E5968] transition-colors"
+                                                >
+                                                    로그아웃
+                                                </button>
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                ) : (
+                                    <motion.div
+                                        key="faq-view"
+                                        initial={{ opacity: 0, x: 10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 10 }}
+                                        className="absolute inset-0 overflow-y-auto px-6 py-4"
+                                    >
+                                        <div className="space-y-3 pb-10">
+                                            {FAQ_DATA.map((item, index) => {
+                                                const isOpen = expandedFAQ === index;
+                                                return (
+                                                    <div key={index} className="border border-[#F2F4F6] rounded-[20px] overflow-hidden bg-white">
+                                                        <button
+                                                            onClick={() => toggleFAQ(index)}
+                                                            className="w-full flex items-center justify-between p-5 text-left active:bg-[#F9FAFB] transition-colors"
+                                                        >
+                                                            <span className="text-[15px] font-bold text-[#333D4B] pr-4 leading-snug">
+                                                                {item.question}
+                                                            </span>
+                                                            {isOpen ? <ChevronUp size={20} className="text-[#8B95A1] flex-shrink-0" /> : <ChevronDown size={20} className="text-[#8B95A1] flex-shrink-0" />}
+                                                        </button>
+                                                        <AnimatePresence>
+                                                            {isOpen && (
+                                                                <motion.div
+                                                                    initial={{ height: 0, opacity: 0 }}
+                                                                    animate={{ height: "auto", opacity: 1 }}
+                                                                    exit={{ height: 0, opacity: 0 }}
+                                                                    className="overflow-hidden"
+                                                                >
+                                                                    <div className="p-5 pt-0 bg-white text-[14px] font-medium text-[#4E5968] leading-relaxed border-t border-[#F2F4F6] border-dashed mt-0.5">
+                                                                        <div className="pt-4">{renderAnswer(item.answer)}</div>
+                                                                    </div>
+                                                                </motion.div>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
-                                        <div className="text-left">
-                                            <h3 className="text-[16px] font-bold text-[#191F28]">친구에게 공유하기</h3>
-                                            <p className="text-[13px] font-medium text-[#8B95A1]">우리 동네 인플루언서를 알려주세요</p>
-                                        </div>
-                                    </div>
-                                    <ChevronUp size={18} className="text-[#ADB5BD] rotate-90" />
-                                </motion.button>
-                            </section>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
 
                         {/* 푸터 */}
-                        <div className="p-6 border-t border-[#F2F4F6]">
+                        <div className="p-6 border-t border-[#F2F4F6] bg-white">
                             <p className="text-[12px] text-[#ADB5BD] text-center">
                                 © 2026 Influencer Map. All rights reserved.
                             </p>
