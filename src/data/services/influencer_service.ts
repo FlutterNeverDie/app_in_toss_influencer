@@ -9,27 +9,52 @@ export const InfluencerService = {
      */
     async fetchInfluencersByRegion(provinceId: string, districtId: string): Promise<Influencer[]> {
         try {
-            console.log(`Fetching influencers for ${provinceId} ${districtId}`);
-
-            // Schema: province_id, district_id 사용
             const { data, error } = await supabase
-                .from('influencer') // User confirmed table name is 'influencer'
+                .from('influencer')
                 .select('*')
                 .eq('province_id', provinceId)
                 .eq('district_id', districtId)
-                // .eq('status', 'approved') // Pending 상태도 보이게 임시 주석 처리
                 .order('like_count', { ascending: false });
 
-            console.log('Fetched count:', data?.length ?? 0);
-
-            if (error) {
-                console.error('Error fetching influencers:', error);
-                return [];
-            }
-
+            if (error) return [];
             return data as Influencer[];
         } catch (e) {
-            console.error('Unexpected error:', e);
+            return [];
+        }
+    },
+
+    /**
+     * 특정 광역 지역의 모든 인플루언서를 가져옵니다.
+     */
+    async fetchInfluencersByProvince(provinceId: string): Promise<Influencer[]> {
+        try {
+            const { data, error } = await supabase
+                .from('influencer')
+                .select('*')
+                .eq('province_id', provinceId)
+                .order('like_count', { ascending: false });
+
+            if (error) return [];
+            return data as Influencer[];
+        } catch (e) {
+            return [];
+        }
+    },
+
+    /**
+     * 특정 기초 지역의 모든 인플루언서를 가져옵니다.
+     */
+    async fetchInfluencersByDistrict(districtId: string): Promise<Influencer[]> {
+        try {
+            const { data, error } = await supabase
+                .from('influencer')
+                .select('*')
+                .eq('district_id', districtId)
+                .order('like_count', { ascending: false });
+
+            if (error) return [];
+            return data as Influencer[];
+        } catch (e) {
             return [];
         }
     },

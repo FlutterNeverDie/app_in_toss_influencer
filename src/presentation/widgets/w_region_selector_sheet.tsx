@@ -122,14 +122,14 @@ export const RegionSelectorSheet = () => {
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             drag="y"
-            dragConstraints={{ top: 0 }}
-            dragElastic={0.2}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.5 }}
             onDragEnd={onDragEnd}
             className="fixed inset-x-0 bottom-0 z-[101] bg-white rounded-t-[32px] flex flex-col shadow-2xl h-[85vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* 시트 핸들 (Toss Style) */}
-            <div className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
+            {/* 시트 핸들 (Toss Style) - 이 영역을 잡고 끌어야 안정적임 */}
+            <div className="flex justify-center pt-3 pb-3 cursor-grab active:cursor-grabbing hover:bg-black/[0.02] transition-colors">
               <div className="w-10 h-1.5 bg-[#E5E8EB] rounded-full" />
             </div>
 

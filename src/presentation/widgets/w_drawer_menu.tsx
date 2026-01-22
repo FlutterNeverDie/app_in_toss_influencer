@@ -18,7 +18,7 @@ const triggerHaptic = (type: "tickWeak" | "tap" | "tickMedium" | "success" = "ti
 
 /**
  * 사이드바 메뉴 (Drawer)
- * 고객센터, FAQ, 인플루언서 등록 기능을 제공합니다.
+ * 고객센터, FAQ, 인플루언서 등록 기능을 제공합니다. 
  */
 export const DrawerMenu = () => {
     const { isDrawerOpen, closeDrawer } = useRegionStore();
@@ -35,9 +35,7 @@ export const DrawerMenu = () => {
         triggerHaptic("tickMedium");
         try {
             if (typeof appLogin === 'function') {
-                const response = await appLogin();
-                console.log('Login Response:', response);
-
+                await appLogin();
                 // 토스에서 받은 정보로 멤버 동기화 (toss_id는 필수)
                 // 실제 앱에서는 response에서 정보를 추출해야 함
                 const member = await MemberService.syncMember({
@@ -49,13 +47,41 @@ export const DrawerMenu = () => {
                     login(member);
                 }
             } else {
-                alert('로그인은 토스 앱 내에서 가능합니다.');
+                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+                if (!isLocal) {
+                    alert('로그인은 토스 앱 내에서 가능합니다.');
+                }
+
                 // 데모용: 로컬 환경에서도 로그인 테스트 가능하게 함
-                const demoMember = await MemberService.syncMember({
-                    toss_id: 'demo_user_123',
-                    name: '데모 사용자',
-                });
-                if (demoMember) login(demoMember);
+                try {
+                    const demoId = 'demo_user_123';
+                    const demoMember = await MemberService.syncMember({
+                        toss_id: demoId,
+                        name: '데모 사용자',
+                    });
+
+                    if (demoMember) {
+                        login(demoMember);
+                    } else if (isLocal) {
+                        // Supabase 연결 실패 시에도 로컬이면 강제 로그인 (테스트용)
+                        login({
+                            id: 'mock-uuid-123',
+                            toss_id: demoId,
+                            name: '로컬 테스터',
+                            created_at: new Date().toISOString()
+                        });
+                    }
+                } catch (e) {
+                    if (isLocal) {
+                        login({
+                            id: 'mock-uuid-123',
+                            toss_id: 'demo_user_123',
+                            name: '로컬 테스터 (오류)',
+                            created_at: new Date().toISOString()
+                        });
+                    }
+                }
             }
         } catch (error) {
             console.error('Login Error:', error);

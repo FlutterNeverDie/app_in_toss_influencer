@@ -109,16 +109,6 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
 
   return (
     <div className="w-full h-full flex flex-col items-center bg-[#F2F4F6] overflow-hidden relative">
-
-      {!selectedProvince && (
-        <header className="pt-12 pb-2 text-center z-10 pointer-events-none flex-none">
-          <h1 className="text-[22px] font-bold text-[#191F28] mb-1">인플루언서 맵</h1>
-          <p className="text-[14px] text-[#4E5968]">
-            어느 지역의 인플루언서가 궁금하세요?
-          </p>
-        </header>
-      )}
-
       <div className="relative w-full h-full flex items-center justify-center flex-1">
         <TransformWrapper
           initialScale={1}
@@ -150,8 +140,8 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                   <motion.g
                     animate={{
                       scale: selectedProvince ? 2.3 : 1,
-                      x: selectedProvince ? 150 - getProvincePosition(selectedProvince).x * 2.3 : 0,
-                      y: selectedProvince ? 200 - getProvincePosition(selectedProvince).y * 2.3 : 0,
+                      x: selectedProvince ? 140 - getProvincePosition(selectedProvince).x * 2.3 : 0,
+                      y: selectedProvince ? 140 - getProvincePosition(selectedProvince).y * 2.3 : 0,
                     }}
                     transition={{ type: "spring", damping: 25, stiffness: 180 }}
                   >

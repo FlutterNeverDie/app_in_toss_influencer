@@ -18,7 +18,7 @@ create policy "Users can update their own profile."
   on public.member for update
   using ( auth.uid() = id );
 
--- 2. Influencer 테이블에 Member ID 연결
+-- 2. Influencer 테이블에 Member ID 연결 
 alter table public.influencer 
 add column if not exists member_id uuid references public.member(id);
  
