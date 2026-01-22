@@ -71,7 +71,18 @@ export const MainScreen = () => {
       setIsLoading(true);
       try {
         const data = await InfluencerService.fetchInfluencersByDistrict(selectedDistrict);
-        setInfluencers(data);
+
+        // 정렬 로직 적용: 좋아요 수(많은 순) -> 등록일(빠른 순)
+        const sortedData = [...data].sort((a, b) => {
+          // 1. 좋아요 수 내림차순
+          if (b.like_count !== a.like_count) {
+            return b.like_count - a.like_count;
+          }
+          // 2. 좋아요 수가 같으면 등록일(created_at) 오름차순 (선착순)
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        });
+
+        setInfluencers(sortedData);
       } catch (e) {
         setInfluencers([]);
       } finally {
