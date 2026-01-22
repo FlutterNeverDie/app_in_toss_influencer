@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageCircle, HelpCircle, UserPlus, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, HelpCircle, UserPlus, ChevronDown, ChevronUp } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { FAQ_DATA } from '../../data/constants/faq';
 
@@ -69,22 +69,6 @@ export const DrawerMenu = () => {
                                         지금 신청하기
                                     </button>
                                 </div>
-                            </section>
-
-                            {/* 고객 지원 */}
-                            <section>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <MessageCircle size={20} className="text-[#333D4B]" />
-                                    <h3 className="text-[18px] font-bold text-[#191F28]">고객 지원</h3>
-                                </div>
-                                <ul className="space-y-4">
-                                    <li>
-                                        <a href="mailto:support@influencermap.com" className="flex flex-col">
-                                            <span className="text-[15px] font-medium text-[#333D4B]">문의하기</span>
-                                            <span className="text-[13px] text-[#8B95A1]">support@influencermap.com</span>
-                                        </a>
-                                    </li>
-                                </ul>
                             </section>
 
                             {/* 자주 묻는 질문 (FAQ) */}

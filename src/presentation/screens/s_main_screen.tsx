@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { isSupabaseConfigured } from '../../lib/supabase';
+import { SafeAreaInsets, openURL } from '@apps-in-toss/web-framework';
 import { motion, useDragControls } from 'framer-motion';
 import { Menu, Search, ChevronDown, Map } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
@@ -18,6 +19,36 @@ export const MainScreen = () => {
   const { selectedProvince, selectedDistrict, openSheet, openDrawer, selectDistrict, selectProvince } = useRegionStore();
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [insets, setInsets] = useState({ top: 0, bottom: 0, left: 0, right: 0 });
+
+  // Safe Area 설정
+  useEffect(() => {
+    // 초기값 가져오기
+    try {
+      if (typeof SafeAreaInsets !== 'undefined' && typeof SafeAreaInsets.get === 'function') {
+        const initialInsets = SafeAreaInsets.get();
+        if (initialInsets) setInsets(initialInsets);
+      }
+    } catch (e) {
+      console.error('Failed to get safe area insets:', e);
+    }
+
+    // 변경 구독
+    let unsubscribe: (() => void) | undefined;
+    try {
+      if (typeof SafeAreaInsets !== 'undefined' && typeof SafeAreaInsets.subscribe === 'function') {
+        unsubscribe = SafeAreaInsets.subscribe({
+          onEvent: (data) => setInsets(data)
+        });
+      }
+    } catch (e) {
+      console.error('Failed to subscribe to safe area insets:', e);
+    }
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
 
   // 드래그 제스처 컨트롤
   const dragControls = useDragControls();
@@ -63,7 +94,13 @@ export const MainScreen = () => {
   };
 
   return (
-    <div className="relative w-full h-full bg-[#F2F4F6] overflow-hidden flex flex-col">
+    <div
+      className="relative w-full h-full bg-[#F2F4F6] overflow-hidden flex flex-col"
+      style={{
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom
+      }}
+    >
       {/* Toast Notification (임시 주석 처리)
       <AnimatePresence>
         {toast.visible && (
@@ -210,7 +247,12 @@ export const MainScreen = () => {
                   onClick={() => {
                     // DB 변경 없이 ID로 바로 링크 생성
                     const profileUrl = `https://www.instagram.com/${influencer.instagram_id}`;
-                    window.open(profileUrl, '_blank');
+                    // 토스 브릿지 방식으로 열기 (방어적 처리)
+                    if (typeof openURL === 'function') {
+                      openURL(profileUrl);
+                    } else {
+                      window.open(profileUrl, '_blank');
+                    }
                   }}
                   className="flex items-center justify-between rounded-[16px] bg-[#F9FAFB] p-4 cursor-pointer hover:bg-gray-100 transition-colors active:scale-[0.98]"
                 >
