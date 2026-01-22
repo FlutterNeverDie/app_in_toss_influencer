@@ -12,6 +12,7 @@ trigger: always_on
 - **데이터 구조**: `image_url` 필드에는 Supabase Storage의 퍼블릭 URL을 저장합니다.
 - **Fallback**: 이미지 로드 실패 시 "IMG" 텍스트 또는 기본 아이콘이 표시되도록 처리합니다.
 
+
 2. 인스타그램 ID 및 링크 로직
 - **ID 마스킹**: 보안 및 이탈 방지를 위해 `maskInstagramId` 함수를 통해 `anti***` 형태로 노출합니다.
 - **링크 연동**: 카드 클릭 시 토스 브릿지의 `openURL` API를 사용하여 실제 인스타그램 앱/웹으로 리다이렉션합니다.
@@ -36,5 +37,6 @@ export interface Influencer {
 ```
 
 5. 기술적 주의사항
-- **URL 만료**: 인스타그램 CDN URL은 만료될 수 있으므로, 이미지가 깨질 경우 DB URL을 수동으로 업데이트해야 합니다.
+- **URL 만료**: 인스타그램 CDN URL은 만료될 수 있으므로, 이미지가 깨질 경우 DB URL을 수동으로 업데이트해야 합니다. 
 - **방어적 브릿지 호출**: 토스 앱 외부에서도 기능이 오작동하지 않도록 `typeof API === 'function'` 체크를 필수로 수행합니다.
+- **VERCEL 업로드 : vercel 업로드를 위해사용 안하는 임포트, 변수 정리해줘 
