@@ -109,7 +109,7 @@ export const DrawerMenu = () => {
                                             {isLoggedIn ? '반가워요!' : '로그인 해주세요'}
                                         </h3>
                                         <p className="text-[14px] font-medium text-[#4E5968]">
-                                            {isLoggedIn ? '오늘도 영향력을 확인해보세요' : '더 많은 추천을 받을 수 있어요'}
+                                            {isLoggedIn ? '오늘도 영향력을 확인해보세요' : '더 많은 기능을 이용해보세요!'}
                                         </p>
                                     </div>
                                 </div>
