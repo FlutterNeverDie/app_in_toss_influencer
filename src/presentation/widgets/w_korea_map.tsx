@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { TransformWrapper, TransformComponent, type ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
+import { Plus, Minus } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { PROVINCE_DISPLAY_NAMES, REGION_DATA } from '../../data/constants/regions';
 import { MAP_COLORS } from '../../data/constants/map_paths';
@@ -163,9 +164,9 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                     <motion.div
                       className="w-full h-full relative"
                       animate={{
-                        scale: selectedProvince ? 2.3 : 1,
-                        x: selectedProvince && activeCentroid ? 150 - activeCentroid.x * 2.3 : 0,
-                        y: selectedProvince && activeCentroid ? 180 - activeCentroid.y * 2.3 : -40,
+                        scale: selectedProvince ? 1.8 : 1,
+                        x: selectedProvince && activeCentroid ? 150 - activeCentroid.x * 1.8 : 0,
+                        y: selectedProvince && activeCentroid ? 180 - activeCentroid.y * 1.8 : -40,
                       }}
                       transition={{ type: "spring", damping: 25, stiffness: 180 }}
                       style={{ transformOrigin: "0 0" }}
@@ -243,7 +244,7 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                                   onClick={(e: any) => handleDistrictClick(dist.id, e)}
                                   initial={{ scale: 0, opacity: 0 }}
                                   animate={{
-                                    scale: isSelected ? 0.5 : 0.43, // 역배율 적용 (2.3배 확대에 대응)
+                                    scale: isSelected ? 0.65 : 0.55, // 1.8배 확대에 맞춘 역배율 (1/1.8 ≈ 0.55)
                                     opacity: 1
                                   }}
                                   whileTap={{ scale: 0.4 }}
@@ -290,6 +291,24 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                     )}
                   </div>
                 </TransformComponent>
+
+                {/* 수동 줌 컨트롤 (우측 하단 Edge 스타일) */}
+                <div className="absolute right-4 top-1/2 translate-y-[80px] z-50 flex flex-col gap-2">
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => { e.stopPropagation(); triggerHaptic("tickWeak"); transformRef.current?.zoomIn(); }}
+                    className="w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-lg border border-[#F2F4F6] text-[#191F28] active:bg-[#F9FAFB] transition-all"
+                  >
+                    <Plus size={20} />
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => { e.stopPropagation(); triggerHaptic("tickWeak"); transformRef.current?.zoomOut(); }}
+                    className="w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-lg border border-[#F2F4F6] text-[#191F28] active:bg-[#F9FAFB] transition-all"
+                  >
+                    <Minus size={20} />
+                  </motion.button>
+                </div>
               </div>
             );
           }}
