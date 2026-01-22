@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, HelpCircle, UserPlus, ChevronDown, ChevronUp, Share2, User, ArrowLeft } from 'lucide-react';
+import { X, HelpCircle, UserPlus, ChevronDown, ChevronUp, User, ArrowLeft } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { useAuthStore } from '../stores/auth_store';
 import { FAQ_DATA } from '../../data/constants/faq';
 import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/regions';
-import { share, generateHapticFeedback, appLogin, openURL } from '@apps-in-toss/web-framework';
+import { generateHapticFeedback, appLogin, openURL } from '@apps-in-toss/web-framework';
 import { MemberService } from '../../data/services/member_service';
 import { InfluencerService } from '../../data/services/influencer_service';
 import { isSupabaseConfigured } from '../../lib/supabase';
@@ -40,7 +40,7 @@ export const DrawerMenu = () => {
         setExpandedFAQ(expandedFAQ === index ? null : index);
     };
 
-    const { isLoggedIn, login, logout, member } = useAuthStore();
+    const { isLoggedIn, login, member } = useAuthStore();
     const [regInfo, setRegInfo] = useState<{
         status: 'pending' | 'approved' | 'rejected' | null;
         province_id?: string;
@@ -137,20 +137,6 @@ export const DrawerMenu = () => {
         }
     };
 
-    const handleShare = async () => {
-        triggerHaptic("tap");
-        try {
-            if (typeof share === 'function') {
-                await share({
-                    message: "내 주변 인플루언서는 누구? '인플루언서 맵'에서 확인해보세요! 📍\nhttps://toss.im/_m/influencer"
-                });
-            } else {
-                alert('공유하기는 토스 앱 내에서 가능합니다.');
-            }
-        } catch (error) {
-            console.error('Share Error:', error);
-        }
-    };
 
     const handleInstagramClick = (username: string) => {
         triggerHaptic("tap");
@@ -327,33 +313,8 @@ export const DrawerMenu = () => {
                                                 <ArrowLeft size={18} className="text-[#ADB5BD] rotate-180" />
                                             </button>
 
-                                            <button
-                                                onClick={handleShare}
-                                                className="w-full flex items-center justify-between p-4 hover:bg-[#F2F4F6] rounded-[16px] transition-colors group"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-[#F2F4F6] rounded-full flex items-center justify-center text-[#4E5968] group-hover:bg-white transition-colors border border-transparent group-hover:border-[#F2F4F6]">
-                                                        <Share2 size={20} />
-                                                    </div>
-                                                    <span className="text-[16px] font-bold text-[#333D4B]">친구에게 공유하기</span>
-                                                </div>
-                                                <ArrowLeft size={18} className="text-[#ADB5BD] rotate-180" />
-                                            </button>
                                         </section>
 
-                                        {isLoggedIn && (
-                                            <div className="pt-2">
-                                                <button
-                                                    onClick={() => {
-                                                        triggerHaptic("tickWeak");
-                                                        logout();
-                                                    }}
-                                                    className="w-full py-4 text-[14px] text-[#8B95A1] font-medium hover:text-[#4E5968] transition-colors"
-                                                >
-                                                    로그아웃
-                                                </button>
-                                            </div>
-                                        )}
                                     </motion.div>
                                 ) : (
                                     <motion.div

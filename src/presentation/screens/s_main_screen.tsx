@@ -11,7 +11,7 @@ import { RegistrationModal } from '../widgets/w_registration_modal';
 import { PROVINCE_DISPLAY_NAMES, REGION_DATA } from '../../data/constants/regions';
 import { InfluencerService } from '../../data/services/influencer_service';
 import type { Influencer } from '../../data/models/m_influencer';
-import { MemberService } from '../../data/services/member_service';
+
 
 /**
  * 햅틱 피드백 유틸리티
@@ -50,14 +50,17 @@ export const MainScreen = () => {
   useEffect(() => {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     if (!isLoggedIn && isLocal) {
-      MemberService.syncMember({
+      // 로컬에서는 싱크 에러가 날 수 있으므로 최소한의 정보로 로그인 처리
+      const mockMember = {
+        id: 'local_dev_user',
         toss_id: 'local_dev_user',
         name: '로컬 개발자',
-      }).then(member => {
-        if (member) login(member);
-      });
+        created_at: new Date().toISOString()
+      };
+      login(mockMember as any);
     }
   }, [isLoggedIn, login]);
+
 
   // 데이터 페칭 로직
   useEffect(() => {
@@ -111,35 +114,21 @@ export const MainScreen = () => {
 
   return (
     <div className="relative w-full h-[100dvh] bg-white overflow-hidden flex flex-col font-toss">
-      {/* 1. 상단 내비게이션 */}
-      <nav className="flex items-center justify-between px-6 py-4 z-50">
-        <button
+
+      {/* 1. 플로팅 버튼 (메뉴) - 토스 표준 내비바 하단에 위치 */}
+      <div className="absolute top-[env(safe-area-inset-top,20px)] left-0 z-50 pointer-events-none p-4">
+        <motion.button
+          whileTap={{ scale: 0.9 }}
           onClick={() => { triggerHaptic("tickWeak"); openDrawer(); }}
-          className="p-2 -ml-2 hover:bg-[#F2F4F6] rounded-full transition-colors"
+          className="pointer-events-auto w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg border border-[#F2F4F6] active:bg-[#F9FAFB] transition-all"
         >
-          <div className="w-6 h-6 flex flex-col justify-center gap-1.5">
-            <div className="w-6 h-0.5 bg-[#191F28]" />
-            <div className="w-4 h-0.5 bg-[#191F28]" />
-            <div className="w-6 h-0.5 bg-[#191F28]" />
+          <div className="flex flex-col gap-1.5">
+            <div className="w-5 h-0.5 bg-[#191F28] rounded-full" />
+            <div className="w-3.5 h-0.5 bg-[#191F28] rounded-full" />
+            <div className="w-5 h-0.5 bg-[#191F28] rounded-full" />
           </div>
-        </button>
-        <div
-          onClick={() => { triggerHaptic("tickWeak"); selectProvince(null); }}
-          className="flex flex-col items-center cursor-pointer"
-        >
-          <span className="text-[17px] font-bold text-[#191F28] tracking-tight">인플루언서 맵</span>
-          <div className="flex items-center gap-1">
-            <div className="w-1 h-1 bg-[#3182F6] rounded-full" />
-            <span className="text-[11px] font-bold text-[#3182F6] uppercase tracking-widest">Influencer Map</span>
-          </div>
-        </div>
-        <div
-          onClick={() => { triggerHaptic("tickWeak"); openSheet(); }}
-          className="w-10 h-10 flex items-center justify-center bg-[#F2F4F6] hover:bg-[#E5E8EB] rounded-full transition-colors cursor-pointer"
-        >
-          <Search size={22} className="text-[#191F28]" />
-        </div>
-      </nav>
+        </motion.button>
+      </div>
 
       {/* 2. 지도 영역 */}
       <main className="flex-1 relative flex flex-col overflow-hidden">
