@@ -48,7 +48,8 @@ export const MainScreen = () => {
 
   // 로컬 개발 환경 자동 로그인 (유저 요청)
   useEffect(() => {
-    if (!isLoggedIn && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (!isLoggedIn && isLocal) {
       MemberService.syncMember({
         toss_id: 'local_dev_user',
         name: '로컬 개발자',

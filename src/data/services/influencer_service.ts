@@ -83,13 +83,17 @@ export const InfluencerService = {
             const { error } = await supabase
                 .from('influencer')
                 .insert({
-                    ...influencer,
-                    status: 'pending', // 초기 상태는 항상 대기
-                    like_count: 0      // 초기 좋아요는 0
+                    instagram_id: influencer.instagram_id,
+                    image_url: influencer.image_url,
+                    province_id: influencer.province_id,
+                    district_id: influencer.district_id,
+                    member_id: influencer.member_id,
+                    status: 'pending',
+                    like_count: 0
                 });
 
             if (error) {
-                console.error('Error registering influencer:', error);
+                console.error('Supabase Insert Error:', error.message, error.details, error.hint);
                 return false;
             }
 
@@ -98,5 +102,104 @@ export const InfluencerService = {
             console.error('Unexpected error in registerInfluencer:', e);
             return false;
         }
+    },
+
+    /**
+     * 내 등록 상태를 확인합니다.
+     */
+    async getMyRegistrationStatus(memberId: string): Promise<'pending' | 'approved' | 'rejected' | null> {
+        try {
+            const { data, error } = await supabase
+                .from('influencer')
+                .select('status')
+                .eq('member_id', memberId)
+                .maybeSingle();
+
+            if (error || !data) return null;
+            return data.status as any;
+        } catch (e) {
+            return null;
+        }
+    },
+
+    /**
+     * 프로필 이미지를 Supabase Storage에 업로드합니다.
+     * WebP 변환 및 최적화를 수행합니다.
+     */
+    async uploadProfileImage(file: File, memberId: string): Promise<string | null> {
+        try {
+            // 1. 이미지 최적화 (WebP 변환 및 리사이징)
+            const optimizedBlob = await this.optimizeImage(file);
+            if (!optimizedBlob) return null;
+
+            // 2. 파일명 고정 (멤버당 1개 제한: memberId.webp)
+            const fileName = `${memberId}.webp`;
+            const filePath = `${fileName}`;
+
+            // 3. Supabase Storage 업로드 (profiles 버킷, upsert: true로 덮어쓰기)
+            const { error } = await supabase.storage
+                .from('profiles')
+                .upload(filePath, optimizedBlob, {
+                    contentType: 'image/webp',
+                    upsert: true
+                });
+
+            if (error) {
+                console.error('Storage Upload Error:', error);
+                return null;
+            }
+
+            // 4. 퍼블릭 URL 반환
+            const { data: { publicUrl } } = supabase.storage
+                .from('profiles')
+                .getPublicUrl(filePath);
+
+            return publicUrl;
+        } catch (e) {
+            console.error('Unexpected error in uploadProfileImage:', e);
+            return null;
+        }
+    },
+
+    /**
+     * Canvas를 이용한 이미지 최적화 (WebP)
+     */
+    async optimizeImage(file: File): Promise<Blob | null> {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 500;
+                    const MAX_HEIGHT = 500;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        resolve(blob);
+                    }, 'image/webp', 0.8); // 80% 품질로 WebP 변환
+                };
+            };
+        });
     }
 };

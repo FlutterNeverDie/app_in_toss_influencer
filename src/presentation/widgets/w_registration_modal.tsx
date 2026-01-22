@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Instagram, MapPin, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { X, Instagram, MapPin, CheckCircle2, ArrowLeft, Camera, Image as ImageIcon } from 'lucide-react';
 import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/regions';
 import { InfluencerService } from '../../data/services/influencer_service';
 import { generateHapticFeedback } from '@apps-in-toss/web-framework';
@@ -23,14 +23,31 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
     const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
     const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
     const [instagramId, setInstagramId] = useState('');
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [registrationStatus, setRegistrationStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
+
+    // 등록 상태 확인
+    useEffect(() => {
+        if (isOpen && member?.id) {
+            InfluencerService.getMyRegistrationStatus(member.id).then(status => {
+                setRegistrationStatus(status);
+            });
+        }
+    }, [isOpen, member?.id]);
 
     const resetForm = () => {
         setStep(1);
         setSelectedProvince(null);
         setSelectedDistrict(null);
         setInstagramId('');
+        setSelectedImage(null);
+        setImagePreview(null);
         setIsSubmitting(false);
+        setErrorMessage(null);
+        setRegistrationStatus(null);
     };
 
     const handleClose = () => {
@@ -38,25 +55,62 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
         onClose();
     };
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setSelectedImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleSubmit = async () => {
-        if (!selectedProvince || !selectedDistrict || !instagramId) return;
+        if (!selectedProvince || !selectedDistrict || !instagramId || !selectedImage) {
+            setErrorMessage('이미지와 인스타그램 아이디를 모두 입력해주세요.');
+            return;
+        }
 
         setIsSubmitting(true);
+        setErrorMessage(null);
         triggerHaptic("tickMedium");
 
-        const result = await InfluencerService.registerInfluencer({
-            instagram_id: instagramId.replace('@', ''),
-            province_id: selectedProvince,
-            district_id: selectedDistrict,
-            member_id: member?.id,
-            image_url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=200&h=200&fit=crop', // 임시 이미지
-        });
+        try {
+            // 1. 이미지 업로드
+            const imageUrl = await InfluencerService.uploadProfileImage(selectedImage, member?.id || 'anonymous');
 
-        if (result) {
-            triggerHaptic("success");
-            setStep(3);
-        } else {
-            alert('등록 신청 중 오류가 발생했습니다. 다시 시도해 주세요.');
+            if (!imageUrl) {
+                setErrorMessage('이미지 업로드에 실패했습니다. (스토리지 설정을 확인해주세요)');
+                setIsSubmitting(false);
+                return;
+            }
+
+            // 2. 인플루언서 등록
+            const result = await InfluencerService.registerInfluencer({
+                instagram_id: instagramId.replace('@', ''),
+                province_id: selectedProvince,
+                district_id: selectedDistrict,
+                member_id: member?.id,
+                image_url: imageUrl,
+            });
+
+            if (result) {
+                triggerHaptic("success");
+                setStep(3);
+                // 등록 성공 후 상태 다시 확인
+                if (member?.id) {
+                    const status = await InfluencerService.getMyRegistrationStatus(member.id);
+                    setRegistrationStatus(status);
+                }
+            } else {
+                setErrorMessage('등록 신청 중 오류가 발생했습니다. (데이터 형식을 확인해주세요)');
+                setIsSubmitting(false);
+            }
+        } catch (e) {
+            console.error('Registration error:', e);
+            setErrorMessage('서버와의 통신이 원활하지 않습니다.');
             setIsSubmitting(false);
         }
     };
@@ -113,7 +167,11 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                                         <h3 className="text-[22px] font-bold text-[#191F28] mb-2 leading-tight">
                                             활동하시는 지역을<br />선택해주세요
                                         </h3>
-                                        <p className="text-[#4E5968] text-[15px]">정확한 정보를 입력해야 지도에 노출됩니다.</p>
+                                        {registrationStatus === 'pending' ? (
+                                            <p className="text-[#3182F6] text-[15px] font-bold bg-[#F2F8FF] p-3 rounded-xl">이미 신청하신 정보가 검수 중입니다.</p>
+                                        ) : (
+                                            <p className="text-[#4E5968] text-[15px]">정확한 정보를 입력해야 지도에 노출됩니다.</p>
+                                        )}
                                     </header>
 
                                     {!selectedProvince ? (
@@ -179,18 +237,39 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                                         </div>
                                     </header>
 
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <label className="text-[14px] font-bold text-[#4E5968] ml-1">인스타그램 ID</label>
-                                            <div className="relative">
-                                                <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 text-[#ADB5BD]" size={20} />
-                                                <input
-                                                    type="text"
-                                                    value={instagramId}
-                                                    onChange={(e) => setInstagramId(e.target.value)}
-                                                    placeholder="아이디를 입력하세요 (예: my_insta)"
-                                                    className="w-full pl-12 pr-4 py-4 bg-[#F9FAFB] rounded-[20px] border-2 border-transparent focus:border-[#3182F6] outline-none text-[16px] font-medium transition-all"
-                                                />
+                                    <div className="space-y-6">
+                                        <div className="flex flex-col items-center gap-4">
+                                            <div className="relative group">
+                                                <div className="w-24 h-24 rounded-full bg-[#F2F4F6] flex items-center justify-center overflow-hidden border-2 border-[#E5E8EB]">
+                                                    {imagePreview ? (
+                                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <Camera className="text-[#ADB5BD]" size={32} />
+                                                    )}
+                                                </div>
+                                                <label className="absolute bottom-0 right-0 w-8 h-8 bg-[#3182F6] rounded-full flex items-center justify-center text-white cursor-pointer shadow-md hover:bg-[#1B64DA] transition-colors">
+                                                    <ImageIcon size={16} />
+                                                    <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                                                </label>
+                                            </div>
+                                            <p className="text-[13px] text-[#8B95A1]">본인 확인이 가능한 사진을 올려주세요</p>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="bg-[#F9FAFB] p-5 rounded-[20px] flex items-center gap-4 border border-[#F2F4F6]">
+                                                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-[#3182F6]">
+                                                    <Instagram size={22} />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-[13px] text-[#8B95A1] mb-1">인스타그램 아이디</p>
+                                                    <input
+                                                        type="text"
+                                                        value={instagramId}
+                                                        onChange={(e) => setInstagramId(e.target.value)}
+                                                        placeholder="@아이디 입력"
+                                                        className="w-full bg-transparent text-[17px] font-bold text-[#191F28] focus:outline-none placeholder:text-[#E5E8EB]"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 
@@ -207,13 +286,19 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                                         </div>
                                     </div>
 
+                                    {errorMessage && (
+                                        <div className="bg-[#FFF0F0] p-4 rounded-[16px] border border-[#FFD0D0] text-[#FF4D4F] text-[13px] font-bold text-center">
+                                            {errorMessage}
+                                        </div>
+                                    )}
+
                                     <motion.button
                                         whileTap={{ scale: 0.98 }}
-                                        disabled={!instagramId || isSubmitting}
+                                        disabled={!instagramId || !selectedImage || isSubmitting || registrationStatus === 'pending'}
                                         onClick={handleSubmit}
                                         className={`
                                             w-full py-5 rounded-[20px] font-bold text-[17px] transition-all shadow-lg
-                                            ${instagramId && !isSubmitting
+                                            ${instagramId && selectedImage && !isSubmitting && registrationStatus !== 'pending'
                                                 ? 'bg-[#3182F6] text-white shadow-[#3182F6]/20'
                                                 : 'bg-[#E5E8EB] text-[#ADB5BD] shadow-none cursor-not-allowed'}
                                         `}
@@ -223,7 +308,11 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                                 <span>처리 중...</span>
                                             </div>
-                                        ) : '등록 신청하기'}
+                                        ) : registrationStatus === 'pending' ? (
+                                            '검수 대기 중'
+                                        ) : (
+                                            '등록 신청하기'
+                                        )}
                                     </motion.button>
                                 </div>
                             )}
@@ -249,7 +338,7 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                                             whileTap={{ scale: 0.98 }}
                                             onClick={() => {
                                                 triggerHaptic("tickMedium");
-                                                window.open('https://instagram.com/influencer_map', '_blank');
+                                                window.open('https://www.instagram.com/influer_map?igsh=OGM2bzExcXlqY25r&utm_source=qr', '_blank');
                                             }}
                                             className="w-full py-5 bg-[#191F28] text-white rounded-[20px] font-bold text-[17px] flex items-center justify-center gap-2 shadow-xl"
                                         >

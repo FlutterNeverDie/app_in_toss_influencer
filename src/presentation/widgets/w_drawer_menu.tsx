@@ -6,6 +6,7 @@ import { useAuthStore } from '../stores/auth_store';
 import { FAQ_DATA } from '../../data/constants/faq';
 import { share, generateHapticFeedback, appLogin } from '@apps-in-toss/web-framework';
 import { MemberService } from '../../data/services/member_service';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 /**
  * 햅틱 피드백 유틸리티
@@ -33,13 +34,20 @@ export const DrawerMenu = () => {
 
     const handleLogin = async () => {
         triggerHaptic("tickMedium");
+
+        // 로컬 환경 또는 개발 환경 체크 
+        const isLocal = window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname.startsWith('192.168.') ||
+            window.location.hostname.endsWith('.local');
+
         try {
-            if (typeof appLogin === 'function') {
+            // 1. 토스 내부 앱 환경인지 확인 (브릿지가 존재하고 로컬이 아닌 경우 우선)
+            if (typeof appLogin === 'function' && !isLocal) {
                 await appLogin();
-                // 토스에서 받은 정보로 멤버 동기화 (toss_id는 필수)
-                // 실제 앱에서는 response에서 정보를 추출해야 함
+
                 const member = await MemberService.syncMember({
-                    toss_id: `toss_${Math.random().toString(36).substr(2, 9)} `, // 임시 ID 생성 (데모용)
+                    toss_id: `toss_${Math.random().toString(36).substring(2, 11)}`,
                     name: '토스 사용자',
                 });
 
@@ -47,44 +55,50 @@ export const DrawerMenu = () => {
                     login(member);
                 }
             } else {
-                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
+                // 2. 로컬 환경이거나 토스 앱이 아닌 경우 (데모 모드)
                 if (!isLocal) {
-                    alert('로그인은 토스 앱 내에서 가능합니다.');
+                    alert('로그인은 토스 앱 내에서 가능합니다.\n(로컬 환경에서는 데모 로그인이 실행됩니다.)');
                 }
 
-                // 데모용: 로컬 환경에서도 로그인 테스트 가능하게 함
-                try {
-                    const demoId = 'demo_user_123';
-                    const demoMember = await MemberService.syncMember({
-                        toss_id: demoId,
-                        name: '데모 사용자',
-                    });
+                // Supabase가 설정되어 있으면 Mock 유저라도 DB에 생성 시도 (외래 키 제약 조건 준수 위해 필수)
+                const mockTossId = 'demo_user_123';
+                const mockName = isLocal ? '로컬 테스터' : '데모 사용자';
 
-                    if (demoMember) {
-                        login(demoMember);
-                    } else if (isLocal) {
-                        // Supabase 연결 실패 시에도 로컬이면 강제 로그인 (테스트용)
-                        login({
-                            id: 'mock-uuid-123',
-                            toss_id: demoId,
-                            name: '로컬 테스터',
-                            created_at: new Date().toISOString()
+                if (isSupabaseConfigured) {
+                    try {
+                        const demoMember = await MemberService.syncMember({
+                            toss_id: mockTossId,
+                            name: mockName,
                         });
-                    }
-                } catch (e) {
-                    if (isLocal) {
-                        login({
-                            id: 'mock-uuid-123',
-                            toss_id: 'demo_user_123',
-                            name: '로컬 테스터 (오류)',
-                            created_at: new Date().toISOString()
-                        });
+
+                        if (demoMember) {
+                            login(demoMember);
+                            return;
+                        }
+                    } catch (e) {
+                        console.warn('Supabase sync failed, falling back to instant mock login');
                     }
                 }
+
+                // 최후의 보루: DB 연결 안되어도 UI는 작동하게 함
+                login({
+                    id: '00000000-0000-0000-0000-000000000000',
+                    toss_id: mockTossId,
+                    name: mockName,
+                    created_at: new Date().toISOString()
+                });
             }
         } catch (error) {
             console.error('Login Error:', error);
+            // 에러 발생 시에도 로컬이면 로그인 상태로 진입하게 해줌 (개발 편의성)
+            if (isLocal) {
+                login({
+                    id: '00000000-0000-0000-0000-000000000001',
+                    toss_id: 'error_user',
+                    name: '로컬 테스터(오류)',
+                    created_at: new Date().toISOString()
+                });
+            }
         }
     };
 
@@ -149,9 +163,11 @@ export const DrawerMenu = () => {
                                         <h3 className="text-[19px] font-bold text-[#191F28] leading-tight">
                                             {isLoggedIn ? '반가워요!' : '로그인 해주세요'}
                                         </h3>
-                                        <p className="text-[14px] font-medium text-[#4E5968]">
-                                            {isLoggedIn ? '오늘도 영향력을 확인해보세요' : '더 많은 기능을 이용해보세요!'}
-                                        </p>
+                                        {!isLoggedIn && (
+                                            <p className="text-[14px] font-medium text-[#4E5968]">
+                                                더 많은 기능을 이용해보세요!
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                                 {!isLoggedIn ? (
