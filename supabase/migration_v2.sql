@@ -1,3 +1,4 @@
+
 -- 1. Status 컬럼 추가 (기존 데이터는 'approved'로 설정)
 alter table public.influencer 
 add column if not exists status text default 'pending' check (status in ('pending', 'approved', 'rejected'));

@@ -141,7 +141,7 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                     animate={{
                       scale: selectedProvince ? 2.3 : 1,
                       x: selectedProvince ? 140 - getProvincePosition(selectedProvince).x * 2.3 : 0,
-                      y: selectedProvince ? 140 - getProvincePosition(selectedProvince).y * 2.3 : 0,
+                      y: selectedProvince ? 140 - getProvincePosition(selectedProvince).y * 2.3 : -40,
                     }}
                     transition={{ type: "spring", damping: 25, stiffness: 180 }}
                   >
