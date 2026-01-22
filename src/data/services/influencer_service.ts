@@ -81,15 +81,13 @@ export const InfluencerService = {
     async registerInfluencer(influencer: Partial<Influencer>): Promise<boolean> {
         try {
             const { error } = await supabase
-                .from('influencer')
+                .from('influencer_request') // 신청 대기 테이블로 변경
                 .insert({
                     instagram_id: influencer.instagram_id,
                     image_url: influencer.image_url,
                     province_id: influencer.province_id,
                     district_id: influencer.district_id,
                     member_id: influencer.member_id,
-                    status: 'pending',
-                    like_count: 0
                 });
 
             if (error) {
@@ -105,20 +103,47 @@ export const InfluencerService = {
     },
 
     /**
-     * 내 등록 상태를 확인합니다.
+     * 내 등록 상태 및 지역을 확인합니다.
      */
-    async getMyRegistrationStatus(memberId: string): Promise<'pending' | 'approved' | 'rejected' | null> {
+    async getMyRegistrationStatus(memberId: string): Promise<{
+        status: 'pending' | 'approved' | 'rejected' | null;
+        province_id?: string;
+        district_id?: string;
+    }> {
         try {
-            const { data, error } = await supabase
+            // 1. 먼저 노출용 테이블(influencer) 확인 - 승인된 상태
+            const { data: approvedData } = await supabase
                 .from('influencer')
-                .select('status')
+                .select('id, province_id, district_id')
                 .eq('member_id', memberId)
                 .maybeSingle();
 
-            if (error || !data) return null;
-            return data.status as any;
+            if (approvedData) {
+                return {
+                    status: 'approved',
+                    province_id: approvedData.province_id,
+                    district_id: approvedData.district_id
+                };
+            }
+
+            // 2. 대기용 테이블(influencer_request) 확인 - 대기 중 상태
+            const { data: pendingData } = await supabase
+                .from('influencer_request')
+                .select('id, province_id, district_id')
+                .eq('member_id', memberId)
+                .maybeSingle();
+
+            if (pendingData) {
+                return {
+                    status: 'pending',
+                    province_id: pendingData.province_id,
+                    district_id: pendingData.district_id
+                };
+            }
+
+            return { status: null };
         } catch (e) {
-            return null;
+            return { status: null };
         }
     },
 

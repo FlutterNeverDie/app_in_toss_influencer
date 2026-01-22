@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { generateHapticFeedback } from '@apps-in-toss/web-framework';
+import { generateHapticFeedback, openURL } from '@apps-in-toss/web-framework';
 import { motion } from 'framer-motion';
 import { Search, Heart } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
@@ -81,6 +81,20 @@ export const MainScreen = () => {
 
     loadInfluencers();
   }, [selectedDistrict]);
+
+  // 인플루언서 클릭 시 인스타그램 이동
+  const handleInfluencerClick = (instagramId: string) => {
+    triggerHaptic("tap");
+    const url = `https://www.instagram.com/${instagramId}`;
+
+    if (typeof openURL === 'function') {
+      (openURL(url) as any).catch(() => {
+        window.open(url, '_blank');
+      });
+    } else {
+      window.open(url, '_blank');
+    }
+  };
 
   return (
     <div className="relative w-full h-screen bg-white overflow-hidden flex flex-col font-toss">
@@ -177,7 +191,8 @@ export const MainScreen = () => {
                     <motion.div
                       key={inf.id}
                       whileTap={{ scale: 0.98 }}
-                      className="min-w-[140px] bg-white rounded-[24px] p-4 border border-[#F2F4F6] shadow-sm flex flex-col items-center text-center gap-3 active:bg-[#F9FAFB] transition-colors"
+                      onClick={() => handleInfluencerClick(inf.instagram_id)}
+                      className="min-w-[140px] bg-white rounded-[24px] p-4 border border-[#F2F4F6] shadow-sm flex flex-col items-center text-center gap-3 active:bg-[#F9FAFB] cursor-pointer transition-colors"
                     >
                       <div className="relative">
                         <img

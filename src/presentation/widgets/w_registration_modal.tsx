@@ -27,13 +27,16 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [registrationStatus, setRegistrationStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
+    const [regInfo, setRegInfo] = useState<{
+        status: 'pending' | 'approved' | 'rejected' | null;
+        province_id?: string;
+        district_id?: string;
+    }>({ status: null });
 
-    // 등록 상태 확인
     useEffect(() => {
         if (isOpen && member?.id) {
-            InfluencerService.getMyRegistrationStatus(member.id).then(status => {
-                setRegistrationStatus(status);
+            InfluencerService.getMyRegistrationStatus(member.id).then(info => {
+                setRegInfo(info);
             });
         }
     }, [isOpen, member?.id]);
@@ -47,7 +50,7 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
         setImagePreview(null);
         setIsSubmitting(false);
         setErrorMessage(null);
-        setRegistrationStatus(null);
+        setRegInfo({ status: null });
     };
 
     const handleClose = () => {
@@ -101,8 +104,8 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                 setStep(3);
                 // 등록 성공 후 상태 다시 확인
                 if (member?.id) {
-                    const status = await InfluencerService.getMyRegistrationStatus(member.id);
-                    setRegistrationStatus(status);
+                    const info = await InfluencerService.getMyRegistrationStatus(member.id);
+                    setRegInfo(info);
                 }
             } else {
                 setErrorMessage('등록 신청 중 오류가 발생했습니다. (데이터 형식을 확인해주세요)');
@@ -167,8 +170,10 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                                         <h3 className="text-[22px] font-bold text-[#191F28] mb-2 leading-tight">
                                             활동하시는 지역을<br />선택해주세요
                                         </h3>
-                                        {registrationStatus === 'pending' ? (
+                                        {regInfo.status === 'pending' ? (
                                             <p className="text-[#3182F6] text-[15px] font-bold bg-[#F2F8FF] p-3 rounded-xl">이미 신청하신 정보가 검수 중입니다.</p>
+                                        ) : regInfo.status === 'approved' ? (
+                                            <p className="text-[#00D082] text-[15px] font-bold bg-[#E6F9F2] p-3 rounded-xl">이미 활동 중인 인플루언서입니다.</p>
                                         ) : (
                                             <p className="text-[#4E5968] text-[15px]">정확한 정보를 입력해야 지도에 노출됩니다.</p>
                                         )}
@@ -292,28 +297,30 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                                         </div>
                                     )}
 
-                                    <motion.button
-                                        whileTap={{ scale: 0.98 }}
-                                        disabled={!instagramId || !selectedImage || isSubmitting || registrationStatus === 'pending'}
-                                        onClick={handleSubmit}
-                                        className={`
-                                            w-full py-5 rounded-[20px] font-bold text-[17px] transition-all shadow-lg
-                                            ${instagramId && selectedImage && !isSubmitting && registrationStatus !== 'pending'
-                                                ? 'bg-[#3182F6] text-white shadow-[#3182F6]/20'
-                                                : 'bg-[#E5E8EB] text-[#ADB5BD] shadow-none cursor-not-allowed'}
-                                        `}
-                                    >
-                                        {isSubmitting ? (
-                                            <div className="flex items-center justify-center gap-2">
-                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                <span>처리 중...</span>
-                                            </div>
-                                        ) : registrationStatus === 'pending' ? (
-                                            '검수 대기 중'
-                                        ) : (
-                                            '등록 신청하기'
-                                        )}
-                                    </motion.button>
+                                    {regInfo.status !== 'approved' && (
+                                        <motion.button
+                                            whileTap={{ scale: 0.98 }}
+                                            disabled={!instagramId || !selectedImage || isSubmitting || regInfo.status === 'pending'}
+                                            onClick={handleSubmit}
+                                            className={`
+                                                w-full py-5 rounded-[20px] font-bold text-[17px] transition-all shadow-lg
+                                                ${instagramId && selectedImage && !isSubmitting && regInfo.status !== 'pending'
+                                                    ? 'bg-[#3182F6] text-white shadow-[#3182F6]/20'
+                                                    : 'bg-[#E5E8EB] text-[#ADB5BD] shadow-none cursor-not-allowed'}
+                                            `}
+                                        >
+                                            {isSubmitting ? (
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                    <span>처리 중...</span>
+                                                </div>
+                                            ) : regInfo.status === 'pending' ? (
+                                                '검수 대기 중'
+                                            ) : (
+                                                '등록 신청하기'
+                                            )}
+                                        </motion.button>
+                                    )}
                                 </div>
                             )}
 

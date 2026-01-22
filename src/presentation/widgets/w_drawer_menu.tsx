@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, HelpCircle, UserPlus, ChevronDown, ChevronUp, Share2, User } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { useAuthStore } from '../stores/auth_store';
 import { FAQ_DATA } from '../../data/constants/faq';
+import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/regions';
 import { share, generateHapticFeedback, appLogin } from '@apps-in-toss/web-framework';
 import { MemberService } from '../../data/services/member_service';
+import { InfluencerService } from '../../data/services/influencer_service';
 import { isSupabaseConfigured } from '../../lib/supabase';
 
 /**
@@ -30,7 +32,30 @@ export const DrawerMenu = () => {
         setExpandedFAQ(expandedFAQ === index ? null : index);
     };
 
-    const { isLoggedIn, login, logout } = useAuthStore();
+    const { isLoggedIn, login, member } = useAuthStore();
+    const [regInfo, setRegInfo] = useState<{
+        status: 'pending' | 'approved' | 'rejected' | null;
+        province_id?: string;
+        district_id?: string;
+    }>({ status: null });
+
+    // 드로어가 열릴 때마다 등록 상태 확인
+    useEffect(() => {
+        if (isDrawerOpen && isLoggedIn && member?.id) {
+            InfluencerService.getMyRegistrationStatus(member.id).then(info => {
+                setRegInfo(info);
+            });
+        }
+    }, [isDrawerOpen, isLoggedIn, member?.id]);
+
+    // 지역 이름 가져오기 유틸
+    const getRegionName = () => {
+        if (!regInfo.province_id || !regInfo.district_id) return '';
+        const provinceName = PROVINCE_DISPLAY_NAMES[regInfo.province_id as keyof typeof PROVINCE_DISPLAY_NAMES] || '';
+        const districts = REGION_DATA[regInfo.province_id as keyof typeof REGION_DATA] || [];
+        const districtName = districts.find(d => d.id === regInfo.district_id)?.name || '';
+        return `${provinceName} ${districtName}`;
+    };
 
     const handleLogin = async () => {
         triggerHaptic("tickMedium");
@@ -170,7 +195,7 @@ export const DrawerMenu = () => {
                                         )}
                                     </div>
                                 </div>
-                                {!isLoggedIn ? (
+                                {!isLoggedIn && (
                                     <motion.button
                                         whileTap={{ scale: 0.96 }}
                                         onClick={handleLogin}
@@ -178,40 +203,50 @@ export const DrawerMenu = () => {
                                     >
                                         토스로 로그인하기
                                     </motion.button>
-                                ) : (
-                                    <button
-                                        onClick={() => {
-                                            triggerHaptic("tickWeak");
-                                            logout();
-                                        }}
-                                        className="w-full mt-2 py-2 text-[14px] text-[#8B95A1] font-medium hover:text-[#4E5968] transition-colors"
-                                    >
-                                        로그아웃
-                                    </button>
                                 )}
                             </section>
 
-                            {/* 인플루언서 등록 (강조) - 로그인 시에만 노출 */}
+                            {/* 인플루언서 등록 / 관리 (상태에 따라 분기) */}
                             {isLoggedIn && (
                                 <section>
                                     <div className="bg-[#F2F4F6] rounded-[24px] p-6 border border-white">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <UserPlus size={20} className="text-[#3182F6]" />
-                                            <h3 className="text-[16px] font-bold text-[#191F28]">인플루언서 등록하기</h3>
+                                            <UserPlus size={20} className={regInfo.status === 'approved' ? 'text-[#00D082]' : 'text-[#3182F6]'} />
+                                            <h3 className="text-[16px] font-bold text-[#191F28]">
+                                                {regInfo.status === 'approved' ? '인플루언서 활동 중' : '인플루언서 등록하기'}
+                                            </h3>
                                         </div>
-                                        <p className="text-[14px] font-medium text-[#4E5968] mb-5 leading-relaxed">
-                                            나의 영향력을 지도에 표시해보세요.<br />등록은 100% 무료입니다!
-                                        </p>
-                                        <motion.button
-                                            whileTap={{ scale: 0.96 }}
-                                            onClick={() => {
-                                                triggerHaptic("tickWeak");
-                                                useRegionStore.getState().openRegistrationModal();
-                                            }}
-                                            className="w-full py-3.5 bg-white text-[#3182F6] border border-[#3182F6] rounded-[14px] font-bold text-[15px] hover:bg-[#F2F8FF] transition-colors"
-                                        >
-                                            지금 신청하기
-                                        </motion.button>
+                                        <div className="text-[14px] font-medium text-[#4E5968] mb-1 leading-relaxed">
+                                            {regInfo.status === 'approved'
+                                                ? (
+                                                    <div className="flex flex-col gap-1">
+                                                        <p>현재 아래 지역 인지도에 노출되고 있습니다.</p>
+                                                        <div className="inline-flex items-center gap-1.5 text-[#00D082] font-bold mt-1">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-[#00D082] animate-pulse" />
+                                                            {getRegionName()}
+                                                        </div>
+                                                    </div>
+                                                )
+                                                : regInfo.status === 'pending'
+                                                    ? '신청하신 정보가 검수 중입니다. 조금만 기다려주세요!'
+                                                    : '나의 영향력을 지도에 표시해보세요. 등록은 100% 무료입니다!'}
+                                        </div>
+
+                                        {regInfo.status !== 'approved' && (
+                                            <motion.button
+                                                whileTap={{ scale: 0.96 }}
+                                                onClick={() => {
+                                                    triggerHaptic("tickWeak");
+                                                    useRegionStore.getState().openRegistrationModal();
+                                                }}
+                                                className={`w-full mt-4 py-3.5 rounded-[14px] font-bold text-[15px] transition-colors border ${regInfo.status === 'pending'
+                                                    ? 'bg-[#F2F8FF] text-[#3182F6] border-[#3182F6]'
+                                                    : 'bg-white text-[#3182F6] border-[#3182F6] hover:bg-[#F2F8FF]'
+                                                    }`}
+                                            >
+                                                {regInfo.status === 'pending' ? '검수 대기 중' : '지금 신청하기'}
+                                            </motion.button>
+                                        )}
                                     </div>
                                 </section>
                             )}
