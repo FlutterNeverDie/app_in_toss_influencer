@@ -215,9 +215,6 @@ export const MainScreen = () => {
                         <div className="text-[14px] font-bold text-[#191F28] truncate max-w-[110px]">
                           {maskInstagramId(inf.instagram_id)}
                         </div>
-                        <div className="text-[12px] font-medium text-[#3182F6]">
-                          좋아요 {inf.like_count + (isLiked(inf.id) ? 1 : 0)}
-                        </div>
                       </div>
                     </motion.div>
                   ))
