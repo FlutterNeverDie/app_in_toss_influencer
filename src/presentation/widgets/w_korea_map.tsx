@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { TransformWrapper, TransformComponent, type ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import { useRegionStore } from '../stores/region_store';
 import { PROVINCE_DISPLAY_NAMES, REGION_DATA } from '../../data/constants/regions';
