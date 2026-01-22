@@ -115,14 +115,15 @@ export const MainScreen = () => {
   return (
     <div className="relative w-full h-[100dvh] bg-white overflow-hidden flex flex-col font-toss">
 
-      {/* 1. 플로팅 버튼 (메뉴) - 토스 표준 내비바 하단에 위치 */}
-      <div className="absolute top-[env(safe-area-inset-top,20px)] left-0 z-50 pointer-events-none p-4">
+      {/* 1. 플로팅 버튼 (메뉴) - 화면 왼쪽 중앙 Edge 스타일 */}
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 z-50 pointer-events-none">
         <motion.button
-          whileTap={{ scale: 0.9 }}
+          whileTap={{ scale: 0.9, x: 0 }}
+          whileHover={{ x: 4 }}
           onClick={() => { triggerHaptic("tickWeak"); openDrawer(); }}
-          className="pointer-events-auto w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-lg border border-[#F2F4F6] active:bg-[#F9FAFB] transition-all"
+          className="pointer-events-auto w-12 h-14 flex items-center justify-center bg-white rounded-r-[20px] shadow-[4px_0_15px_rgba(0,0,0,0.1)] border border-l-0 border-[#F2F4F6] active:bg-[#F9FAFB] transition-all"
         >
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 ml-[-4px]">
             <div className="w-5 h-0.5 bg-[#191F28] rounded-full" />
             <div className="w-3.5 h-0.5 bg-[#191F28] rounded-full" />
             <div className="w-5 h-0.5 bg-[#191F28] rounded-full" />
