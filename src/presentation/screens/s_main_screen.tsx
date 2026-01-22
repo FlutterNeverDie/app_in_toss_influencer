@@ -110,7 +110,7 @@ export const MainScreen = () => {
   };
 
   return (
-    <div className="relative w-full h-screen bg-white overflow-hidden flex flex-col font-toss">
+    <div className="relative w-full h-[100dvh] bg-white overflow-hidden flex flex-col font-toss">
       {/* 1. 상단 내비게이션 */}
       <nav className="flex items-center justify-between px-6 py-4 z-50">
         <button
