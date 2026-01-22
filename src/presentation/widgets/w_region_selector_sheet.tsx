@@ -25,7 +25,8 @@ export const RegionSelectorSheet = () => {
     selectedDistrict,
     closeSheet,
     selectProvince,
-    selectDistrict
+    selectDistrict,
+    selectRegion
   } = useRegionStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,8 +88,7 @@ export const RegionSelectorSheet = () => {
 
   // 검색 결과 클릭 핸들러
   const handleSearchResultClick = (provinceId: string, districtId: string) => {
-    selectProvince(provinceId);
-    selectDistrict(districtId);
+    selectRegion(provinceId, districtId);
     setSearchQuery('');
     setIsSearching(false);
     closeSheet();

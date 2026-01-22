@@ -19,6 +19,7 @@ interface RegionActions {
   closeRegistrationModal: () => void;
   selectProvince: (province: string | null) => void;
   selectDistrict: (district: string | null) => void;
+  selectRegion: (province: string | null, district: string | null) => void;
 }
 
 // 3. 스토어 생성
@@ -44,6 +45,12 @@ export const useRegionStore = create<RegionState & RegionActions>((set) => ({
   }),
 
   selectDistrict: (district) => set({
+    selectedDistrict: district,
+    isSheetOpen: false
+  }),
+
+  selectRegion: (province, district) => set({
+    selectedProvince: province,
     selectedDistrict: district,
     isSheetOpen: false
   }),

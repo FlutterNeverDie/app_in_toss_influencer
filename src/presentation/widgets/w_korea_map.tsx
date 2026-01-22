@@ -23,7 +23,7 @@ interface KoreaMapWidgetProps {
 }
 
 export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
-  const { selectedProvince, selectProvince, selectDistrict } = useRegionStore();
+  const { selectedProvince, selectedDistrict, selectProvince, selectDistrict } = useRegionStore();
   const transformRef = useRef<ReactZoomPanPinchRef>(null);
 
   // 1. 상세 지역 진입/이탈 시 줌 상태 초기화
@@ -239,7 +239,11 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                                   delay: Math.random() * 0.1
                                 }}
                                 style={{ left: `${left}%`, top: `${top}%` }}
-                                className="absolute -translate-x-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-md border border-[#E5E8EB] shadow-[0_2px_8px_rgba(0,0,0,0.08)] px-3 py-1.5 rounded-full text-[13px] font-bold text-[#333D4B] hover:scale-110 hover:text-[#3182F6] hover:border-[#3182F6] transition-all z-10 whitespace-nowrap"
+                                className={`absolute -translate-x-1/2 -translate-y-1/2 backdrop-blur-md border shadow-[0_2px_8px_rgba(0,0,0,0.08)] px-3 py-1.5 rounded-full text-[13px] font-bold transition-all z-10 whitespace-nowrap
+                                  ${selectedDistrict === dist.id
+                                    ? 'bg-[#3182F6] text-white border-[#3182F6] scale-110 shadow-[0_4px_12px_rgba(49,130,246,0.3)]'
+                                    : 'bg-white/90 text-[#333D4B] border-[#E5E8EB] hover:scale-110 hover:text-[#3182F6] hover:border-[#3182F6]'
+                                  }`}
                               >
                                 {dist.name}
                               </motion.button>
@@ -254,7 +258,11 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                                 key={dist.id}
                                 onClick={(e: any) => handleDistrictClick(dist.id, e)}
                                 whileTap={{ scale: 0.95 }}
-                                className="bg-white/90 backdrop-blur-md border border-white/50 shadow-sm px-4 py-2.5 rounded-xl text-[14px] font-bold text-[#333D4B] hover:bg-white hover:text-[#3182F6] transition-colors"
+                                className={`backdrop-blur-md border shadow-sm px-4 py-2.5 rounded-xl text-[14px] font-bold transition-colors
+                                  ${selectedDistrict === dist.id
+                                    ? 'bg-[#3182F6] text-white border-[#3182F6]'
+                                    : 'bg-white/90 border-white/50 text-[#333D4B] hover:bg-white hover:text-[#3182F6]'
+                                  }`}
                               >
                                 {dist.name}
                               </motion.button>
