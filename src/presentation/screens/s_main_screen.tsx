@@ -160,14 +160,7 @@ export const MainScreen = () => {
                     }}
                     className="bg-[#F2F4F6] px-4 py-2.5 rounded-full text-[#4E5968] text-[14px] font-bold flex items-center gap-1.5"
                   >
-                    초기화
-                  </motion.button>
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={openSheet}
-                    className="bg-[#F2F4F6] px-4 py-2.5 rounded-full text-[#4E5968] text-[14px] font-bold flex items-center gap-1.5"
-                  >
-                    지역 변경
+                    처음으로
                   </motion.button>
                 </div>
               </div>
