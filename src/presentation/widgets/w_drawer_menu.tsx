@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, HelpCircle, UserPlus, ChevronDown, ChevronUp, Share2, User } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
+import { useAuthStore } from '../stores/auth_store';
 import { FAQ_DATA } from '../../data/constants/faq';
 import { share, generateHapticFeedback, appLogin } from '@apps-in-toss/web-framework';
 
@@ -27,7 +28,7 @@ export const DrawerMenu = () => {
         setExpandedFAQ(expandedFAQ === index ? null : index);
     };
 
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const { isLoggedIn, login, logout } = useAuthStore();
 
     const handleLogin = async () => {
         triggerHaptic("tickMedium");
@@ -35,10 +36,11 @@ export const DrawerMenu = () => {
             if (typeof appLogin === 'function') {
                 const response = await appLogin();
                 console.log('Login Response:', response);
-                // authorizationCode를 서버로 전달하여 세션 생성 가능
-                setIsLoggedIn(true);
+                login(); // auth_store 로그인 처리
             } else {
                 alert('로그인은 토스 앱 내에서 가능합니다.');
+                // 개발용: 브라우저에서도 로그인된 것처럼 보이게 하려면 주석 해제 가능
+                // login();
             }
         } catch (error) {
             console.error('Login Error:', error);
@@ -111,7 +113,7 @@ export const DrawerMenu = () => {
                                         </p>
                                     </div>
                                 </div>
-                                {!isLoggedIn && (
+                                {!isLoggedIn ? (
                                     <motion.button
                                         whileTap={{ scale: 0.96 }}
                                         onClick={handleLogin}
@@ -119,31 +121,43 @@ export const DrawerMenu = () => {
                                     >
                                         토스로 로그인하기
                                     </motion.button>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            triggerHaptic("tickWeak");
+                                            logout();
+                                        }}
+                                        className="w-full mt-2 py-2 text-[14px] text-[#8B95A1] font-medium hover:text-[#4E5968] transition-colors"
+                                    >
+                                        로그아웃
+                                    </button>
                                 )}
                             </section>
 
-                            {/* 인플루언서 등록 (강조) */}
-                            <section>
-                                <div className="bg-[#F2F4F6] rounded-[24px] p-6 border border-white">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <UserPlus size={20} className="text-[#3182F6]" />
-                                        <h3 className="text-[16px] font-bold text-[#191F28]">인플루언서 등록하기</h3>
+                            {/* 인플루언서 등록 (강조) - 로그인 시에만 노출 */}
+                            {isLoggedIn && (
+                                <section>
+                                    <div className="bg-[#F2F4F6] rounded-[24px] p-6 border border-white">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <UserPlus size={20} className="text-[#3182F6]" />
+                                            <h3 className="text-[16px] font-bold text-[#191F28]">인플루언서 등록하기</h3>
+                                        </div>
+                                        <p className="text-[14px] font-medium text-[#4E5968] mb-5 leading-relaxed">
+                                            나의 영향력을 지도에 표시해보세요.<br />등록은 100% 무료입니다!
+                                        </p>
+                                        <motion.button
+                                            whileTap={{ scale: 0.96 }}
+                                            onClick={() => {
+                                                triggerHaptic("tickWeak");
+                                                alert('준비 중인 기능입니다! (Google Form 연동 예정)');
+                                            }}
+                                            className="w-full py-3.5 bg-white text-[#3182F6] border border-[#3182F6] rounded-[14px] font-bold text-[15px] hover:bg-[#F2F8FF] transition-colors"
+                                        >
+                                            지금 신청하기
+                                        </motion.button>
                                     </div>
-                                    <p className="text-[14px] font-medium text-[#4E5968] mb-5 leading-relaxed">
-                                        나의 영향력을 지도에 표시해보세요.<br />등록은 100% 무료입니다!
-                                    </p>
-                                    <motion.button
-                                        whileTap={{ scale: 0.96 }}
-                                        onClick={() => {
-                                            triggerHaptic("tickWeak");
-                                            alert('준비 중인 기능입니다! (Google Form 연동 예정)');
-                                        }}
-                                        className="w-full py-3.5 bg-white text-[#3182F6] border border-[#3182F6] rounded-[14px] font-bold text-[15px] hover:bg-[#F2F8FF] transition-colors"
-                                    >
-                                        지금 신청하기
-                                    </motion.button>
-                                </div>
-                            </section>
+                                </section>
+                            )}
 
                             {/* 자주 묻는 질문 (FAQ) */}
                             <section>

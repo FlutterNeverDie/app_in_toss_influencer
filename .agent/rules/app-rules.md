@@ -10,28 +10,29 @@ trigger: always_on
 - **핵심 기능:**
   - 행정구역(시/군/구) 기반 인플루언서 랭킹 서비스
   - 지도 선택 → 바텀 시트(Bottom Sheet) → 리스트 확인의 2-Depth 구조
-  - 인스타그램 ID 마스킹 및 광고 시청 후 리다이렉션 수익 모델
-- **현재 단계:** MVP 초기 개발 
+  - **앱 사용법 (Flow)**: 
+    1. **비로그인**: 단순하게 각 지역 인플루언서를 확인할 수만 있음.
+    2. **로그인 시**: '인플루언서 등록하기' 버튼이 활성화되어 사용할 수 있음.
+    3. **로그인 시**: 특정 인플루언서에게 '좋아요'를 누를 수 있음 (1인당 1회 제한, 추천 기능).
+  - 인스타그램 ID 마스킹 및 상세 페이지 리다이렉션
 
 ## 2. 기술 스택 (Tech Stack)
 - **Core:** React 18+ (Vite), TypeScript
-- **State Management:** Zustand (Riverpod 대체)
-- **Styling:** Tailwind CSS **v3.4.17** (v4.0 사용 금지 - 설정 충돌 방지)
+- **State Management:** Zustand (Region 상태 및 Auth/Like 상태 관리)
+- **Styling:** Tailwind CSS **v3.4.17** (v4.0 사용 금지)
 - **Routing:** React Router Dom
 - **Build Tool:** Vite (Node.js v20 LTS 권장)
-Deploy: Static Web App (Vercel/Netlify 등) → App-in-Toss Webview
-
-## 2-1 개발 배포 대상
-- 토스앱의 인앱토스(미니앱) 
-- 반응형 웹앱으로 만들어야함
-
+- **Database:** Supabase (Real-time data fetching)
 
 ## 3. 앱인토스(App-in-Toss) 환경 특이사항
-이 서비스는 모바일 브라우저가 아닌 **토스 앱 내부**에서 실행됩니다. 다음 사항을 준수해야 합니다.
-1.  **Mobile First:** PC 뷰는 고려하지 않습니다. 모든 UI는 모바일 터치 환경에 최적화되어야 합니다.
-2.  **Navigation:** 브라우저 뒤로가기가 아닌, 앱 내 네비게이션 동작을 고려해야 합니다.
-3.  **Safe Area:** 아이폰 노치(Notch) 및 하단 홈 바(Home Indicator) 영역을 침범하지 않도록 `padding` 처리가 필요합니다.
-4.  **Toss Bridge:** 향후 토스 앱의 기능(결제, 인증 등) 호출 시 토스 브릿지 인터페이스 연동이 필요합니다.
+이 서비스는 토스 앱 내부에서 실행되는 미니앱입니다.
+1.  **Mobile First:** 모든 UI는 모바일 터치 환경에 최적화(TDS UI 스타일 준수).
+2.  **Toss Bridge Integration**: 
+    - `appLogin`: 계정 연동 및 본인 인증
+    - `share`: 친구 초대 및 바이럴 기능
+    - `generateHapticFeedback`: 주요 인터랙션(클릭, 스크롤 등)에 따른 물리적 피드백 제공
+    - `SafeAreaInsets`: 기기별 노치 및 하단 바 영역 대응
+    - `openURL`: 외부 인스타그램 링크 연동 시 사용
 
 ## 4. 데이터 및 지역 구분 규칙 (Strict Rules)
 지역 데이터는 `src/data/constants/regions.ts`에 정의되어 있으며, 다음 **3가지 그룹** 규칙을 절대적으로 따릅니다.
@@ -39,14 +40,16 @@ Deploy: Static Web App (Vercel/Netlify 등) → App-in-Toss Webview
 - **Group B (8도):** `시/군` 단위로 통합 (예: 경기도 성남시 - 분당구/수정구 구분 안 함)
 - **Group C (예외):** 세종(단일), 제주(제주시/서귀포시 2개)
 
-## 4.1 사용자 검증
--- 뚜존쿠 맵처럼 등록하고 싶은 인플루언서는 지역을 설정하고 본인 링크를 첨부, 인스타에 올라가있는(개발자 계정) 관리자 계정을 팔로우 하고 DM을 보내면 사용자 인증 완료, 개발자가 직접 승인을 하면 그때부터 노출 시작 
+## 5. UI/UX 디자인 규칙 (Design System)
+- **Radius**: 주요 버튼 및 카드의 곡률은 `24px` 또는 `rounded-full`을 사용합니다.
+- **Detailed View**: 상세 지역(자치구) 진입 시, 대분류 도시 이름과 상단 헤더를 숨겨 상세 리스트에 집중하도록 합니다.
+- **Haptics**: 모든 클릭 가능한 요소에는 `triggerHaptic`을 적용하여 반응성을 높입니다.
 
-
-## 5. 설치 및 실행 가이드
+## 6. 설치 및 실행 가이드
 ```bash
-# 1. 의존성 설치 (반드시 Tailwind v3 확인)
+# 1. 의존성 설치
 npm install
 
 # 2. 로컬 서버 실행
 npm run dev
+```

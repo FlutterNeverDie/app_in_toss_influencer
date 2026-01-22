@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { SafeAreaInsets, openURL, generateHapticFeedback } from '@apps-in-toss/web-framework';
 import { motion, useDragControls } from 'framer-motion';
-import { Menu, Search, ChevronDown, Map } from 'lucide-react';
+import { Menu, Search, ChevronDown, Map, Heart } from 'lucide-react';
 
 /**
  * 햅틱 피드백 유틸리티
@@ -13,6 +13,7 @@ const triggerHaptic = (type: "tickWeak" | "tap" | "tickMedium" | "success" = "ti
   }
 };
 import { useRegionStore } from '../stores/region_store';
+import { useAuthStore } from '../stores/auth_store';
 import { KoreaMapWidget } from '../widgets/w_korea_map';
 import { RegionSelectorSheet } from '../widgets/w_region_selector_sheet';
 import { DrawerMenu } from '../widgets/w_drawer_menu';
@@ -26,6 +27,7 @@ import type { Influencer } from '../../data/models/m_influencer';
  */
 export const MainScreen = () => {
   const { selectedProvince, selectedDistrict, openSheet, openDrawer, selectDistrict, selectProvince } = useRegionStore();
+  const { isLoggedIn, toggleLike, isLiked } = useAuthStore();
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [insets, setInsets] = useState({ top: 0, bottom: 0, left: 0, right: 0 });
@@ -297,13 +299,37 @@ export const MainScreen = () => {
                         {maskInstagramId(influencer.instagram_id)}
                       </span>
                       <span className="text-[14px] font-medium text-[#8B95A1]">
-                        좋아요 {influencer.like_count.toLocaleString()}
+                        좋아요 {(influencer.like_count + (isLiked(influencer.id) ? 1 : 0)).toLocaleString()}
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-sm border border-[#F2F4F6]">
-                    <ChevronDown className="w-4 h-4 text-[#ADB5BD] -rotate-90" />
-                  </div>
+
+                  {/* 좋아요(추천) 버튼 */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // 카드 클릭(인스타 이동) 방지
+                      if (!isLoggedIn) {
+                        triggerHaptic("tickWeak");
+                        alert('로그인 후 추천할 수 있습니다.');
+                        openDrawer(); // 로그인을 유도하기 위해 서랍 열기
+                        return;
+                      }
+                      triggerHaptic("success");
+                      toggleLike(influencer.id);
+                    }}
+                    className={`
+                      p-3 rounded-full transition-all
+                      ${isLiked(influencer.id)
+                        ? 'bg-[#FF3B30]/10 text-[#FF3B30]'
+                        : 'bg-gray-100 text-[#ADB5BD] hover:bg-gray-200'}
+                    `}
+                  >
+                    <Heart
+                      size={22}
+                      fill={isLiked(influencer.id) ? "currentColor" : "none"}
+                      className={isLiked(influencer.id) ? "scale-110" : ""}
+                    />
+                  </button>
                 </motion.div>
               ))
             ) : (

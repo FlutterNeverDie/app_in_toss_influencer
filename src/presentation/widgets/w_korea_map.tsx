@@ -1,11 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { TransformWrapper, TransformComponent, type ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
-import { Compass } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { PROVINCE_DISPLAY_NAMES, REGION_DATA } from '../../data/constants/regions';
 import { MAP_COLORS } from '../../data/constants/map_paths';
-import { generateHapticFeedback, getCurrentLocation, Accuracy } from '@apps-in-toss/web-framework';
+import { generateHapticFeedback } from '@apps-in-toss/web-framework';
 
 /**
  * 햅틱 피드백 유틸리티
@@ -107,97 +106,20 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
     }
   };
 
-  /**
-   * 내 위치 기반 지역 자동 선택
-   */
-  const [isLocating, setIsLocating] = React.useState(false);
-
-  const handleMyLocation = async () => {
-    if (isLocating) return;
-    setIsLocating(true);
-    triggerHaptic("tickMedium");
-
-    try {
-      if (typeof getCurrentLocation !== 'function') {
-        alert('토스 앱 내에서만 지원되는 기능입니다.');
-        return;
-      }
-
-      const location = await getCurrentLocation({ accuracy: Accuracy.Balanced });
-
-      // 주요 광역시/도 중심 좌표 (거리 계산용)
-      const provinceCoords: Record<string, { lat: number; lng: number }> = {
-        seoul: { lat: 37.5665, lng: 126.9780 },
-        incheon: { lat: 37.4563, lng: 126.7052 },
-        gyeonggi_south: { lat: 37.2636, lng: 127.0286 }, // 수원 기준
-        gyeonggi_north: { lat: 37.7381, lng: 127.0337 }, // 의정부 기준
-        gangwon: { lat: 37.8228, lng: 128.1555 },
-        chungbuk: { lat: 36.6350, lng: 127.4912 },
-        chungnam: { lat: 36.6588, lng: 126.6728 },
-        daejeon: { lat: 36.3504, lng: 127.3845 },
-        sejong: { lat: 36.4800, lng: 127.2890 },
-        jeonbuk: { lat: 35.7175, lng: 127.1530 },
-        jeonnam: { lat: 34.8679, lng: 126.9910 },
-        gwangju: { lat: 35.1595, lng: 126.8526 },
-        gyeongbuk: { lat: 36.5741, lng: 128.5047 },
-        gyeongnam: { lat: 35.2377, lng: 128.6924 },
-        daegu: { lat: 35.8714, lng: 128.6014 },
-        ulsan: { lat: 35.5384, lng: 129.3114 },
-        busan: { lat: 35.1796, lng: 129.0756 },
-        jeju: { lat: 33.4890, lng: 126.4983 },
-      };
-
-      let nearestProvince = "seoul";
-      let minDistance = Infinity;
-
-      Object.entries(provinceCoords).forEach(([key, coords]) => {
-        const dist = Math.sqrt(
-          Math.pow(coords.lat - location.coords.latitude, 2) +
-          Math.pow(coords.lng - location.coords.longitude, 2)
-        );
-        if (dist < minDistance) {
-          minDistance = dist;
-          nearestProvince = key;
-        }
-      });
-
-      triggerHaptic("success");
-      selectProvince(nearestProvince);
-
-    } catch (error) {
-      console.error('Location Error:', error);
-    } finally {
-      setIsLocating(false);
-    }
-  };
 
   return (
     <div className="w-full h-full flex flex-col items-center bg-[#F2F4F6] overflow-hidden relative">
-      {/* 내 위치 버튼 (TDS Style) */}
-      <motion.button
-        whileTap={{ scale: 0.92 }}
-        onClick={handleMyLocation}
-        disabled={isLocating}
-        className="absolute right-6 bottom-40 z-30 w-[54px] h-[54px] bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-[#E5E8EB] flex items-center justify-center text-[#333D4B] hover:text-[#3182F6] transition-all group active:bg-[#F2F4F6]"
-        aria-label="내 위치 찾기"
-      >
-        {isLocating ? (
-          <div className="w-5 h-5 border-2 border-[#3182F6] border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <Compass size={24} className="group-hover:rotate-12 transition-transform" />
-        )}
-      </motion.button>
 
-      <header className="pt-12 pb-2 text-center z-10 pointer-events-none flex-none">
-        <h1 className="text-[22px] font-bold text-[#191F28] mb-1">인플루언서 맵</h1>
-        <p className="text-[14px] text-[#4E5968]">
-          {selectedProvince
-            ? `${PROVINCE_DISPLAY_NAMES[selectedProvince]}의 상세 지역을 선택하세요`
-            : '어느 지역의 인플루언서가 궁금하세요?'}
-        </p>
-      </header>
+      {!selectedProvince && (
+        <header className="pt-12 pb-2 text-center z-10 pointer-events-none flex-none">
+          <h1 className="text-[22px] font-bold text-[#191F28] mb-1">인플루언서 맵</h1>
+          <p className="text-[14px] text-[#4E5968]">
+            어느 지역의 인플루언서가 궁금하세요?
+          </p>
+        </header>
+      )}
 
-      <div className="relative w-full h-full flex items-center justify-center -mt-4 flex-1">
+      <div className="relative w-full h-full flex items-center justify-center flex-1">
         <TransformWrapper
           initialScale={1}
           minScale={0.8}
@@ -256,7 +178,7 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                             strokeWidth={isSelected ? 0 : 1}
                             animate={{
                               fill: isSelected ? MAP_COLORS.selected : MAP_COLORS.fill,
-                              opacity: (selectedProvince && !isSelected) ? 0 : 1 // 선택 안 된 지역 완전히 숨김
+                              opacity: selectedProvince ? 0 : 1 // 상세 지역 진입 시 모든 대분류 숨김
                             }}
                             transition={{ duration: 0.2 }}
                           />
@@ -273,7 +195,7 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                               fontFamily: 'Pretendard, -apple-system, sans-serif'
                             }}
                             animate={{
-                              opacity: (selectedProvince && !isSelected) ? 0 : 1 // 텍스트도 완전히 숨김
+                              opacity: selectedProvince ? 0 : 1 // 텍스트도 완전히 숨김
                             }}
                           >
                             {formatProvinceName(PROVINCE_DISPLAY_NAMES[provKey])}
