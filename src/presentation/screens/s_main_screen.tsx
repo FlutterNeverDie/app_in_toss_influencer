@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { isSupabaseConfigured } from '../../lib/supabase';
-import { motion, useDragControls, AnimatePresence } from 'framer-motion';
+import { motion, useDragControls } from 'framer-motion';
 import { Menu, Search, ChevronDown, Map } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { KoreaMapWidget } from '../widgets/w_korea_map';
@@ -23,8 +23,9 @@ export const MainScreen = () => {
   const dragControls = useDragControls();
 
   // 토스트 메시지 상태
-  const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+  // const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
 
+  /* 
   const showToast = (message: string) => {
     setToast({ message, visible: true });
     // 3초 후 자동으로 사라짐
@@ -32,6 +33,7 @@ export const MainScreen = () => {
       setToast(prev => ({ ...prev, visible: false }));
     }, 3000);
   };
+  */
 
   const provinceName = selectedProvince ? PROVINCE_DISPLAY_NAMES[selectedProvince] : '';
   const districtName = (selectedProvince && selectedDistrict)
@@ -62,7 +64,7 @@ export const MainScreen = () => {
 
   return (
     <div className="relative w-full h-full bg-[#F2F4F6] overflow-hidden flex flex-col">
-      {/* Toast Notification */}
+      {/* Toast Notification (임시 주석 처리)
       <AnimatePresence>
         {toast.visible && (
           <motion.div
@@ -76,6 +78,7 @@ export const MainScreen = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      */}
 
       {/* 1. 상단: 지도 영역 (메인) - 전체 높이 사용 */}
       <div className="absolute inset-0 z-0">
