@@ -1,8 +1,17 @@
 import { useState, useEffect } from 'react';
 import { isSupabaseConfigured } from '../../lib/supabase';
-import { SafeAreaInsets, openURL } from '@apps-in-toss/web-framework';
+import { SafeAreaInsets, openURL, generateHapticFeedback } from '@apps-in-toss/web-framework';
 import { motion, useDragControls } from 'framer-motion';
 import { Menu, Search, ChevronDown, Map } from 'lucide-react';
+
+/**
+ * 햅틱 피드백 유틸리티
+ */
+const triggerHaptic = (type: "tickWeak" | "tap" | "tickMedium" | "success" = "tickWeak") => {
+  if (typeof generateHapticFeedback === 'function') {
+    generateHapticFeedback({ type }).catch(() => { });
+  }
+};
 import { useRegionStore } from '../stores/region_store';
 import { KoreaMapWidget } from '../widgets/w_korea_map';
 import { RegionSelectorSheet } from '../widgets/w_region_selector_sheet';
@@ -121,7 +130,10 @@ export const MainScreen = () => {
       <div className="absolute inset-0 z-0">
         {/* 메뉴 버튼 */}
         <button
-          onClick={openDrawer}
+          onClick={() => {
+            triggerHaptic("tickMedium");
+            openDrawer();
+          }}
           className="absolute top-12 left-6 z-20 p-2 -ml-2 rounded-full hover:bg-black/5 transition-colors"
         >
           <Menu size={24} className="text-[#191F28]" />
@@ -135,7 +147,10 @@ export const MainScreen = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            onClick={() => selectProvince(null)}
+            onClick={() => {
+              triggerHaptic("tickWeak");
+              selectProvince(null);
+            }}
             className="absolute top-12 right-6 z-20 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-black/5 hover:bg-white transition-colors"
           >
             <Map size={14} className="text-[#4E5968]" />
@@ -204,7 +219,10 @@ export const MainScreen = () => {
                 <span className="text-[#3182F6]">{districtName}</span> 핫플 랭킹
               </h2>
               <button
-                onClick={openSheet}
+                onClick={() => {
+                  triggerHaptic("tap");
+                  openSheet();
+                }}
                 className="p-2 -mr-2 text-[#4E5968] hover:bg-gray-100 rounded-full transition-colors"
                 aria-label="지역 검색"
               >
@@ -242,9 +260,11 @@ export const MainScreen = () => {
             ) : influencers.length > 0 ? (
               /* 실제 데이터 리스트 */
               influencers.map((influencer) => (
-                <div
+                <motion.div
                   key={influencer.id}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => {
+                    triggerHaptic("tap");
                     // DB 변경 없이 ID로 바로 링크 생성
                     const profileUrl = `https://www.instagram.com/${influencer.instagram_id}`;
                     // 토스 브릿지 방식으로 열기 (방어적 처리)
@@ -254,34 +274,37 @@ export const MainScreen = () => {
                       window.open(profileUrl, '_blank');
                     }
                   }}
-                  className="flex items-center justify-between rounded-[16px] bg-[#F9FAFB] p-4 cursor-pointer hover:bg-gray-100 transition-colors active:scale-[0.98]"
+                  className="flex items-center justify-between mx-6 rounded-[20px] bg-[#F9FAFB] p-4 cursor-pointer hover:bg-[#F2F4F6] transition-all border border-transparent hover:border-[#E5E8EB]"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     {/* 프로필 이미지 (No-Storage Policy 준수) */}
-                    <div className="h-12 w-12 overflow-hidden rounded-full border border-[#E5E8EB]">
+                    <div className="h-14 w-14 overflow-hidden rounded-full border border-[#F2F4F6] bg-white shadow-sm shrink-0">
                       <img
                         src={influencer.image_url}
                         alt="Profile"
                         referrerPolicy="no-referrer"
                         className="h-full w-full object-cover"
                         onError={(e) => {
-                          // 이미지 로드 실패 시 기본 색상으로 대체
+                          // 이미지 로드 실패 시 기본 UI
                           ; (e.target as HTMLImageElement).style.display = 'none'
-                            ; (e.target as HTMLImageElement).parentElement!.style.backgroundColor =
-                              '#F2F4F6'
+                            ; (e.target as HTMLImageElement).parentElement!.classList.add('flex', 'items-center', 'justify-center', 'bg-[#F2F4F6]')
+                            ; (e.target as HTMLImageElement).parentElement!.innerHTML = '<span class="text-[10px] font-bold text-[#ADB5BD]">IMG</span>'
                         }}
                       />
                     </div>
-                    <div>
-                      <div className="text-[16px] font-bold text-[#333D4B]">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[17px] font-bold text-[#191F28] leading-tight">
                         {maskInstagramId(influencer.instagram_id)}
-                      </div>
-                      <div className="text-[13px] text-[#8B95A1]">
-                        좋아요 {influencer.like_count.toLocaleString()}개
-                      </div>
+                      </span>
+                      <span className="text-[14px] font-medium text-[#8B95A1]">
+                        좋아요 {influencer.like_count.toLocaleString()}
+                      </span>
                     </div>
                   </div>
-                </div>
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-sm border border-[#F2F4F6]">
+                    <ChevronDown className="w-4 h-4 text-[#ADB5BD] -rotate-90" />
+                  </div>
+                </motion.div>
               ))
             ) : (
               /* 데이터 없음 */

@@ -3,6 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Search as SearchIcon, ArrowLeft } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/regions';
+import { generateHapticFeedback } from '@apps-in-toss/web-framework';
+
+/**
+ * 햅틱 피드백 유틸리티
+ */
+const triggerHaptic = (type: "tickWeak" | "tap" | "tickMedium" | "success" = "tickWeak") => {
+  if (typeof generateHapticFeedback === 'function') {
+    generateHapticFeedback({ type }).catch(() => { });
+  }
+};
 
 /**
  * 지역 선택 바텀 시트 (Advanced Premium Version)
@@ -227,7 +237,10 @@ export const RegionSelectorSheet = () => {
                         <li
                           key={provKey}
                           data-selected={isSelected}
-                          onClick={() => selectProvince(provKey)}
+                          onClick={() => {
+                            triggerHaptic("tickWeak");
+                            selectProvince(provKey);
+                          }}
                           className={`
                             relative px-6 py-6 text-[16px] cursor-pointer transition-all
                             ${isSelected
@@ -264,6 +277,7 @@ export const RegionSelectorSheet = () => {
                           <motion.li
                             key={dist.id}
                             onClick={() => {
+                              triggerHaptic("tap");
                               selectDistrict(dist.id);
                               closeSheet();
                             }}
