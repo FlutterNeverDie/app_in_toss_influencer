@@ -207,24 +207,25 @@ export const MainScreen = () => {
                       onClick={() => handleInfluencerClick(inf.instagram_id)}
                       className="min-w-[140px] bg-white rounded-[24px] p-4 border border-[#F2F4F6] shadow-sm flex flex-col items-center text-center gap-3 active:bg-[#F9FAFB] cursor-pointer transition-colors"
                     >
-                      <div className="relative">
+                      <div className="relative group/image">
                         <img
                           src={inf.image_url}
                           alt={inf.instagram_id}
-                          className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md font-bold text-[10px]"
+                          className="w-20 h-20 rounded-full object-cover border-2 border-white shadow-md font-bold text-[10px]"
                         />
-                        <button
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
                           onClick={(e) => {
                             e.stopPropagation();
                             triggerHaptic("tap");
                             toggleLike(inf.id);
                           }}
-                          className={`absolute -bottom-1 -right-1 p-1.5 rounded-full shadow-lg transition-all ${isLiked(inf.id) ? 'bg-[#3182F6] text-white' : 'bg-white text-[#ADB5BD]'}`}
+                          className={`absolute -top-1 -right-1 w-8 h-8 flex items-center justify-center rounded-full shadow-lg transition-all z-10 ${isLiked(inf.id) ? 'bg-[#F04452] text-white' : 'bg-white text-[#ADB5BD] border border-[#F2F4F6]'}`}
                         >
-                          <Heart size={14} fill={isLiked(inf.id) ? "currentColor" : "none"} />
-                        </button>
+                          <Heart size={16} fill={isLiked(inf.id) ? "currentColor" : "none"} strokeWidth={2.5} />
+                        </motion.button>
                       </div>
-                      <div className="space-y-0.5">
+                      <div className="space-y-0.5 mt-1">
                         <div className="text-[14px] font-bold text-[#191F28] truncate max-w-[110px]">
                           {maskInstagramId(inf.instagram_id)}
                         </div>
