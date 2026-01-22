@@ -79,7 +79,9 @@ export const MainScreen = () => {
             return b.like_count - a.like_count;
           }
           // 2. 좋아요 수가 같으면 등록일(created_at) 오름차순 (선착순)
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dateA - dateB;
         });
 
         setInfluencers(sortedData);

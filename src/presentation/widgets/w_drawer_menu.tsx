@@ -5,7 +5,7 @@ import { useRegionStore } from '../stores/region_store';
 import { useAuthStore } from '../stores/auth_store';
 import { FAQ_DATA } from '../../data/constants/faq';
 import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/regions';
-import { share, generateHapticFeedback, appLogin } from '@apps-in-toss/web-framework';
+import { share, generateHapticFeedback, appLogin, openURL } from '@apps-in-toss/web-framework';
 import { MemberService } from '../../data/services/member_service';
 import { InfluencerService } from '../../data/services/influencer_service';
 import { isSupabaseConfigured } from '../../lib/supabase';
@@ -110,6 +110,7 @@ export const DrawerMenu = () => {
                     id: '00000000-0000-0000-0000-000000000000',
                     toss_id: mockTossId,
                     name: mockName,
+                    profile_image: '',
                     created_at: new Date().toISOString()
                 });
             }
@@ -121,6 +122,7 @@ export const DrawerMenu = () => {
                     id: '00000000-0000-0000-0000-000000000001',
                     toss_id: 'error_user',
                     name: '로컬 테스터(오류)',
+                    profile_image: '',
                     created_at: new Date().toISOString()
                 });
             }
@@ -140,6 +142,37 @@ export const DrawerMenu = () => {
         } catch (error) {
             console.error('Share Error:', error);
         }
+    };
+
+    const handleInstagramClick = (username: string) => {
+        triggerHaptic("tap");
+        const url = `https://www.instagram.com/${username.replace('@', '')}`;
+        if (typeof openURL === 'function') {
+            (openURL(url) as any).catch(() => window.open(url, '_blank'));
+        } else {
+            window.open(url, '_blank');
+        }
+    };
+
+    const renderAnswer = (text: string) => {
+        const parts = text.split(/(@\w+)/g);
+        return parts.map((part, i) => {
+            if (part.startsWith('@')) {
+                return (
+                    <span
+                        key={part + i}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleInstagramClick(part);
+                        }}
+                        className="text-[#3182F6] font-bold underline cursor-pointer active:opacity-60 transition-opacity inline-block"
+                    >
+                        {part}
+                    </span>
+                );
+            }
+            return part;
+        });
     };
 
     return (
@@ -280,7 +313,7 @@ export const DrawerMenu = () => {
                                                             className="overflow-hidden"
                                                         >
                                                             <div className="p-5 pt-0 bg-white text-[14px] font-medium text-[#4E5968] leading-relaxed border-t border-[#F2F4F6] border-dashed mt-0.5">
-                                                                <div className="pt-4">{item.answer}</div>
+                                                                <div className="pt-4">{renderAnswer(item.answer)}</div>
                                                             </div>
                                                         </motion.div>
                                                     )}
