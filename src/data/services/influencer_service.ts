@@ -47,5 +47,31 @@ export const InfluencerService = {
 
         if (error) return [];
         return data as Influencer[];
+    },
+
+    /**
+     * 새로운 인플루언서 등록 신청을 합니다.
+     * @param influencer 신청 정보
+     */
+    async registerInfluencer(influencer: Partial<Influencer>): Promise<boolean> {
+        try {
+            const { error } = await supabase
+                .from('influencer')
+                .insert({
+                    ...influencer,
+                    status: 'pending', // 초기 상태는 항상 대기
+                    like_count: 0      // 초기 좋아요는 0
+                });
+
+            if (error) {
+                console.error('Error registering influencer:', error);
+                return false;
+            }
+
+            return true;
+        } catch (e) {
+            console.error('Unexpected error in registerInfluencer:', e);
+            return false;
+        }
     }
 };

@@ -25,6 +25,12 @@ export interface Influencer {
     // 좋아요 수 (랭킹 산정 기준)
     readonly like_count: number;
 
+    // 등록한 유저 ID
+    readonly member_id?: string;
+
+    // 승인 상태 (pending, approved, rejected)
+    readonly status: 'pending' | 'approved' | 'rejected';
+
     // 생성일 (정렬용)
     readonly created_at?: string;
 }

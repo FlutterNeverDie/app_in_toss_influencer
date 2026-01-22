@@ -17,6 +17,7 @@ import { useAuthStore } from '../stores/auth_store';
 import { KoreaMapWidget } from '../widgets/w_korea_map';
 import { RegionSelectorSheet } from '../widgets/w_region_selector_sheet';
 import { DrawerMenu } from '../widgets/w_drawer_menu';
+import { RegistrationModal } from '../widgets/w_registration_modal';
 import { PROVINCE_DISPLAY_NAMES, REGION_DATA } from '../../data/constants/regions';
 import { InfluencerService } from '../../data/services/influencer_service';
 import type { Influencer } from '../../data/models/m_influencer';
@@ -378,6 +379,11 @@ export const MainScreen = () => {
 
       {/* 3. 오버레이: 지역 선택 바텀 시트 */}
       <RegionSelectorSheet />
+
+      <RegistrationModal
+        isOpen={useRegionStore(state => state.isRegistrationModalOpen)}
+        onClose={useRegionStore(state => state.closeRegistrationModal)}
+      />
 
       {/* 4. 오버레이: 사이드바 메뉴 (Drawer) */}
       <DrawerMenu />

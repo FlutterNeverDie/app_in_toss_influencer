@@ -5,6 +5,7 @@ import { useRegionStore } from '../stores/region_store';
 import { useAuthStore } from '../stores/auth_store';
 import { FAQ_DATA } from '../../data/constants/faq';
 import { share, generateHapticFeedback, appLogin } from '@apps-in-toss/web-framework';
+import { MemberService } from '../../data/services/member_service';
 
 /**
  * 햅틱 피드백 유틸리티
@@ -36,11 +37,25 @@ export const DrawerMenu = () => {
             if (typeof appLogin === 'function') {
                 const response = await appLogin();
                 console.log('Login Response:', response);
-                login(); // auth_store 로그인 처리
+
+                // 토스에서 받은 정보로 멤버 동기화 (toss_id는 필수)
+                // 실제 앱에서는 response에서 정보를 추출해야 함
+                const member = await MemberService.syncMember({
+                    toss_id: `toss_${Math.random().toString(36).substr(2, 9)} `, // 임시 ID 생성 (데모용)
+                    name: '토스 사용자',
+                });
+
+                if (member) {
+                    login(member);
+                }
             } else {
                 alert('로그인은 토스 앱 내에서 가능합니다.');
-                // 개발용: 브라우저에서도 로그인된 것처럼 보이게 하려면 주석 해제 가능
-                // login();
+                // 데모용: 로컬 환경에서도 로그인 테스트 가능하게 함
+                const demoMember = await MemberService.syncMember({
+                    toss_id: 'demo_user_123',
+                    name: '데모 사용자',
+                });
+                if (demoMember) login(demoMember);
             }
         } catch (error) {
             console.error('Login Error:', error);
@@ -149,7 +164,7 @@ export const DrawerMenu = () => {
                                             whileTap={{ scale: 0.96 }}
                                             onClick={() => {
                                                 triggerHaptic("tickWeak");
-                                                alert('준비 중인 기능입니다! (Google Form 연동 예정)');
+                                                useRegionStore.getState().openRegistrationModal();
                                             }}
                                             className="w-full py-3.5 bg-white text-[#3182F6] border border-[#3182F6] rounded-[14px] font-bold text-[15px] hover:bg-[#F2F8FF] transition-colors"
                                         >
