@@ -23,7 +23,9 @@
   }
 
   body {
-    @apply antialiased text-[#191F28] bg-[#F2F4F6];
+    @apply antialiased transition-colors duration-300;
+    color: var(--text-color);
+    background-color: var(--bg-color);
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
@@ -33,6 +35,40 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+}
+
+:root {
+  --bg-color: #F2F4F6;
+  --text-color: #191F28;
+  --panel-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --map-fill: #FFFFFF;
+  --map-stroke: #E5E8EB;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #0F1012;
+    --text-color: #FFFFFF;
+    --panel-bg: rgba(25, 27, 30, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --map-fill: #1C1D20;
+    --map-stroke: #2C2E33;
+  }
+}
+
+.liquid-glass {
+  @apply backdrop-blur-2xl border transition-all duration-300;
+  background: var(--panel-bg);
+  border-color: var(--glass-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+}
+
+.liquid-glass-active {
+  @apply backdrop-blur-3xl transition-all duration-300;
+  background: rgba(49, 130, 246, 0.85);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(49, 130, 246, 0.2);
 }
 
 .safe-area-pt {

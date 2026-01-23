@@ -130,7 +130,7 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center bg-[#F2F4F6] overflow-hidden relative">
+    <div className="w-full h-full flex flex-col items-center bg-[var(--bg-color)] overflow-hidden relative">
       <div className="relative w-full h-full flex items-center justify-center flex-1">
         <TransformWrapper
           initialScale={1}
@@ -175,6 +175,7 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                         scale: selectedProvince ? 1.2 : 1,
                         x: selectedProvince && activeCentroid ? 110 - activeCentroid.x * 1.2 : 0,
                         y: selectedProvince && activeCentroid ? 110 - activeCentroid.y * 1.2 : -40,
+                        opacity: 1 // 딤처리 제거 (항상 1)
                       }}
                       transition={{ type: "spring", damping: 25, stiffness: 180 }}
                       style={{ transformOrigin: "0 0" }}
@@ -204,11 +205,11 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                                   width={48}
                                   height={28}
                                   rx={8}
-                                  fill={isSelected ? MAP_COLORS.selected : MAP_COLORS.fill}
-                                  stroke={isSelected ? MAP_COLORS.selected : '#E5E8EB'}
+                                  fill={isSelected ? MAP_COLORS.selected : 'var(--map-fill)'}
+                                  stroke={isSelected ? MAP_COLORS.selected : 'var(--map-stroke)'}
                                   strokeWidth={isSelected ? 0 : 1}
                                   animate={{
-                                    fill: isSelected ? MAP_COLORS.selected : MAP_COLORS.fill,
+                                    fill: isSelected ? MAP_COLORS.selected : 'var(--map-fill)',
                                     opacity: selectedProvince ? 0 : 1
                                   }}
                                   transition={{ duration: 0.2 }}
@@ -222,7 +223,7 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                                   style={{
                                     fontSize: '10px',
                                     fontWeight: isSelected ? '700' : '600',
-                                    fill: isSelected ? MAP_COLORS.selectedText : '#333D4B',
+                                    fill: isSelected ? MAP_COLORS.selectedText : 'var(--text-color)',
                                     fontFamily: 'Pretendard, -apple-system, sans-serif'
                                   }}
                                   animate={{
@@ -257,10 +258,10 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                                   }}
                                   whileTap={{ scale: 0.4 }}
                                   style={{ left: `${left}%`, top: `${top}%` }}
-                                  className={`absolute -translate-x-1/2 -translate-y-1/2 backdrop-blur-md border shadow-[0_2px_8px_rgba(0,0,0,0.08)] px-4 py-2 rounded-full text-[14px] font-bold transition-all z-10 whitespace-nowrap
+                                  className={`absolute -translate-x-1/2 -translate-y-1/2 text-[14px] font-bold z-10 whitespace-nowrap px-4 py-2 rounded-full
                                     ${isSelected
-                                      ? 'bg-[#3182F6] text-white border-[#3182F6] shadow-[0_4px_12px_rgba(49,130,246,0.3)]'
-                                      : 'bg-white/95 text-[#333D4B] border-[#E5E8EB] active:text-[#3182F6] active:border-[#3182F6]'
+                                      ? 'liquid-glass-active text-white'
+                                      : 'liquid-glass text-[var(--text-color)]'
                                     }`}
                                 >
                                   {dist.name}
@@ -279,16 +280,16 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                         animate={{ opacity: 1, y: 0 }}
                         className="absolute inset-0 z-30 flex items-center justify-center p-8 pointer-events-none"
                       >
-                        <div className="flex flex-wrap justify-center gap-2 max-h-[300px] overflow-y-auto pointer-events-auto p-4 rounded-xl no-scrollbar bg-white/50 backdrop-blur-sm border border-white/30 shadow-lg">
+                        <div className="flex flex-wrap justify-center gap-2 max-h-[300px] overflow-y-auto pointer-events-auto p-4 rounded-xl no-scrollbar liquid-glass">
                           {REGION_DATA[selectedProvince].map((dist: any) => (
                             <motion.button
                               key={dist.id}
                               onClick={(e: any) => handleDistrictClick(dist.id, e)}
                               whileTap={{ scale: 0.95 }}
-                              className={`backdrop-blur-md border shadow-sm px-4 py-2.5 rounded-xl text-[14px] font-bold transition-colors
+                              className={`px-4 py-2.5 rounded-xl text-[14px] font-bold transition-colors
                                 ${selectedDistrict === dist.id
-                                  ? 'bg-[#3182F6] text-white border-[#3182F6]'
-                                  : 'bg-white/90 border-white/50 text-[#333D4B] hover:bg-white hover:text-[#3182F6]'
+                                  ? 'bg-[#3182F6] text-white'
+                                  : 'text-[var(--text-color)] hover:text-[#3182F6]'
                                 }`}
                             >
                               {dist.name}
@@ -315,14 +316,14 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={(e) => { e.stopPropagation(); triggerHaptic("tickWeak"); transformRef.current?.zoomIn(); }}
-                    className="w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-lg border border-[#F2F4F6] text-[#191F28] active:bg-[#F9FAFB] transition-all"
+                    className="w-10 h-10 flex items-center justify-center liquid-glass rounded-xl text-[var(--text-color)] active:scale-95"
                   >
                     <Plus size={20} />
                   </motion.button>
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={(e) => { e.stopPropagation(); triggerHaptic("tickWeak"); transformRef.current?.zoomOut(); }}
-                    className="w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-lg border border-[#F2F4F6] text-[#191F28] active:bg-[#F9FAFB] transition-all"
+                    className="w-10 h-10 flex items-center justify-center liquid-glass rounded-xl text-[var(--text-color)] active:scale-95"
                   >
                     <Minus size={20} />
                   </motion.button>
