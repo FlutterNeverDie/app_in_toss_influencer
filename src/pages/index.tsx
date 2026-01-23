@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { MainScreen } from '../presentation/screens/s_main_screen';
 
 const IndexPage = () => {
@@ -6,4 +6,3 @@ const IndexPage = () => {
 };
 
 export default IndexPage;
- 
