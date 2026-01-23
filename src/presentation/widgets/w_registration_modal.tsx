@@ -137,7 +137,7 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                        className="fixed inset-x-0 bottom-0 z-[201] h-[85vh] bg-[var(--bg-color)] rounded-t-[32px] flex flex-col overflow-hidden shadow-2xl"
+                        className="fixed inset-x-0 bottom-0 z-[201] h-[85vh] bg-white dark:bg-[var(--sheet-bg)] rounded-t-[32px] flex flex-col overflow-hidden shadow-2xl"
                     >
                         {/* 헤더 */}
                         <div className="flex items-center justify-between p-6 border-b border-[var(--glass-border)]">

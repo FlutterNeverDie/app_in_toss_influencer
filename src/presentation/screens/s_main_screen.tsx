@@ -64,6 +64,26 @@ export const MainScreen = () => {
     }
   }, [isLoggedIn, login]);
 
+  // 다크모드 시스템 설정 동기화
+  useEffect(() => {
+    const root = window.document.documentElement;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const updateTheme = (isDark: boolean) => {
+      if (isDark) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    };
+
+    updateTheme(mediaQuery.matches);
+
+    const handler = (e: MediaQueryListEvent) => updateTheme(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
 
   // 데이터 페칭 로직
   useEffect(() => {
@@ -172,7 +192,7 @@ export const MainScreen = () => {
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="absolute bottom-0 inset-x-0 bg-white dark:bg-[var(--sheet-bg)] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] rounded-t-[32px] p-6 pb-10"
+          className="absolute bottom-0 inset-x-0 bg-white dark:bg-[var(--sheet-bg)] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.3)] rounded-t-[32px] p-6 pb-10"
         >
           {selectedDistrict ? (
             <div className="space-y-4">
@@ -218,7 +238,7 @@ export const MainScreen = () => {
                         <img
                           src={inf.image_url}
                           alt={inf.instagram_id}
-                          className="w-20 h-20 rounded-full object-cover border-2 border-white shadow-md font-bold text-[10px]"
+                          className="w-20 h-20 rounded-full object-cover border-2 border-white dark:border-[#3A3D43] shadow-md font-bold text-[10px]"
                         />
                         <motion.button
                           whileTap={{ scale: 0.9 }}
@@ -240,7 +260,7 @@ export const MainScreen = () => {
                     </motion.div>
                   ))
                 ) : (
-                  <div className="w-full flex flex-col items-center justify-center py-6 text-[#8B95A1] gap-2">
+                  <div className="w-full flex flex-col items-center justify-center py-6 text-[#8B95A1] dark:text-[#5A636E] gap-2">
                     <div className="text-[13px]">검색 결과가 없어요</div>
                     <div className="text-[12px] opacity-60">가장 먼저 등록해 보세요!</div>
                   </div>

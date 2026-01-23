@@ -81,11 +81,19 @@
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
 }
 
+.dark .liquid-glass {
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
 .liquid-glass-active {
   @apply backdrop-blur-3xl transition-all duration-300;
   background: rgba(49, 130, 246, 0.85);
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px 0 rgba(49, 130, 246, 0.2);
+}
+
+.dark .liquid-glass-active {
+  box-shadow: 0 8px 32px 0 rgba(49, 130, 246, 0.4);
 }
 
 .safe-area-pt {
