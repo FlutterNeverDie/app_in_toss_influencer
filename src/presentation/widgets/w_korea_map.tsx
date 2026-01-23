@@ -196,7 +196,7 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                                 key={provKey}
                                 initial={false}
                                 whileHover={{ scale: isSelected ? 1 : 1.05 }}
-                                onClick={(e: any) => handleProvinceClick(provKey, e)}
+                                onClick={(e: React.MouseEvent) => handleProvinceClick(provKey, e)}
                                 className="cursor-pointer"
                               >
                                 <motion.rect
@@ -242,7 +242,7 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                       {selectedProvince && REGION_DATA[selectedProvince]?.some(d => d.x !== undefined) && (
                         <div className="absolute inset-0 pointer-events-none">
                           <div className="relative w-full h-full pointer-events-auto">
-                            {REGION_DATA[selectedProvince].map((dist: any) => {
+                            {REGION_DATA[selectedProvince].map((dist) => {
                               const left = dist.x ? (dist.x / 300) * 100 : 50;
                               const top = dist.y ? (dist.y / 400) * 100 : 50;
                               const isSelected = selectedDistrict === dist.id;
@@ -250,7 +250,7 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                               return (
                                 <motion.button
                                   key={dist.id}
-                                  onClick={(e: any) => handleDistrictClick(dist.id, e)}
+                                  onClick={(e: React.MouseEvent) => handleDistrictClick(dist.id, e)}
                                   initial={{ scale: 0, opacity: 0 }}
                                   animate={{
                                     scale: isSelected ? 0.75 : 0.65, // 1.2배 확대에서 버튼 겹침 방지를 위해 축소
@@ -281,10 +281,10 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                         className="absolute inset-0 z-30 flex items-center justify-center p-8 pointer-events-none"
                       >
                         <div className="flex flex-wrap justify-center gap-2 max-h-[300px] overflow-y-auto pointer-events-auto p-4 rounded-xl no-scrollbar liquid-glass">
-                          {REGION_DATA[selectedProvince].map((dist: any) => (
+                          {REGION_DATA[selectedProvince].map((dist) => (
                             <motion.button
                               key={dist.id}
-                              onClick={(e: any) => handleDistrictClick(dist.id, e)}
+                              onClick={(e: React.MouseEvent) => handleDistrictClick(dist.id, e)}
                               whileTap={{ scale: 0.95 }}
                               className={`px-4 py-2.5 rounded-xl text-[14px] font-bold transition-colors
                                 ${selectedDistrict === dist.id

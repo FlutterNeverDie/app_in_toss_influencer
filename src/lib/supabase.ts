@@ -7,7 +7,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const isValidUrl = (urlString: string) => {
     try {
         return Boolean(new URL(urlString));
-    } catch (e) {
+    } catch {
         return false;
     }
 };

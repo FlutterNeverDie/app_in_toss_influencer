@@ -6,7 +6,7 @@ import { useAuthStore } from '../stores/auth_store';
 import { FAQ_DATA } from '../../data/constants/faq';
 import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/regions';
 import { generateHapticFeedback, openURL } from '@apps-in-toss/web-framework';
-import { InfluencerService } from '../../data/services/influencer_service';
+import { MockLoginButton } from './w_mock_login';
 
 /**
  * 햅틱 피드백 유틸리티
@@ -38,21 +38,14 @@ export const DrawerMenu = () => {
         setExpandedFAQ(expandedFAQ === index ? null : index);
     };
 
-    const { member } = useAuthStore();
-    const [regInfo, setRegInfo] = useState<{
-        status: 'pending' | 'approved' | 'rejected' | null;
-        province_id?: string;
-        district_id?: string;
-    }>({ status: null });
+    const { member, influencerStatus: regInfo, refreshInfluencerStatus } = useAuthStore();
 
-    // 드로어가 열릴 때마다 등록 상태 확인
+    // 드로어가 열릴 때마다 최신 등록 상태 로드 (자동 갱신 보증)
     useEffect(() => {
         if (isDrawerOpen && member?.id) {
-            InfluencerService.getMyRegistrationStatus(member.id).then(info => {
-                setRegInfo(info);
-            });
+            refreshInfluencerStatus();
         }
-    }, [isDrawerOpen, member?.id]);
+    }, [isDrawerOpen, member?.id, refreshInfluencerStatus]);
 
     // 지역 이름 가져오기 유틸
     const getRegionName = () => {
@@ -67,7 +60,7 @@ export const DrawerMenu = () => {
         triggerHaptic("tap");
         const url = `https://www.instagram.com/${username.replace('@', '')}`;
         if (typeof openURL === 'function') {
-            (openURL(url) as any).catch(() => window.open(url, '_blank'));
+            (openURL(url) as Promise<unknown>).catch(() => window.open(url, '_blank'));
         } else {
             window.open(url, '_blank');
         }
@@ -160,9 +153,13 @@ export const DrawerMenu = () => {
                                                     <h3 className="text-[19px] font-bold text-[var(--text-color)] leading-tight">
                                                         {member?.name || '토스 사용자'}
                                                     </h3>
-                                                    <p className="text-[14px] font-medium text-[var(--text-color)] opacity-70">
+                                                    <p className="text-[14px] font-medium text-[var(--text-color)] opacity-70 mb-2">
                                                         반가워요!
                                                     </p>
+                                                    {/* 로컬 개발용 Mock 로그인 버튼 */}
+                                                    <div className="mt-1">
+                                                        <MockLoginButton />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </section>

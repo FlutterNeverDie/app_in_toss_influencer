@@ -18,7 +18,7 @@ const triggerHaptic = (type: "tickWeak" | "tap" | "tickMedium" | "success" = "ti
 };
 
 export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, onClose }) => {
-    const { member } = useAuthStore();
+    const { member, influencerStatus: regInfo, refreshInfluencerStatus } = useAuthStore();
     const [step, setStep] = useState<1 | 2 | 3>(1); // 1: 지역 선택, 2: 정보 입력, 3: 완료 안내
     const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
     const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
@@ -27,19 +27,12 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [regInfo, setRegInfo] = useState<{
-        status: 'pending' | 'approved' | 'rejected' | null;
-        province_id?: string;
-        district_id?: string;
-    }>({ status: null });
 
     useEffect(() => {
         if (isOpen && member?.id) {
-            InfluencerService.getMyRegistrationStatus(member.id).then(info => {
-                setRegInfo(info);
-            });
+            refreshInfluencerStatus();
         }
-    }, [isOpen, member?.id]);
+    }, [isOpen, member?.id, refreshInfluencerStatus]);
 
     const resetForm = () => {
         setStep(1);
@@ -50,7 +43,7 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
         setImagePreview(null);
         setIsSubmitting(false);
         setErrorMessage(null);
-        setRegInfo({ status: null });
+        // regInfo는 전역 상태이므로 여기서 리셋하지 않음 (필요 시 refresh 호출)
     };
 
     const handleClose = () => {
@@ -99,16 +92,13 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                 image_url: imageUrl,
             });
 
-            if (result) {
+            if (result.success) {
                 triggerHaptic("success");
                 setStep(3);
-                // 등록 성공 후 상태 다시 확인
-                if (member?.id) {
-                    const info = await InfluencerService.getMyRegistrationStatus(member.id);
-                    setRegInfo(info);
-                }
+                // 등록 성공 후 상태 갱신
+                await refreshInfluencerStatus();
             } else {
-                setErrorMessage('등록 신청 중 오류가 발생했습니다. (데이터 형식을 확인해주세요)');
+                setErrorMessage(result.message || '등록 신청 중 오류가 발생했습니다. (데이터 형식을 확인해주세요)');
                 setIsSubmitting(false);
             }
         } catch (e) {

@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import type { Member } from '../models/m_member';
+import { MOCK_MEMBERS } from '../mock/mock_members';
 
 export const MemberService = {
     /**
@@ -30,6 +31,21 @@ export const MemberService = {
     },
 
     /**
+     * 로컬 개발용 Mock 로그인
+     * @param memberId 선택적 회원 ID (없으면 첫 번째 mock 회원 사용)
+     */
+    async mockLogin(memberId?: string): Promise<Member | null> {
+        // 로컬 개발 환경이 아니면 동작하지 않음
+        if (!import.meta.env.DEV) {
+            console.warn('mockLogin is only available in development mode.');
+            return null;
+        }
+
+        const member = MOCK_MEMBERS.find(m => m.id === memberId) || MOCK_MEMBERS[0];
+        return member || null;
+    },
+
+    /**
      * (Legacy) 로컬 테스트용 등 수동 동기화
      */
     async syncMember(member: Partial<Member>): Promise<Member | null> {
@@ -46,10 +62,9 @@ export const MemberService = {
             // 2. Upsert 수행 (id가 있으면 기존 데이터 유지, 없으면 신규 생성)
             // 주의: DB의 id 기본값이 auth.uid()이므로, 비로그인 상태에서는 null이 되어 NOT NULL 제약조건 위반 가능성 있음.
             // 따라서 신규 생성 시에는 id를 생략하여 DB default를 따르거나, 명시적으로 처리해야 함.
-            const upsertData: any = {
+            const upsertData: Partial<Member> & { id?: string } = {
                 toss_id: member.toss_id,
                 name: member.name || '토스 사용자',
-                profile_image: member.profile_image || '',
             };
 
             // 기존 멤버가 있다면 id를 지정하여 업데이트, 없다면 새 UUID 생성 (auth.uid() 대비)
@@ -59,7 +74,7 @@ export const MemberService = {
                 // Supabase Auth 연동 전인 웹뷰 환경을 위해 직접 UUID 생성
                 try {
                     upsertData.id = crypto.randomUUID();
-                } catch (e) {
+                } catch {
                     // Fallback for older browsers (though unlikely in modern webview)
                     upsertData.id = '00000000-0000-4000-8000-' + Math.random().toString(16).substring(2, 14).padEnd(12, '0');
                 }

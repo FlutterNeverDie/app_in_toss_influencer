@@ -38,11 +38,14 @@ export const RegionSelectorSheet = () => {
   // 시트가 열릴 때 상태 초기화 및 스크롤 동기화
   useEffect(() => {
     if (isSheetOpen) {
-      setSearchQuery('');
-      setIsSearching(false);
+      // 동기적인 setState 호출로 인한 cascading render를 방지하기 위해 microtask 사용
+      queueMicrotask(() => {
+        setSearchQuery('');
+        setIsSearching(false);
+      });
 
       // 약간의 지연 후 선택된 지역으로 스크롤 (애니메이션 완료 시점 고려)
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         if (sidebarRef.current) {
           const activeItem = sidebarRef.current.querySelector('[data-selected="true"]');
           if (activeItem) {
@@ -50,8 +53,9 @@ export const RegionSelectorSheet = () => {
           }
         }
       }, 300);
+      return () => clearTimeout(timer);
     }
-  }, [isSheetOpen]);
+  }, [isSheetOpen, setIsSearching]);
 
   // 지역 선택이 바뀔 때도 스크롤 동기화
   useEffect(() => {
@@ -96,7 +100,7 @@ export const RegionSelectorSheet = () => {
   };
 
   // 드래그 종료 시 닫기 로직
-  const onDragEnd = (_: any, info: any) => {
+  const onDragEnd = (_: unknown, info: { offset: { y: number } }) => {
     if (info.offset.y > 150) {
       closeSheet();
     }

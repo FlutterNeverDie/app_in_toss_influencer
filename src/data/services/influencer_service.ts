@@ -18,7 +18,7 @@ export const InfluencerService = {
 
             if (error) return [];
             return data as Influencer[];
-        } catch (e) {
+        } catch {
             return [];
         }
     },
@@ -36,7 +36,7 @@ export const InfluencerService = {
 
             if (error) return [];
             return data as Influencer[];
-        } catch (e) {
+        } catch {
             return [];
         }
     },
@@ -54,7 +54,7 @@ export const InfluencerService = {
 
             if (error) return [];
             return data as Influencer[];
-        } catch (e) {
+        } catch {
             return [];
         }
     },
@@ -78,7 +78,7 @@ export const InfluencerService = {
      * 새로운 인플루언서 등록 신청을 합니다.
      * @param influencer 신청 정보
      */
-    async registerInfluencer(influencer: Partial<Influencer>): Promise<boolean> {
+    async registerInfluencer(influencer: Partial<Influencer>): Promise<{ success: boolean; message?: string }> {
         try {
             const { error } = await supabase
                 .from('influencer_request') // 신청 대기 테이블로 변경
@@ -92,13 +92,14 @@ export const InfluencerService = {
 
             if (error) {
                 console.error('Supabase Insert Error:', error.message, error.details, error.hint);
-                return false;
+                return { success: false, message: error.message };
             }
 
-            return true;
-        } catch (e) {
+            return { success: true };
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.';
             console.error('Unexpected error in registerInfluencer:', e);
-            return false;
+            return { success: false, message: errorMessage };
         }
     },
 
@@ -142,7 +143,7 @@ export const InfluencerService = {
             }
 
             return { status: null };
-        } catch (e) {
+        } catch {
             return { status: null };
         }
     },

@@ -60,30 +60,21 @@ export const MainScreen = () => {
 
       try {
         // 1. 토스 앱 브릿지 환경인 경우 (appLogin 존재 시)
-        if (typeof (window as any).appLogin === 'function' || (!isLocal && typeof (window as any).appLogin !== 'undefined')) {
+        const tossWindow = window as Window & { appLogin?: unknown };
+        if (typeof tossWindow.appLogin === 'function' || (!isLocal && typeof tossWindow.appLogin !== 'undefined')) {
           const { appLogin } = await import('@apps-in-toss/web-framework');
-          const authData: any = await appLogin();
+          const authData = await appLogin() as { authorizationCode: string };
 
           if (authData?.authorizationCode) {
-            // 인가 코드를 받았으므로 Edge Function을 통해 서버 로그인 수행
-            // (AuthCode -> AccessToken -> UserProfile -> DB Upsert)
             const member = await MemberService.loginWithToss(authData.authorizationCode);
-
-            if (member) login(member);
+            if (member) {
+              login(member);
+            }
           }
         }
         // 2. 로컬 개발 환경인 경우 (Mock 로그인)
         else if (isLocal) {
-          // Supabase의 member_id는 UUID 타입이므로, 테스트를 위해 실제 UUID 형식을 사용해야 함
-          // 이 ID로 DB에 인플루언서 정보가 박혀있어야 "활동 중"으로 뜹니다.
-          // 편의상 고정된 테스트 UUID를 사용합니다.
-          const mockMember = {
-            id: '00000000-0000-0000-0000-000000000000', // 테스트용 고정 UUID
-            toss_id: 'local_dev_user',
-            name: '로컬 개발자',
-            created_at: new Date().toISOString()
-          };
-          login(mockMember as any);
+          await useAuthStore.getState().mockLogin();
         }
       } catch (error) {
         console.error('Auto login failed:', error);
@@ -92,6 +83,13 @@ export const MainScreen = () => {
 
     handleAutoLogin();
   }, [isLoggedIn, login]);
+
+  // [중요] 앱 시작 시 또는 로그인 상태 변경 시 인플루언서 상태 동기화
+  useEffect(() => {
+    if (isLoggedIn) {
+      useAuthStore.getState().refreshInfluencerStatus();
+    }
+  }, [isLoggedIn]);
 
   // 다크모드 시스템 설정 동기화
   useEffect(() => {
@@ -140,7 +138,7 @@ export const MainScreen = () => {
         });
 
         setInfluencers(sortedData);
-      } catch (e) {
+      } catch {
         setInfluencers([]);
       } finally {
         setIsLoading(false);
@@ -149,7 +147,7 @@ export const MainScreen = () => {
     };
 
     loadInfluencers();
-  }, [selectedDistrict]);
+  }, [selectedDistrict, setIsLoadingData]);
 
   // 인플루언서 클릭 시 인스타그램 이동
   const handleInfluencerClick = (instagramId: string) => {
@@ -157,7 +155,7 @@ export const MainScreen = () => {
     const url = `https://www.instagram.com/${instagramId}`;
 
     if (typeof openURL === 'function') {
-      (openURL(url) as any).catch(() => {
+      (openURL(url) as Promise<unknown>).catch(() => {
         window.open(url, '_blank');
       });
     } else {
