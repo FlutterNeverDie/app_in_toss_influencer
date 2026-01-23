@@ -130,23 +130,13 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                         className="fixed inset-x-0 bottom-0 z-[201] h-[85vh] bg-white dark:bg-[var(--sheet-bg)] rounded-t-[32px] flex flex-col overflow-hidden shadow-2xl"
                     >
                         {/* 헤더 */}
-                        <div className="flex items-center justify-between p-6 border-b border-[var(--glass-border)]">
-                            <div className="flex items-center gap-2">
-                                {step === 2 && (
-                                    <button
-                                        onClick={() => { triggerHaptic("tickWeak"); setStep(1); }}
-                                        className="p-1 hover:bg-[var(--glass-border)] rounded-full transition-colors"
-                                    >
-                                        <ArrowLeft size={24} className="text-[var(--text-color)]" />
-                                    </button>
-                                )}
-                                <h2 className="text-[20px] font-bold text-[var(--text-color)]">
-                                    {step === 3 ? '신청 완료' : '인플루언서 등록'}
-                                </h2>
-                            </div>
+                        <div className="flex items-center justify-center p-6 border-b border-[var(--glass-border)]">
+                            <h2 className="text-[20px] font-bold text-[var(--text-color)]">
+                                {step === 3 ? '신청 완료' : (regInfo.status === 'pending' ? '신청 현황' : '인플루언서 등록')}
+                            </h2>
                             <button
                                 onClick={handleClose}
-                                className="p-2 hover:bg-[var(--glass-border)] rounded-full transition-colors"
+                                className="absolute right-6 p-2 hover:bg-[var(--glass-border)] rounded-full transition-colors"
                             >
                                 <X size={24} className="text-[var(--text-color)]" />
                             </button>
@@ -154,7 +144,46 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
 
                         {/* 단계별 컨텐츠 */}
                         <div className="flex-1 overflow-y-auto px-6 pb-12">
-                            {step === 1 && (
+                            {regInfo.status === 'pending' && step !== 3 ? (
+                                <div className="h-full flex flex-col items-center justify-center text-center space-y-8 pt-10">
+                                    <div className="w-24 h-24 bg-[#3182F6]/10 rounded-full flex items-center justify-center relative">
+                                        <div className="absolute inset-0 border-2 border-[#3182F6]/20 rounded-full animate-ping opacity-20" />
+                                        <CheckCircle2 size={48} className="text-[#3182F6]" />
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <h3 className="text-[24px] font-bold text-[var(--text-color)]">
+                                            꼼꼼하게 검토하고 있어요!
+                                        </h3>
+                                        <p className="text-[var(--text-color)] opacity-70 text-[16px] leading-relaxed">
+                                            제출해주신 정보를 확인하고 있습니다.<br />
+                                            조금만 기다려주시면 알림을 보내드릴게요.
+                                        </p>
+                                    </div>
+
+                                    <div className="w-full max-w-[280px] bg-[var(--glass-border)] rounded-[20px] p-5 text-left space-y-3">
+                                        <div className="flex justify-between items-center text-[14px]">
+                                            <span className="text-[var(--text-color)] opacity-50">신청 지역</span>
+                                            <span className="font-bold text-[var(--text-color)]">
+                                                {regInfo.province_id && PROVINCE_DISPLAY_NAMES[regInfo.province_id]}
+                                                {' '}
+                                                {regInfo.province_id && regInfo.district_id && REGION_DATA[regInfo.province_id]?.find(d => d.id === regInfo.district_id)?.name}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-[14px]">
+                                            <span className="text-[var(--text-color)] opacity-50">상태</span>
+                                            <span className="text-[#3182F6] font-bold">검수 대기 중</span>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={handleClose}
+                                        className="w-full py-4 rounded-[20px] bg-[#F2F4F6] dark:bg-[var(--glass-border)] text-[var(--text-color)] font-bold text-[15px] active:scale-98 transition-all"
+                                    >
+                                        닫기
+                                    </button>
+                                </div>
+                            ) : step === 1 && (
                                 <div className="space-y-6">
                                     <header>
                                         <h3 className="text-[22px] font-bold text-[var(--text-color)] mb-2 leading-tight">
