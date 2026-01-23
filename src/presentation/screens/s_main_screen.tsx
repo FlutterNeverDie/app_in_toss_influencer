@@ -117,7 +117,7 @@ export const MainScreen = () => {
   };
 
   return (
-    <div className="relative w-full h-[100dvh] bg-white overflow-hidden flex flex-col font-toss">
+    <div className="relative w-full h-[100dvh] bg-[var(--bg-color)] overflow-hidden flex flex-col font-toss">
 
       {/* 1. 플로팅 버튼 (메뉴) - 바텀 시트 유무에 따라 위치 동적 조정 */}
       <motion.div
@@ -135,12 +135,12 @@ export const MainScreen = () => {
           whileTap={{ scale: 0.9, x: 0 }}
           whileHover={{ x: 4 }}
           onClick={() => { triggerHaptic("tickWeak"); openDrawer(); }}
-          className="pointer-events-auto w-12 h-14 flex items-center justify-center bg-white rounded-r-[20px] shadow-[4px_0_15px_rgba(0,0,0,0.1)] border border-l-0 border-[#F2F4F6] active:bg-[#F9FAFB] transition-all"
+          className="pointer-events-auto w-12 h-14 flex items-center justify-center liquid-glass rounded-r-[24px] border-l-0 active:scale-95 transition-all"
         >
           <div className="flex flex-col gap-1.5 ml-[-4px]">
-            <div className="w-5 h-0.5 bg-[#191F28] rounded-full" />
-            <div className="w-3.5 h-0.5 bg-[#191F28] rounded-full" />
-            <div className="w-5 h-0.5 bg-[#191F28] rounded-full" />
+            <div className="w-5 h-0.5 bg-[var(--text-color)] rounded-full" />
+            <div className="w-3.5 h-0.5 bg-[var(--text-color)] rounded-full" />
+            <div className="w-5 h-0.5 bg-[var(--text-color)] rounded-full" />
           </div>
         </motion.button>
       </motion.div>
@@ -161,10 +161,10 @@ export const MainScreen = () => {
               triggerHaptic("tickWeak");
               selectProvince(null);
             }}
-            className="absolute top-6 right-6 z-30 bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-full shadow-lg border border-[#F2F4F6] flex items-center gap-2 group active:scale-95 transition-all"
+            className="absolute top-6 right-6 z-30 liquid-glass px-4 py-2.5 rounded-full flex items-center gap-2 group active:scale-95 transition-all"
           >
             <div className="w-1.5 h-1.5 bg-[#3182F6] rounded-full" />
-            <span className="text-[14px] font-bold text-[#191F28]">전체 지도</span>
+            <span className="text-[14px] font-bold text-[var(--text-color)]">전체 지도</span>
           </motion.button>
         )}
 
@@ -172,13 +172,13 @@ export const MainScreen = () => {
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="absolute bottom-0 inset-x-0 bg-white shadow-[0_-8px_30px_rgba(0,0,0,0.08)] rounded-t-[32px] p-6 pb-10"
+          className="absolute bottom-0 inset-x-0 liquid-glass rounded-t-[32px] p-6 pb-10"
         >
           {selectedDistrict ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-[22px] font-bold text-[#191F28] tracking-tight leading-tight">
+                  <h2 className="text-[22px] font-bold text-[var(--text-color)] tracking-tight leading-tight">
                     {PROVINCE_DISPLAY_NAMES[selectedProvince!]}
                     {` ${REGION_DATA[selectedProvince!].find(d => d.id === selectedDistrict)?.name}`}
                   </h2>
@@ -212,7 +212,7 @@ export const MainScreen = () => {
                       key={inf.id}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleInfluencerClick(inf.instagram_id)}
-                      className="min-w-[140px] h-[156px] bg-white rounded-[24px] p-4 border border-[#F2F4F6] shadow-sm flex flex-col items-center text-center gap-3 active:bg-[#F9FAFB] cursor-pointer transition-colors"
+                      className="min-w-[140px] h-[156px] liquid-glass rounded-[24px] p-4 flex flex-col items-center text-center gap-3 active:scale-95 cursor-pointer transition-all"
                     >
                       <div className="relative group/image">
                         <img
@@ -233,7 +233,7 @@ export const MainScreen = () => {
                         </motion.button>
                       </div>
                       <div className="space-y-0.5 mt-1">
-                        <div className="text-[14px] font-bold text-[#191F28] truncate max-w-[110px]">
+                        <div className="text-[14px] font-bold text-[var(--text-color)] truncate max-w-[110px]">
                           {maskInstagramId(inf.instagram_id)}
                         </div>
                       </div>
@@ -249,12 +249,12 @@ export const MainScreen = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              <h2 className="text-[20px] font-bold text-[#191F28] tracking-tight">
+              <h2 className="text-[20px] font-bold text-[var(--text-color)] tracking-tight">
                 어느 지역이 궁금하세요?
               </h2>
               <div
                 onClick={openSheet}
-                className="flex items-center gap-3 bg-[#F2F4F6] px-5 py-4 rounded-[20px] cursor-pointer hover:bg-[#E5E8EB] transition-colors"
+                className="flex items-center gap-3 liquid-glass px-5 py-4 rounded-[20px] cursor-pointer active:scale-95 transition-all"
               >
                 <Search size={20} className="text-[#8B95A1]" />
                 <span className="text-[#ADB5BD] text-[16px] font-medium">지역 이름을 검색해보세요</span>

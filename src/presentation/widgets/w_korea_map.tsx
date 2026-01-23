@@ -206,7 +206,7 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                                   height={28}
                                   rx={8}
                                   fill={isSelected ? MAP_COLORS.selected : 'var(--map-fill)'}
-                                  stroke={isSelected ? MAP_COLORS.selected : 'var(--map-stroke)'}
+                                  stroke={isSelected ? MAP_COLORS.selected : 'var(--glass-border)'}
                                   strokeWidth={isSelected ? 0 : 1}
                                   animate={{
                                     fill: isSelected ? MAP_COLORS.selected : 'var(--map-fill)',
@@ -289,7 +289,7 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                               className={`px-4 py-2.5 rounded-xl text-[14px] font-bold transition-colors
                                 ${selectedDistrict === dist.id
                                   ? 'bg-[#3182F6] text-white'
-                                  : 'text-[var(--text-color)] hover:text-[#3182F6]'
+                                  : 'text-white hover:text-[#3182F6]'
                                 }`}
                             >
                               {dist.name}

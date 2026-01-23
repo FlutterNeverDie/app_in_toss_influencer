@@ -188,29 +188,29 @@ export const DrawerMenu = () => {
                         animate={{ x: 0 }}
                         exit={{ x: "-100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                        className="fixed inset-y-0 left-0 z-[111] w-[85%] max-w-[320px] bg-white shadow-2xl flex flex-col pt-safe"
+                        className="fixed inset-y-0 left-0 z-[111] w-[85%] max-w-[320px] bg-[var(--bg-color)] shadow-2xl flex flex-col pt-safe"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* 헤더 */}
-                        <div className="flex items-center justify-between p-6 border-b border-[#F2F4F6]">
+                        <div className="flex items-center justify-between p-6 border-b border-[var(--glass-border)]">
                             <div className="flex items-center gap-3">
                                 {view === 'faq' && (
                                     <button
                                         onClick={() => { triggerHaptic("tickWeak"); setView('main'); }}
-                                        className="p-1 hover:bg-[#F2F4F6] rounded-full transition-colors"
+                                        className="p-1 hover:bg-[var(--glass-border)] rounded-full transition-colors"
                                     >
-                                        <ArrowLeft size={24} className="text-[#333D4B]" />
+                                        <ArrowLeft size={24} className="text-[var(--text-color)]" />
                                     </button>
                                 )}
-                                <h2 className="text-[20px] font-bold text-[#191F28]">
+                                <h2 className="text-[20px] font-bold text-[var(--text-color)]">
                                     {view === 'faq' ? '자주 묻는 질문' : '메뉴'}
                                 </h2>
                             </div>
                             <button
                                 onClick={closeDrawer}
-                                className="p-2 -mr-2 hover:bg-[#F2F4F6] rounded-full transition-colors"
+                                className="p-2 -mr-2 hover:bg-[var(--glass-border)] rounded-full transition-colors"
                             >
-                                <X size={24} className="text-[#333D4B]" />
+                                <X size={24} className="text-[var(--text-color)]" />
                             </button>
                         </div>
 
@@ -227,16 +227,16 @@ export const DrawerMenu = () => {
                                     >
                                         {/* 프로필 / 로그인 */}
                                         <section>
-                                            <div className="flex items-center gap-4 mb-4 bg-[#F9FAFB] p-5 rounded-[24px] border border-[#F2F4F6]">
-                                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-[#ADB5BD] shadow-sm border border-[#F2F4F6]">
+                                            <div className="flex items-center gap-4 mb-4 liquid-glass p-5 rounded-[24px]">
+                                                <div className="w-16 h-16 bg-[var(--bg-color)] rounded-full flex items-center justify-center text-[var(--text-color)] opacity-60 shadow-sm border border-[var(--glass-border)]">
                                                     <User size={36} />
                                                 </div>
                                                 <div className="flex flex-col gap-0.5">
-                                                    <h3 className="text-[19px] font-bold text-[#191F28] leading-tight">
+                                                    <h3 className="text-[19px] font-bold text-[var(--text-color)] leading-tight">
                                                         {isLoggedIn ? '반가워요!' : '로그인 해주세요'}
                                                     </h3>
                                                     {!isLoggedIn && (
-                                                        <p className="text-[14px] font-medium text-[#4E5968]">
+                                                        <p className="text-[14px] font-medium text-[var(--text-color)] opacity-70">
                                                             더 많은 기능을 이용해보세요!
                                                         </p>
                                                     )}
@@ -256,14 +256,14 @@ export const DrawerMenu = () => {
                                         {/* 인플루언서 등록 / 관리 */}
                                         {isLoggedIn && (
                                             <section>
-                                                <div className="bg-[#F2F4F6] rounded-[24px] p-6 border border-white">
+                                                <div className="liquid-glass rounded-[24px] p-6">
                                                     <div className="flex items-center gap-2 mb-2">
                                                         <UserPlus size={20} className={regInfo.status === 'approved' ? 'text-[#00D082]' : 'text-[#3182F6]'} />
-                                                        <h3 className="text-[16px] font-bold text-[#191F28]">
+                                                        <h3 className="text-[16px] font-bold text-[var(--text-color)]">
                                                             {regInfo.status === 'approved' ? '인플루언서 활동 중' : '인플루언서 등록하기'}
                                                         </h3>
                                                     </div>
-                                                    <div className="text-[14px] font-medium text-[#4E5968] mb-1 leading-relaxed">
+                                                    <div className="text-[14px] font-medium text-[var(--text-color)] opacity-80 mb-1 leading-relaxed">
                                                         {regInfo.status === 'approved'
                                                             ? (
                                                                 <div className="flex flex-col gap-1">
@@ -286,9 +286,9 @@ export const DrawerMenu = () => {
                                                                 triggerHaptic("tickWeak");
                                                                 useRegionStore.getState().openRegistrationModal();
                                                             }}
-                                                            className={`w-full mt-4 py-3.5 rounded-[14px] font-bold text-[15px] transition-colors border ${regInfo.status === 'pending'
-                                                                ? 'bg-[#F2F8FF] text-[#3182F6] border-[#3182F6]'
-                                                                : 'bg-white text-[#3182F6] border-[#3182F6] hover:bg-[#F2F8FF]'
+                                                            className={`w-full mt-4 py-3.5 rounded-[14px] font-bold text-[15px] transition-all border ${regInfo.status === 'pending'
+                                                                ? 'bg-[#3182F6]/10 text-[#3182F6] border-[#3182F6]'
+                                                                : 'bg-[var(--bg-color)] text-[#3182F6] border-[#3182F6] hover:bg-[#3182F6]/5'
                                                                 }`}
                                                         >
                                                             {regInfo.status === 'pending' ? '검수 대기 중' : '지금 신청하기'}
@@ -302,15 +302,15 @@ export const DrawerMenu = () => {
                                         <section className="space-y-1">
                                             <button
                                                 onClick={() => { triggerHaptic("tickWeak"); setView('faq'); }}
-                                                className="w-full flex items-center justify-between p-4 hover:bg-[#F2F4F6] rounded-[16px] transition-colors group"
+                                                className="w-full flex items-center justify-between p-4 hover:bg-[var(--glass-border)] rounded-[16px] transition-colors group"
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-[#F2F4F6] rounded-full flex items-center justify-center text-[#4E5968] group-hover:bg-white transition-colors border border-transparent group-hover:border-[#F2F4F6]">
+                                                    <div className="w-10 h-10 bg-[var(--glass-border)] rounded-full flex items-center justify-center text-[var(--text-color)] opacity-70 group-hover:bg-[var(--bg-color)] transition-colors border border-transparent">
                                                         <HelpCircle size={20} />
                                                     </div>
-                                                    <span className="text-[16px] font-bold text-[#333D4B]">자주 묻는 질문</span>
+                                                    <span className="text-[16px] font-bold text-[var(--text-color)] opacity-90">자주 묻는 질문</span>
                                                 </div>
-                                                <ArrowLeft size={18} className="text-[#ADB5BD] rotate-180" />
+                                                <ArrowLeft size={18} className="text-[var(--text-color)] opacity-30 rotate-180" />
                                             </button>
 
                                         </section>
@@ -328,15 +328,15 @@ export const DrawerMenu = () => {
                                             {FAQ_DATA.map((item, index) => {
                                                 const isOpen = expandedFAQ === index;
                                                 return (
-                                                    <div key={index} className="border border-[#F2F4F6] rounded-[20px] overflow-hidden bg-white">
+                                                    <div key={index} className="liquid-glass rounded-[20px] overflow-hidden">
                                                         <button
                                                             onClick={() => toggleFAQ(index)}
-                                                            className="w-full flex items-center justify-between p-5 text-left active:bg-[#F9FAFB] transition-colors"
+                                                            className="w-full flex items-center justify-between p-5 text-left active:bg-[var(--glass-border)] transition-colors"
                                                         >
-                                                            <span className="text-[15px] font-bold text-[#333D4B] pr-4 leading-snug">
+                                                            <span className="text-[15px] font-bold text-[var(--text-color)] pr-4 leading-snug">
                                                                 {item.question}
                                                             </span>
-                                                            {isOpen ? <ChevronUp size={20} className="text-[#8B95A1] flex-shrink-0" /> : <ChevronDown size={20} className="text-[#8B95A1] flex-shrink-0" />}
+                                                            {isOpen ? <ChevronUp size={20} className="text-[var(--text-color)] opacity-50 flex-shrink-0" /> : <ChevronDown size={20} className="text-[var(--text-color)] opacity-50 flex-shrink-0" />}
                                                         </button>
                                                         <AnimatePresence>
                                                             {isOpen && (
@@ -346,7 +346,7 @@ export const DrawerMenu = () => {
                                                                     exit={{ height: 0, opacity: 0 }}
                                                                     className="overflow-hidden"
                                                                 >
-                                                                    <div className="p-5 pt-0 bg-white text-[14px] font-medium text-[#4E5968] leading-relaxed border-t border-[#F2F4F6] border-dashed mt-0.5">
+                                                                    <div className="p-5 pt-0 text-[14px] font-medium text-[var(--text-color)] opacity-80 leading-relaxed border-t border-[var(--glass-border)] border-dashed mt-0.5">
                                                                         <div className="pt-4">{renderAnswer(item.answer)}</div>
                                                                     </div>
                                                                 </motion.div>
@@ -362,8 +362,8 @@ export const DrawerMenu = () => {
                         </div>
 
                         {/* 푸터 */}
-                        <div className="p-6 border-t border-[#F2F4F6] bg-white">
-                            <p className="text-[12px] text-[#ADB5BD] text-center">
+                        <div className="p-6 border-t border-[var(--glass-border)]">
+                            <p className="text-[12px] text-[var(--text-color)] opacity-40 text-center">
                                 © 2026 Influencer Map. All rights reserved.
                             </p>
                         </div>
