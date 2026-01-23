@@ -24,26 +24,29 @@ export const RegionSelectorSheet = () => {
     selectedProvince,
     selectedDistrict,
     closeSheet,
-    selectProvince,
-    selectDistrict,
     selectRegion,
     isSearching,
     setIsSearching
   } = useRegionStore();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<string>('seoul'); // [NEW] 로컬 탭 상태 (지도와 분리)
   const sheetRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLUListElement>(null);
 
-  // 시트가 열릴 때 상태 초기화 및 스크롤 동기화
+  // 시트가 열릴 때 상태 초기화
   useEffect(() => {
     if (isSheetOpen) {
-      // 선택된 지역이 없을 경우 (예: '처음으로' 클릭 후 다시 열 때) 서울을 기본값으로 설정
-      if (!selectedProvince) {
-        selectProvince('seoul');
+      // 1. 이미 글로벌에 선택된 지역이 있으면 그 탭을 보여줌
+      if (selectedProvince) {
+        setActiveTab(selectedProvince);
+      }
+      // 2. 선택된 게 없으면 '서울'을 보여줌 (지도 상태는 건드리지 않음!)
+      else {
+        setActiveTab('seoul');
       }
 
-      // 동기적인 setState 호출로 인한 cascading render를 방지하기 위해 microtask 사용
+      // 검색 초기화
       queueMicrotask(() => {
         setSearchQuery('');
         setIsSearching(false);
@@ -60,9 +63,9 @@ export const RegionSelectorSheet = () => {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [isSheetOpen, setIsSearching, selectedProvince, selectProvince]);
+  }, [isSheetOpen, setIsSearching, selectedProvince]);
 
-  // 지역 선택이 바뀔 때도 스크롤 동기화
+  // 탭 변경 시 스크롤 동기화
   useEffect(() => {
     if (isSheetOpen && sidebarRef.current) {
       const activeItem = sidebarRef.current.querySelector('[data-selected="true"]');
@@ -70,7 +73,7 @@ export const RegionSelectorSheet = () => {
         activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
-  }, [selectedProvince, isSheetOpen]);
+  }, [activeTab, isSheetOpen]);
 
   // 전체 지역 데이터 플랫하게 변환 (검색 효율성을 위해)
   const allDistricts = useMemo(() => {
@@ -240,7 +243,7 @@ export const RegionSelectorSheet = () => {
                     className="w-[125px] bg-[#F9FAFB] dark:bg-[var(--sidebar-bg)] overflow-y-auto scrollbar-hide py-2 border-r border-[#E5E8EB] dark:border-[#2C2E33]"
                   >
                     {Object.keys(REGION_DATA).map((provKey) => {
-                      const isSelected = selectedProvince === provKey;
+                      const isSelected = activeTab === provKey; // [CHANGE] selectedProvince -> activeTab
                       const displayName = PROVINCE_DISPLAY_NAMES[provKey];
 
                       return (
@@ -249,7 +252,7 @@ export const RegionSelectorSheet = () => {
                           data-selected={isSelected}
                           onClick={() => {
                             triggerHaptic("tickWeak");
-                            selectProvince(provKey);
+                            setActiveTab(provKey); // [CHANGE] 지도 이동(selectProvince) 대신 로컬 탭 변경
                           }}
                           className={`
                             relative px-6 py-6 text-[16px] cursor-pointer transition-all
@@ -276,14 +279,14 @@ export const RegionSelectorSheet = () => {
                   <div className="flex-1 overflow-y-auto bg-white dark:bg-[var(--sheet-bg)] px-5 py-2">
 
                     <ul className="space-y-0 pb-10">
-                      {(selectedProvince ? REGION_DATA[selectedProvince] : []).map((dist: { id: string; name: string }) => {
-                        const isSelected = selectedDistrict === dist.id;
+                      {(activeTab ? REGION_DATA[activeTab] : []).map((dist: { id: string; name: string }) => {
+                        const isSelected = selectedProvince === activeTab && selectedDistrict === dist.id; // [CHANGE] 현재 탭이 실제 선택된 Province일 때만 체크 표시
                         return (
                           <motion.li
                             key={dist.id}
                             onClick={() => {
                               triggerHaptic("tap");
-                              selectDistrict(dist.id);
+                              selectRegion(activeTab, dist.id); // [CHANGE] 이때 비로소 글로벌 상태 업데이트 (지도 이동)
                               closeSheet();
                             }}
                             whileTap={{ scale: 0.98 }}
