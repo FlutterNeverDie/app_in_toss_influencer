@@ -32,7 +32,7 @@ export const useRegionStore = create<RegionState & RegionActions>((set) => ({
   isSheetOpen: false,
   isDrawerOpen: false,
   isRegistrationModalOpen: false,
-  selectedProvince: null,
+  selectedProvince: 'seoul',
   selectedDistrict: null,
   isSearching: false,
   isLoadingData: false,

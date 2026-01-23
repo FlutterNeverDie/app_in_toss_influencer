@@ -221,7 +221,7 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                                                         triggerHaptic("tickWeak");
                                                         setSelectedProvince(id);
                                                     }}
-                                                    className="p-4 liquid-glass hover:bg-[var(--glass-border)] text-center font-bold text-[var(--text-color)] transition-all active:scale-95"
+                                                    className="p-4 liquid-glass [@media(hover:hover)]:hover:bg-[var(--glass-border)] text-center font-bold text-[var(--text-color)] transition-all active:scale-95 active:bg-[var(--glass-border)]"
                                                 >
                                                     {name}
                                                 </button>
@@ -249,7 +249,7 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                                                             setSelectedDistrict(district.id);
                                                             setStep(2);
                                                         }}
-                                                        className="p-4 liquid-glass hover:bg-[var(--glass-border)] text-center font-bold text-[var(--text-color)] transition-all active:scale-95"
+                                                        className="p-4 liquid-glass [@media(hover:hover)]:hover:bg-[var(--glass-border)] text-center font-bold text-[var(--text-color)] transition-all active:scale-95 active:bg-[var(--glass-border)]"
                                                     >
                                                         {district.name}
                                                     </button>
