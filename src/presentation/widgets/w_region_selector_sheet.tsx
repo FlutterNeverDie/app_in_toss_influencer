@@ -38,6 +38,11 @@ export const RegionSelectorSheet = () => {
   // 시트가 열릴 때 상태 초기화 및 스크롤 동기화
   useEffect(() => {
     if (isSheetOpen) {
+      // 선택된 지역이 없을 경우 (예: '처음으로' 클릭 후 다시 열 때) 서울을 기본값으로 설정
+      if (!selectedProvince) {
+        selectProvince('seoul');
+      }
+
       // 동기적인 setState 호출로 인한 cascading render를 방지하기 위해 microtask 사용
       queueMicrotask(() => {
         setSearchQuery('');
@@ -55,7 +60,7 @@ export const RegionSelectorSheet = () => {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [isSheetOpen, setIsSearching]);
+  }, [isSheetOpen, setIsSearching, selectedProvince, selectProvince]);
 
   // 지역 선택이 바뀔 때도 스크롤 동기화
   useEffect(() => {
