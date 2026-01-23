@@ -52,9 +52,14 @@ export const InfluencerService = {
                 .eq('district_id', districtId)
                 .order('like_count', { ascending: false });
 
-            if (error) return [];
+            if (error) {
+                console.error('Supabase error fetching influencers (district):', error);
+                return [];
+            }
+            console.log(`Fetched influencers for ${districtId}:`, data);
             return data as Influencer[];
-        } catch {
+        } catch (e) {
+            console.error('Unexpected error fetching influencers (district):', e);
             return [];
         }
     },
