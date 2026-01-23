@@ -126,12 +126,12 @@ export const RegionSelectorSheet = () => {
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.5 }}
             onDragEnd={onDragEnd}
-            className="fixed inset-x-0 bottom-0 z-[101] bg-white rounded-t-[32px] flex flex-col shadow-2xl h-[85vh] overflow-hidden"
+            className="fixed inset-x-0 bottom-0 z-[101] bg-white dark:bg-[var(--sheet-bg)] rounded-t-[32px] flex flex-col shadow-2xl h-[85vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* 시트 핸들 (Toss Style) - 이 영역을 잡고 끌어야 안정적임 */}
-            <div className="flex justify-center pt-3 pb-3 cursor-grab active:cursor-grabbing hover:bg-black/[0.02] transition-colors">
-              <div className="w-10 h-1.5 bg-[#E5E8EB] rounded-full" />
+            <div className="flex justify-center pt-3 pb-3 cursor-grab active:cursor-grabbing hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+              <div className="w-10 h-1.5 bg-[#E5E8EB] dark:bg-[#3A3D43] rounded-full" />
             </div>
 
             {/* 헤더 섹션 */}
@@ -142,27 +142,27 @@ export const RegionSelectorSheet = () => {
                     setSearchQuery('');
                     setIsSearching(false);
                   }}
-                  className="mr-3 p-2 -ml-2 hover:bg-[#F2F4F6] rounded-full transition-colors"
+                  className="mr-3 p-2 -ml-2 hover:bg-[#F2F4F6] dark:hover:bg-[#2C2E33] rounded-full transition-colors"
                 >
-                  <ArrowLeft size={24} className="text-[#191F28]" />
+                  <ArrowLeft size={24} className="text-[#191F28] dark:text-white" />
                 </button>
               )}
 
-              <h3 className="text-[20px] font-bold text-[#191F28] flex-1">
+              <h3 className="text-[20px] font-bold text-[#191F28] dark:text-white flex-1">
                 {searchQuery || isSearching ? '지역 검색' : '어디로 갈까요?'}
               </h3>
 
               <button
                 onClick={closeSheet}
-                className="w-10 h-10 flex items-center justify-center bg-[#F2F4F6] hover:bg-[#E5E8EB] rounded-full transition-colors"
+                className="w-10 h-10 flex items-center justify-center bg-[#F2F4F6] dark:bg-[#2C2E33] hover:bg-[#E5E8EB] dark:hover:bg-[#3A3D43] rounded-full transition-colors"
               >
-                <X size={20} className="text-[#4E5968]" />
+                <X size={20} className="text-[#4E5968] dark:text-[#8B95A1]" />
               </button>
             </div>
 
             {/* 검색창 */}
             <div className="px-6 pb-2">
-              <div className="flex items-center gap-2 bg-[#F2F4F6] px-4 py-3.5 rounded-[16px] focus-within:ring-2 focus-within:ring-[#3182F6] focus-within:bg-white transition-all shadow-sm">
+              <div className="flex items-center gap-2 bg-[#F2F4F6] dark:bg-[#2C2E33] px-4 py-3.5 rounded-[16px] focus-within:ring-2 focus-within:ring-[#3182F6] focus-within:bg-white dark:focus-within:bg-[#1C1E22] transition-all shadow-sm">
                 <SearchIcon size={20} className="text-[#8B95A1]" />
                 <input
                   type="text"
@@ -170,14 +170,14 @@ export const RegionSelectorSheet = () => {
                   onFocus={() => setIsSearching(true)}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="지역 이름을 검색해보세요"
-                  className="bg-transparent border-none outline-none text-[16px] w-full placeholder:text-[#ADB5BD] text-[#191F28] font-medium"
+                  className="bg-transparent border-none outline-none text-[16px] w-full placeholder:text-[#ADB5BD] dark:placeholder:text-[#4E5968] text-[#191F28] dark:text-white font-medium"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="p-1 hover:bg-[#E5E8EB] rounded-full transition-colors"
+                    className="p-1 hover:bg-[#E5E8EB] dark:hover:bg-[#3A3D43] rounded-full transition-colors"
                   >
-                    <X size={18} className="text-[#8B95A1] bg-[#E5E8EB] rounded-full p-0.5" />
+                    <X size={18} className="text-[#8B95A1] bg-[#E5E8EB] dark:bg-[#3A3D43] rounded-full p-0.5" />
                   </button>
                 )}
               </div>
@@ -187,7 +187,7 @@ export const RegionSelectorSheet = () => {
             <div className="flex flex-1 overflow-hidden">
               {(searchQuery || isSearching) ? (
                 /* 검색 결과 레이아웃 */
-                <div className="flex-1 overflow-y-auto px-5 py-3 bg-[#F9FAFB]">
+                <div className="flex-1 overflow-y-auto px-5 py-3 bg-[#F9FAFB] dark:bg-[var(--sidebar-bg)]">
                   {searchResults.length > 0 ? (
                     <ul className="space-y-3 pb-10">
                       {searchResults.map((result) => (
@@ -195,10 +195,10 @@ export const RegionSelectorSheet = () => {
                           key={`${result.provinceId}-${result.districtId}`}
                           onClick={() => handleSearchResultClick(result.provinceId, result.districtId)}
                           whileTap={{ scale: 0.98 }}
-                          className="flex items-center justify-between px-6 py-4 bg-white rounded-[24px] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-[#F2F4F6] transition-all active:bg-[#F2F4F6]"
+                          className="flex items-center justify-between px-6 py-4 bg-white dark:bg-[#2C2E33] rounded-[24px] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-[#F2F4F6] dark:border-[#3A3D43] transition-all active:bg-[#F2F4F6] dark:active:bg-[#3A3D43]"
                         >
                           <div className="flex flex-col">
-                            <span className="text-[16px] font-bold text-[#191F28]">
+                            <span className="text-[16px] font-bold text-[#191F28] dark:text-white">
                               {result.name}
                             </span>
                             <span className="text-[13px] text-[#8B95A1] mt-0.5">
@@ -210,7 +210,7 @@ export const RegionSelectorSheet = () => {
                     </ul>
                   ) : searchQuery ? (
                     <div className="flex flex-col items-center justify-center h-full text-[#8B95A1] pb-20">
-                      <div className="bg-[#F2F4F6] p-4 rounded-full mb-4">
+                      <div className="bg-[#F2F4F6] dark:bg-[#2C2E33] p-4 rounded-full mb-4">
                         <SearchIcon size={32} />
                       </div>
                       <span className="text-[15px] font-medium">검색 결과가 없어요</span>
@@ -228,7 +228,7 @@ export const RegionSelectorSheet = () => {
                   {/* 왼쪽: 광역 리스트 */}
                   <ul
                     ref={sidebarRef}
-                    className="w-[125px] bg-[#F9FAFB] overflow-y-auto scrollbar-hide py-2 border-r border-[#E5E8EB]"
+                    className="w-[125px] bg-[#F9FAFB] dark:bg-[var(--sidebar-bg)] overflow-y-auto scrollbar-hide py-2 border-r border-[#E5E8EB] dark:border-[#2C2E33]"
                   >
                     {Object.keys(REGION_DATA).map((provKey) => {
                       const isSelected = selectedProvince === provKey;
@@ -245,8 +245,8 @@ export const RegionSelectorSheet = () => {
                           className={`
                             relative px-6 py-6 text-[16px] cursor-pointer transition-all
                             ${isSelected
-                              ? 'bg-white text-[#3182F6] font-bold'
-                              : 'text-[#8B95A1] hover:text-[#4E5968]'}
+                              ? 'bg-white dark:bg-[var(--sheet-bg)] text-[#3182F6] font-bold'
+                              : 'text-[#8B95A1] hover:text-[#4E5968] dark:hover:text-white'}
                           `}
                         >
                           {isSelected && (
@@ -264,9 +264,9 @@ export const RegionSelectorSheet = () => {
                   </ul>
 
                   {/* 오른쪽: 기초 리스트 */}
-                  <div className="flex-1 overflow-y-auto bg-white px-5 py-2">
-                    <div className="sticky top-0 bg-white/95 backdrop-blur-sm z-10 py-4 mb-3">
-                      <span className="text-[14px] text-[#4E5968] font-bold px-1 tracking-tight">
+                  <div className="flex-1 overflow-y-auto bg-white dark:bg-[var(--sheet-bg)] px-5 py-2">
+                    <div className="sticky top-0 bg-white/95 dark:bg-[var(--sheet-bg)]/95 backdrop-blur-sm z-10 py-4 mb-3">
+                      <span className="text-[14px] text-[#4E5968] dark:text-[#ADB5BD] font-bold px-1 tracking-tight">
                         {selectedProvince ? PROVINCE_DISPLAY_NAMES[selectedProvince] : '지역 선택'}
                       </span>
                     </div>
@@ -287,7 +287,7 @@ export const RegionSelectorSheet = () => {
                               flex items-center justify-between px-6 py-6 cursor-pointer transition-all
                               ${isSelected
                                 ? 'text-[#3182F6]'
-                                : 'text-[#333D4B] border-b border-[#F2F4F6] active:bg-[#F2F4F6]'}
+                                : 'text-[#333D4B] dark:text-[#D1D5DB] border-b border-[#F2F4F6] dark:border-[#2C2E33] active:bg-[#F2F4F6] dark:active:bg-[#2C2E33]'}
                             `}
                           >
                             <span className={`text-[17px] ${isSelected ? 'font-bold' : 'font-medium'}`}>
@@ -310,7 +310,8 @@ export const RegionSelectorSheet = () => {
               )}
             </div>
 
-            <div className="h-8 shrink-0 bg-white" />
+            <div className="h-8 shrink-0 bg-white dark:bg-[var(--sheet-bg)]" />
+
           </motion.div>
         </>
       )}

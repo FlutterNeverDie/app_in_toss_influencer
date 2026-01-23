@@ -50,11 +50,28 @@
   :root {
     --bg-color: #0F1012;
     --text-color: #FFFFFF;
-    --panel-bg: rgba(30, 32, 35, 0.8);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --map-fill: #2A2C30;
-    --map-stroke: #5A5D63;
+    --text-color-secondary: #8B95A1;
+    --panel-bg: rgba(30, 32, 35, 0.9);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --map-fill: #1C1E22;
+    --map-stroke: #3A3D43;
+    --input-bg: rgba(255, 255, 255, 0.05);
+    --sheet-bg: #191f28;
+    --sidebar-bg: #14171d;
   }
+}
+
+.dark {
+  --bg-color: #0F1012;
+  --text-color: #FFFFFF;
+  --text-color-secondary: #8B95A1;
+  --panel-bg: rgba(30, 32, 35, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --map-fill: #1C1E22;
+  --map-stroke: #3A3D43;
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --sheet-bg: #191f28;
+  --sidebar-bg: #14171d;
 }
 
 .liquid-glass {

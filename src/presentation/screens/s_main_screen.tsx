@@ -172,17 +172,17 @@ export const MainScreen = () => {
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="absolute bottom-0 inset-x-0 liquid-glass rounded-t-[32px] p-6 pb-10"
+          className="absolute bottom-0 inset-x-0 bg-white dark:bg-[var(--sheet-bg)] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] rounded-t-[32px] p-6 pb-10"
         >
           {selectedDistrict ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-[22px] font-bold text-[var(--text-color)] tracking-tight leading-tight">
+                  <h2 className="text-[22px] font-bold text-[#191F28] dark:text-white tracking-tight leading-tight">
                     {PROVINCE_DISPLAY_NAMES[selectedProvince!]}
                     {` ${REGION_DATA[selectedProvince!].find(d => d.id === selectedDistrict)?.name}`}
                   </h2>
-                  <p className="text-[#8B95A1] text-[14px] font-medium mt-1">
+                  <p className="text-[#8B95A1] dark:text-[#ADB5BD] text-[14px] font-medium mt-1">
                     {isLoading ? '인플루언서를 찾고있습니다...' : `인플루언서 총 ${influencers.length}명을 찾았어요`}
                   </p>
                 </div>
@@ -193,7 +193,7 @@ export const MainScreen = () => {
                       triggerHaptic("tickWeak");
                       selectProvince(null);
                     }}
-                    className="bg-[#F2F4F6] px-4 py-2.5 rounded-full text-[#4E5968] text-[14px] font-bold flex items-center gap-1.5"
+                    className="bg-[#F2F4F6] dark:bg-[#2C2E33] px-4 py-2.5 rounded-full text-[#4E5968] dark:text-[#ADB5BD] text-[14px] font-bold flex items-center gap-1.5"
                   >
                     처음으로
                   </motion.button>
@@ -204,7 +204,7 @@ export const MainScreen = () => {
               <div className="flex gap-3 overflow-x-auto py-2 px-1 -mx-1 scrollbar-hide">
                 {isLoading ? (
                   Array(3).fill(0).map((_, i) => (
-                    <div key={i} className="min-w-[140px] h-[156px] bg-[#F9FAFB] rounded-[24px] animate-pulse" />
+                    <div key={i} className="min-w-[140px] h-[156px] bg-[#F9FAFB] dark:bg-[#2C2E33] rounded-[24px] animate-pulse" />
                   ))
                 ) : influencers.length > 0 ? (
                   influencers.map((inf) => (
@@ -212,7 +212,7 @@ export const MainScreen = () => {
                       key={inf.id}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleInfluencerClick(inf.instagram_id)}
-                      className="min-w-[140px] h-[156px] liquid-glass rounded-[24px] p-4 flex flex-col items-center text-center gap-3 active:scale-95 cursor-pointer transition-all"
+                      className="min-w-[140px] h-[156px] bg-white dark:bg-[#2C2E33] rounded-[24px] p-4 border border-[#F2F4F6] dark:border-[#3A3D43] shadow-sm flex flex-col items-center text-center gap-3 active:bg-[#F9FAFB] dark:active:bg-[#3A3D43] cursor-pointer transition-colors"
                     >
                       <div className="relative group/image">
                         <img
@@ -227,13 +227,13 @@ export const MainScreen = () => {
                             triggerHaptic("tap");
                             toggleLike(inf.id);
                           }}
-                          className={`absolute -top-1 -right-1 w-8 h-8 flex items-center justify-center rounded-full shadow-lg transition-all z-10 ${isLiked(inf.id) ? 'bg-[#FF80AB] text-white' : 'bg-white text-[#ADB5BD] border border-[#F2F4F6]'}`}
+                          className={`absolute -top-1 -right-1 w-8 h-8 flex items-center justify-center rounded-full shadow-lg transition-all z-10 ${isLiked(inf.id) ? 'bg-[#FF80AB] text-white' : 'bg-white dark:bg-[#2C2E33] text-[#ADB5BD] border border-[#F2F4F6] dark:border-[#3A3D43]'}`}
                         >
                           <Heart size={16} fill={isLiked(inf.id) ? "currentColor" : "none"} strokeWidth={2.5} />
                         </motion.button>
                       </div>
                       <div className="space-y-0.5 mt-1">
-                        <div className="text-[14px] font-bold text-[var(--text-color)] truncate max-w-[110px]">
+                        <div className="text-[14px] font-bold text-[#191F28] dark:text-white truncate max-w-[110px]">
                           {maskInstagramId(inf.instagram_id)}
                         </div>
                       </div>
@@ -249,15 +249,15 @@ export const MainScreen = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              <h2 className="text-[20px] font-bold text-[var(--text-color)] tracking-tight">
+              <h2 className="text-[20px] font-bold text-[#191F28] dark:text-white tracking-tight">
                 어느 지역이 궁금하세요?
               </h2>
               <div
                 onClick={openSheet}
-                className="flex items-center gap-3 liquid-glass px-5 py-4 rounded-[20px] cursor-pointer active:scale-95 transition-all"
+                className="flex items-center gap-3 bg-[#F2F4F6] dark:bg-[#2C2E33] px-5 py-4 rounded-[20px] cursor-pointer hover:bg-[#E5E8EB] dark:hover:bg-[#3A3D43] transition-colors"
               >
                 <Search size={20} className="text-[#8B95A1]" />
-                <span className="text-[#ADB5BD] text-[16px] font-medium">지역 이름을 검색해보세요</span>
+                <span className="text-[#ADB5BD] dark:text-[#4E5968] text-[16px] font-medium">지역 이름을 검색해보세요</span>
               </div>
             </div>
           )}

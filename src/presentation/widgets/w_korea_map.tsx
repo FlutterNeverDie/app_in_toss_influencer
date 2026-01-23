@@ -261,7 +261,7 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                                   className={`absolute -translate-x-1/2 -translate-y-1/2 text-[14px] font-bold z-10 whitespace-nowrap px-4 py-2 rounded-full
                                     ${isSelected
                                       ? 'liquid-glass-active text-white'
-                                      : 'liquid-glass text-[var(--text-color)]'
+                                      : 'liquid-glass text-[var(--text-color)] dark:text-white'
                                     }`}
                                 >
                                   {dist.name}
@@ -289,7 +289,7 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                               className={`px-4 py-2.5 rounded-xl text-[14px] font-bold transition-colors
                                 ${selectedDistrict === dist.id
                                   ? 'bg-[#3182F6] text-white'
-                                  : 'text-white hover:text-[#3182F6]'
+                                  : 'text-white dark:text-[#ADB5BD] hover:text-[#3182F6]'
                                 }`}
                             >
                               {dist.name}
@@ -323,7 +323,7 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={(e) => { e.stopPropagation(); triggerHaptic("tickWeak"); transformRef.current?.zoomOut(); }}
-                    className="w-10 h-10 flex items-center justify-center liquid-glass rounded-xl text-[var(--text-color)] active:scale-95"
+                    className="w-10 h-10 flex items-center justify-center liquid-glass rounded-xl text-[var(--text-color)] dark:text-white active:scale-95"
                   >
                     <Minus size={20} />
                   </motion.button>
