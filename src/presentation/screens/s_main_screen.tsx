@@ -115,8 +115,8 @@ export const MainScreen = () => {
   return (
     <div className="relative w-full h-[100dvh] bg-white overflow-hidden flex flex-col font-toss">
 
-      {/* 1. 플로팅 버튼 (메뉴) - 화면 왼쪽 중앙 Edge 스타일 */}
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 z-50 pointer-events-none">
+      {/* 1. 플로팅 버튼 (메뉴) - 우측 버튼들과 높이를 맞춰 바텀 시트 근처로 이동 */}
+      <div className="absolute left-0 top-1/2 translate-y-[80px] z-50 pointer-events-none">
         <motion.button
           whileTap={{ scale: 0.9, x: 0 }}
           whileHover={{ x: 4 }}
