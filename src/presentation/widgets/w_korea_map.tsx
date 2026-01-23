@@ -57,25 +57,25 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
   // SVG 내에서 각 지역의 초기 위치 (대한민국 형상 유지용)
   const getProvincePosition = (key: string) => {
     const layout: Record<string, { x: number; y: number }> = {
-      seoul: { x: 80, y: 65 },
-      gyeonggi_north: { x: 80, y: 25 },
-      gyeonggi_south: { x: 80, y: 100 },
-      incheon: { x: 20, y: 70 },
-      gangwon: { x: 155, y: 60 },
+      seoul: { x: 80, y: 45 },
+      gyeonggi_north: { x: 80, y: -10 },
+      gyeonggi_south: { x: 100, y: 90 },
+      incheon: { x: 10, y: 70 },
+      gangwon: { x: 205, y: 60 },
       chungbuk: { x: 135, y: 135 },
       chungnam: { x: 50, y: 165 },
-      daejeon: { x: 100, y: 185 },
-      sejong: { x: 70, y: 132 },
+      daejeon: { x: 120, y: 185 },
+      sejong: { x: 70, y: 128 },
       jeonbuk: { x: 80, y: 220 },
       jeonnam: { x: 75, y: 310 },
       gwangju: { x: 35, y: 265 },
       gyeongbuk: { x: 185, y: 165 },
       gyeongnam: { x: 165, y: 245 },
       daegu: { x: 195, y: 205 },
-      ulsan: { x: 225, y: 245 },
-      busan: { x: 215, y: 285 },
-      jeju: { x: 80, y: 365 },
-      ulleung: { x: 260, y: 135 },
+      ulsan: { x: 225, y: 255 },
+      busan: { x: 215, y: 305 },
+      jeju: { x: 80, y: 390 },
+      ulleung: { x: 280, y: 135 },
     };
     return layout[key] || { x: 0, y: 0 };
   };
