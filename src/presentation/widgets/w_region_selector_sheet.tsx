@@ -265,11 +265,6 @@ export const RegionSelectorSheet = () => {
 
                   {/* 오른쪽: 기초 리스트 */}
                   <div className="flex-1 overflow-y-auto bg-white dark:bg-[var(--sheet-bg)] px-5 py-2">
-                    <div className="sticky top-0 bg-white/95 dark:bg-[var(--sheet-bg)]/95 backdrop-blur-sm z-10 py-4 mb-3">
-                      <span className="text-[14px] text-[#4E5968] dark:text-[#ADB5BD] font-bold px-1 tracking-tight">
-                        {selectedProvince ? PROVINCE_DISPLAY_NAMES[selectedProvince] : '지역 선택'}
-                      </span>
-                    </div>
 
                     <ul className="space-y-0 pb-10">
                       {(selectedProvince ? REGION_DATA[selectedProvince] : []).map((dist: { id: string; name: string }) => {

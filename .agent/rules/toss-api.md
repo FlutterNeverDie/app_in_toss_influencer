@@ -13,14 +13,16 @@ https://developers-apps-in-toss.toss.im/development/integration-process.html
 토스 로그인 이해하기
 https://developers-apps-in-toss.toss.im/login/intro.html
 
-토스 콘솔 가이드
+토스 로그인 콘솔 가이드
 https://developers-apps-in-toss.toss.im/login/console.html
 
-토스 개발하기
+토스 로그인개발하기
 https://developers-apps-in-toss.toss.im/login/develop.html
 
-QC진행하기
+토스 로그인 QC진행하기
 https://developers-apps-in-toss.toss.im/login/qa.html
+
+
 
 토스 샌드박스 (테스트앱)
 https://developers-apps-in-toss.toss.im/development/test/sandbox.html
