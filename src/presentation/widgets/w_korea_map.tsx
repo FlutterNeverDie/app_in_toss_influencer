@@ -173,8 +173,8 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                       className="w-full h-full relative"
                       animate={{
                         scale: selectedProvince ? 1.2 : 1,
-                        x: selectedProvince && activeCentroid ? 150 - activeCentroid.x * 1.2 : 0,
-                        y: selectedProvince && activeCentroid ? 130 - activeCentroid.y * 1.2 : -40,
+                        x: selectedProvince && activeCentroid ? 110 - activeCentroid.x * 1.2 : 0,
+                        y: selectedProvince && activeCentroid ? 110 - activeCentroid.y * 1.2 : -40,
                       }}
                       transition={{ type: "spring", damping: 25, stiffness: 180 }}
                       style={{ transformOrigin: "0 0" }}
