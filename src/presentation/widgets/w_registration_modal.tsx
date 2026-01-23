@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Instagram, MapPin, CheckCircle2, ArrowLeft, Camera, Image as ImageIcon } from 'lucide-react';
+import { X, Instagram, MapPin, CheckCircle2, Camera, Image as ImageIcon } from 'lucide-react';
 import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/regions';
 import { InfluencerService } from '../../data/services/influencer_service';
 import { generateHapticFeedback } from '@apps-in-toss/web-framework';
@@ -64,8 +64,21 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
     };
 
     const handleSubmit = async () => {
+        if (isSubmitting) return;
+
         if (!selectedProvince || !selectedDistrict || !instagramId || !selectedImage) {
             setErrorMessage('이미지와 인스타그램 아이디를 모두 입력해주세요.');
+            return;
+        }
+
+        // Instagram ID Validation Rules
+        const instagramIdRegex = /^[a-z0-9_.]+$/;
+        if (instagramId.length > 30) {
+            setErrorMessage('인스타그램 아이디는 30자 이내여야 합니다.');
+            return;
+        }
+        if (!instagramIdRegex.test(instagramId)) {
+            setErrorMessage('아이디는 소문자, 숫자, 밑줄(_), 마침표(.)만 사용할 수 있습니다.');
             return;
         }
 
@@ -291,6 +304,7 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                                                         value={instagramId}
                                                         onChange={(e) => setInstagramId(e.target.value)}
                                                         placeholder="@아이디 입력"
+                                                        maxLength={30}
                                                         className="w-full bg-transparent text-[17px] font-bold text-[var(--text-color)] focus:outline-none placeholder:opacity-30"
                                                     />
                                                 </div>
