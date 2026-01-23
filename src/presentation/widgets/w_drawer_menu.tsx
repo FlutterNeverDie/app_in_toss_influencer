@@ -177,7 +177,7 @@ export const DrawerMenu = () => {
                                                     {regInfo.status === 'approved'
                                                         ? (
                                                             <div className="flex flex-col gap-1">
-                                                                <p>현재 아래 지역 인지도에 노출되고 있습니다.</p>
+                                                                <p>현재 아래 지역에 노출되고 있습니다.</p>
                                                                 <div className="inline-flex items-center gap-1.5 text-[#00D082] font-bold mt-1">
                                                                     <div className="w-1.5 h-1.5 rounded-full bg-[#00D082] animate-pulse" />
                                                                     {getRegionName()}
