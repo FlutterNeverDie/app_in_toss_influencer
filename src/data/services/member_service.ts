@@ -3,8 +3,34 @@ import type { Member } from '../models/m_member';
 
 export const MemberService = {
     /**
-     * 토스 로그인 정보를 바탕으로 DB의 멤버 정보를 업데이트하거나 생성합니다. (Upsert)
-     * @param member 멤버 정보
+     * 토스 인가 코드를 사용하여 서버(Edge Function)를 통해 로그인 및 데이터 동기화를 수행합니다.
+     * @param authCode 토스 인가 코드 (authorizationCode)
+     */
+    async loginWithToss(authCode: string): Promise<Member | null> {
+        try {
+            const { data, error } = await supabase.functions.invoke('toss-login', {
+                body: { code: authCode }
+            });
+
+            if (error) {
+                console.error('Edge Function Error:', error);
+                return null;
+            }
+
+            if (!data.success || !data.member) {
+                console.error('Login Failed:', data.error);
+                return null;
+            }
+
+            return data.member as Member;
+        } catch (e) {
+            console.error('Unexpected error in loginWithToss:', e);
+            return null;
+        }
+    },
+
+    /**
+     * (Legacy) 로컬 테스트용 등 수동 동기화
      */
     async syncMember(member: Partial<Member>): Promise<Member | null> {
         try {

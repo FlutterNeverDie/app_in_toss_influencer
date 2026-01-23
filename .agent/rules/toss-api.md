@@ -16,7 +16,7 @@ https://developers-apps-in-toss.toss.im/login/intro.html
 토스 로그인 콘솔 가이드
 https://developers-apps-in-toss.toss.im/login/console.html
 
-토스 로그인개발하기
+토스 로그인 개발하기
 https://developers-apps-in-toss.toss.im/login/develop.html
 
 토스 로그인 QC진행하기
@@ -25,7 +25,7 @@ https://developers-apps-in-toss.toss.im/login/qa.html
 
 
 토스 샌드박스 (테스트앱)
-https://developers-apps-in-toss.toss.im/development/test/sandbox.html
+https://developers-apps-in-toss.toss.im/development/test/sandbox.html 
 
 토스 미니앱 출시하기
 https://developers-apps-in-toss.toss.im/development/test/toss.html

@@ -10,6 +10,7 @@ import { DrawerMenu } from '../widgets/w_drawer_menu';
 import { RegistrationModal } from '../widgets/w_registration_modal';
 import { PROVINCE_DISPLAY_NAMES, REGION_DATA } from '../../data/constants/regions';
 import { InfluencerService } from '../../data/services/influencer_service';
+import { MemberService } from '../../data/services/member_service';
 import type { Influencer } from '../../data/models/m_influencer';
 
 
@@ -49,19 +50,47 @@ export const MainScreen = () => {
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 로컬 개발 환경 자동 로그인 (유저 요청)
+  // [Toss Integration] 자동 로그인 및 초기화 로직
   useEffect(() => {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (!isLoggedIn && isLocal) {
-      // 로컬에서는 싱크 에러가 날 수 있으므로 최소한의 정보로 로그인 처리
-      const mockMember = {
-        id: 'local_dev_user',
-        toss_id: 'local_dev_user',
-        name: '로컬 개발자',
-        created_at: new Date().toISOString()
-      };
-      login(mockMember as any);
-    }
+    const handleAutoLogin = async () => {
+      // 이미 로그인되어 있다면 중단
+      if (isLoggedIn) return;
+
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+      try {
+        // 1. 토스 앱 브릿지 환경인 경우 (appLogin 존재 시)
+        if (typeof (window as any).appLogin === 'function' || (!isLocal && typeof (window as any).appLogin !== 'undefined')) {
+          const { appLogin } = await import('@apps-in-toss/web-framework');
+          const authData: any = await appLogin();
+
+          if (authData?.authorizationCode) {
+            // 인가 코드를 받았으므로 Edge Function을 통해 서버 로그인 수행
+            // (AuthCode -> AccessToken -> UserProfile -> DB Upsert)
+            const member = await MemberService.loginWithToss(authData.authorizationCode);
+
+            if (member) login(member);
+          }
+        }
+        // 2. 로컬 개발 환경인 경우 (Mock 로그인)
+        else if (isLocal) {
+          // Supabase의 member_id는 UUID 타입이므로, 테스트를 위해 실제 UUID 형식을 사용해야 함
+          // 이 ID로 DB에 인플루언서 정보가 박혀있어야 "활동 중"으로 뜹니다.
+          // 편의상 고정된 테스트 UUID를 사용합니다.
+          const mockMember = {
+            id: '00000000-0000-0000-0000-000000000000', // 테스트용 고정 UUID
+            toss_id: 'local_dev_user',
+            name: '로컬 개발자',
+            created_at: new Date().toISOString()
+          };
+          login(mockMember as any);
+        }
+      } catch (error) {
+        console.error('Auto login failed:', error);
+      }
+    };
+
+    handleAutoLogin();
   }, [isLoggedIn, login]);
 
   // 다크모드 시스템 설정 동기화
