@@ -249,7 +249,7 @@ export const RegistrationModal: React.FC<IRegistrationModalProps> = ({ isOpen, o
                                                             setSelectedDistrict(district.id);
                                                             setStep(2);
                                                         }}
-                                                        className="p-4 liquid-glass [@media(hover:hover)]:hover:bg-[var(--glass-border)] text-center font-bold text-[var(--text-color)] transition-all active:scale-95 active:bg-[var(--glass-border)]"
+                                                        className="p-4 rounded-[20px] bg-[#F9FAFB] dark:bg-[#2C2E33] border border-[#E5E8EB] dark:border-[#3A3D43] text-center font-bold text-[var(--text-color)] transition-all active:scale-95 [@media(hover:hover)]:hover:bg-[#F2F4F6] dark:[@media(hover:hover)]:hover:bg-[#3A3D43] active:bg-[#F2F4F6] dark:active:bg-[#3A3D43]"
                                                     >
                                                         {district.name}
                                                     </button>
