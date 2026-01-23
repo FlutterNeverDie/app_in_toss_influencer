@@ -3,51 +3,69 @@
 @tailwind utilities;
 
 :root {
-  --toss-blue: #3182f6;
-  --toss-grey-100: #f2f4f6;
-  --toss-grey-900: #191f28;
+    --toss-blue: #3182f6;
+    --toss-grey-100: #f2f4f6;
+    --toss-grey-900: #191f28;
 
-  /* Safe Area Variables */
-  --safe-area-top: env(safe-area-inset-top, 0px);
-  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    /* Safe Area Variables */
+    --safe-area-top: env(safe-area-inset-top, 0px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @layer base {
 
-  html,
-  body,
-  #root {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
+    html,
+    body,
+    #root {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        /* Add explicit background color */
+        overflow: hidden;
+        /* Prevent scrolling on body */
+    }
 
-  body {
-    @apply antialiased transition-colors duration-300;
-    color: var(--text-color);
-    background-color: var(--bg-color);
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-  }
+    body {
+        @apply antialiased transition-colors duration-300;
+        color: var(--text-color);
+        background-color: var(--bg-color);
+        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
 
-  /* Scrollbar Hide */
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
+    /* Scrollbar Hide */
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 :root {
-  --bg-color: #F2F4F6;
-  --text-color: #191F28;
-  --panel-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --map-fill: #FFFFFF;
-  --map-stroke: #E5E8EB;
+    --bg-color: #F2F4F6;
+    --text-color: #191F28;
+    --panel-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --map-fill: #FFFFFF;
+    --map-stroke: #E5E8EB;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+    :root {
+        --bg-color: #0F1012;
+        --text-color: #FFFFFF;
+        --text-color-secondary: #8B95A1;
+        --panel-bg: rgba(30, 32, 35, 0.9);
+        --glass-border: rgba(255, 255, 255, 0.15);
+        --map-fill: #1C1E22;
+        --map-stroke: #3A3D43;
+        --input-bg: rgba(255, 255, 255, 0.05);
+        --sheet-bg: #191f28;
+        --sidebar-bg: #14171d;
+    }
+}
+
+.dark {
     --bg-color: #0F1012;
     --text-color: #FFFFFF;
     --text-color-secondary: #8B95A1;
@@ -58,52 +76,38 @@
     --input-bg: rgba(255, 255, 255, 0.05);
     --sheet-bg: #191f28;
     --sidebar-bg: #14171d;
-  }
-}
-
-.dark {
-  --bg-color: #0F1012;
-  --text-color: #FFFFFF;
-  --text-color-secondary: #8B95A1;
-  --panel-bg: rgba(30, 32, 35, 0.9);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --map-fill: #1C1E22;
-  --map-stroke: #3A3D43;
-  --input-bg: rgba(255, 255, 255, 0.05);
-  --sheet-bg: #191f28;
-  --sidebar-bg: #14171d;
 }
 
 .liquid-glass {
-  @apply backdrop-blur-2xl border transition-all duration-300;
-  background: var(--panel-bg);
-  border-color: var(--glass-border);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+    @apply backdrop-blur-2xl border transition-all duration-300;
+    background: var(--panel-bg);
+    border-color: var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
 }
 
 .dark .liquid-glass {
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
 .liquid-glass-active {
-  @apply backdrop-blur-3xl transition-all duration-300;
-  background: rgba(49, 130, 246, 0.85);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px 0 rgba(49, 130, 246, 0.2);
+    @apply backdrop-blur-3xl transition-all duration-300;
+    background: rgba(49, 130, 246, 0.85);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(49, 130, 246, 0.2);
 }
 
 .dark .liquid-glass-active {
-  box-shadow: 0 8px 32px 0 rgba(49, 130, 246, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(49, 130, 246, 0.4);
 }
 
 .safe-area-pt {
-  padding-top: var(--safe-area-top);
+    padding-top: var(--safe-area-top);
 }
 
 .safe-area-pb {
-  padding-bottom: var(--safe-area-bottom);
+    padding-bottom: var(--safe-area-bottom);
 }
 
 .safe-area-mb {
-  margin-bottom: var(--safe-area-bottom);
+    margin-bottom: var(--safe-area-bottom);
 }

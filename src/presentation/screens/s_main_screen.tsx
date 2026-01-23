@@ -35,6 +35,9 @@ const maskInstagramId = (id: string) => {
  * 인플루언서 맵 메인 화면
  */
 export const MainScreen = () => {
+  // Debug log to verify component mounting
+  console.log('MainScreen mounted');
+
   const {
     selectedProvince,
     selectedDistrict,
