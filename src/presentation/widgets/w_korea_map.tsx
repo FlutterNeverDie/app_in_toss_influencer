@@ -21,10 +21,18 @@ const triggerHaptic = (type: "tickWeak" | "tap" | "tickMedium" | "success" = "ti
  */
 interface KoreaMapWidgetProps {
   onDistrictClick?: (provinceId: string, districtId: string) => void;
+  hasResults?: boolean;
+  isSearching?: boolean;
 }
 
-export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
-  const { selectedProvince, selectedDistrict, selectProvince, selectDistrict } = useRegionStore();
+export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearching = false }: KoreaMapWidgetProps) => {
+  const {
+    selectedProvince,
+    selectedDistrict,
+    selectProvince,
+    selectDistrict,
+    isLoadingData
+  } = useRegionStore();
   const transformRef = useRef<ReactZoomPanPinchRef>(null);
 
   // 1. 상세 지역 진입/이탈 시 줌 상태 초기화
@@ -164,9 +172,9 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                     <motion.div
                       className="w-full h-full relative"
                       animate={{
-                        scale: selectedProvince ? 1.5 : 1,
-                        x: selectedProvince && activeCentroid ? 150 - activeCentroid.x * 1.5 : 0,
-                        y: selectedProvince && activeCentroid ? 180 - activeCentroid.y * 1.5 : -40,
+                        scale: selectedProvince ? 1.2 : 1,
+                        x: selectedProvince && activeCentroid ? 150 - activeCentroid.x * 1.2 : 0,
+                        y: selectedProvince && activeCentroid ? 130 - activeCentroid.y * 1.2 : -40,
                       }}
                       transition={{ type: "spring", damping: 25, stiffness: 180 }}
                       style={{ transformOrigin: "0 0" }}
@@ -244,7 +252,7 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                                   onClick={(e: any) => handleDistrictClick(dist.id, e)}
                                   initial={{ scale: 0, opacity: 0 }}
                                   animate={{
-                                    scale: isSelected ? 0.75 : 0.66, // 1.5배 확대에 맞춘 역배율 (1/1.5 ≈ 0.66)
+                                    scale: isSelected ? 0.75 : 0.65, // 1.2배 확대에서 버튼 겹침 방지를 위해 축소
                                     opacity: 1
                                   }}
                                   whileTap={{ scale: 0.4 }}
@@ -292,8 +300,18 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                   </div>
                 </TransformComponent>
 
-                {/* 수동 줌 컨트롤 (우측 하단 Edge 스타일) - 바텀 시트 위로 살짝 이동 */}
-                <div className="absolute right-4 top-1/2 translate-y-[60px] z-50 flex flex-col gap-2">
+                {/* 수동 줌 컨트롤 (우측 하단 Edge 스타일) - 바텀 시트 유무에 따라 위치 동적 조정 */}
+                <motion.div
+                  animate={{
+                    y: (isSearching || isLoadingData || hasResults)
+                      ? -80       // 0. 검색 중 / 로딩 중 / 결과 있음: -80
+                      : !selectedDistrict
+                        ? 70      // 1. 기본 상태: 70
+                        : -10     // 3. 결과 없음: -10
+                  }}
+                  transition={{ type: "spring", damping: 30, stiffness: 350 }}
+                  className="absolute right-4 top-1/2 z-50 flex flex-col gap-2"
+                >
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={(e) => { e.stopPropagation(); triggerHaptic("tickWeak"); transformRef.current?.zoomIn(); }}
@@ -308,7 +326,7 @@ export const KoreaMapWidget = ({ onDistrictClick }: KoreaMapWidgetProps) => {
                   >
                     <Minus size={20} />
                   </motion.button>
-                </div>
+                </motion.div>
               </div>
             );
           }}

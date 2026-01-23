@@ -39,7 +39,10 @@ export const MainScreen = () => {
     selectedDistrict,
     openSheet,
     openDrawer,
-    selectProvince
+    selectProvince,
+    isSearching,
+    isLoadingData,
+    setIsLoadingData
   } = useRegionStore();
 
   const { isLoggedIn, toggleLike, isLiked, login } = useAuthStore();
@@ -92,6 +95,7 @@ export const MainScreen = () => {
         setInfluencers([]);
       } finally {
         setIsLoading(false);
+        setIsLoadingData(false);
       }
     };
 
@@ -115,8 +119,18 @@ export const MainScreen = () => {
   return (
     <div className="relative w-full h-[100dvh] bg-white overflow-hidden flex flex-col font-toss">
 
-      {/* 1. 플로팅 버튼 (메뉴) - 우측 버튼들과 높이를 맞춰 바텀 시트 근처로 이동 */}
-      <div className="absolute left-0 top-1/2 translate-y-[80px] z-50 pointer-events-none">
+      {/* 1. 플로팅 버튼 (메뉴) - 바텀 시트 유무에 따라 위치 동적 조정 */}
+      <motion.div
+        animate={{
+          y: (isSearching || isLoadingData || influencers.length > 0)
+            ? -80       // 0. 검색 중 / 로딩 중 / 결과 있음: -80
+            : !selectedDistrict
+              ? 70      // 1. 기본 상태: 70
+              : -10     // 3. 결과 없음: -10
+        }}
+        transition={{ type: "spring", damping: 30, stiffness: 350 }}
+        className="absolute left-0 top-1/2 z-50 pointer-events-none"
+      >
         <motion.button
           whileTap={{ scale: 0.9, x: 0 }}
           whileHover={{ x: 4 }}
@@ -129,11 +143,14 @@ export const MainScreen = () => {
             <div className="w-5 h-0.5 bg-[#191F28] rounded-full" />
           </div>
         </motion.button>
-      </div>
+      </motion.div>
 
       {/* 2. 지도 영역 */}
       <main className="flex-1 relative flex flex-col overflow-hidden">
-        <KoreaMapWidget />
+        <KoreaMapWidget
+          hasResults={influencers.length > 0}
+          isSearching={isSearching}
+        />
 
         {/* [NEW] 전체 지도 보기 버튼 (상세 진입 시 노출) */}
         {selectedProvince && (
@@ -187,7 +204,7 @@ export const MainScreen = () => {
               <div className="flex gap-3 overflow-x-auto py-2 px-1 -mx-1 scrollbar-hide">
                 {isLoading ? (
                   Array(3).fill(0).map((_, i) => (
-                    <div key={i} className="min-w-[140px] h-[180px] bg-[#F9FAFB] rounded-[24px] animate-pulse" />
+                    <div key={i} className="min-w-[140px] h-[156px] bg-[#F9FAFB] rounded-[24px] animate-pulse" />
                   ))
                 ) : influencers.length > 0 ? (
                   influencers.map((inf) => (
@@ -195,7 +212,7 @@ export const MainScreen = () => {
                       key={inf.id}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleInfluencerClick(inf.instagram_id)}
-                      className="min-w-[140px] bg-white rounded-[24px] p-4 border border-[#F2F4F6] shadow-sm flex flex-col items-center text-center gap-3 active:bg-[#F9FAFB] cursor-pointer transition-colors"
+                      className="min-w-[140px] h-[156px] bg-white rounded-[24px] p-4 border border-[#F2F4F6] shadow-sm flex flex-col items-center text-center gap-3 active:bg-[#F9FAFB] cursor-pointer transition-colors"
                     >
                       <div className="relative group/image">
                         <img

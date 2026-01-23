@@ -7,6 +7,8 @@ interface RegionState {
   isRegistrationModalOpen: boolean; // 인플루언서 등록 모달 열림 여부
   selectedProvince: string | null;      // 광역 (예: 'seoul', 'gyeonggi')
   selectedDistrict: string | null; // 기초 (예: 'gangnam', 'bundang')
+  isSearching: boolean;          // 검색 중 여부
+  isLoadingData: boolean;        // 데이터 로딩 중 여부
 }
 
 // 2. 액션(Action) 정의
@@ -20,6 +22,8 @@ interface RegionActions {
   selectProvince: (province: string | null) => void;
   selectDistrict: (district: string | null) => void;
   selectRegion: (province: string | null, district: string | null) => void;
+  setIsSearching: (isSearching: boolean) => void;
+  setIsLoadingData: (isLoading: boolean) => void;
 }
 
 // 3. 스토어 생성
@@ -30,6 +34,8 @@ export const useRegionStore = create<RegionState & RegionActions>((set) => ({
   isRegistrationModalOpen: false,
   selectedProvince: null,
   selectedDistrict: null,
+  isSearching: false,
+  isLoadingData: false,
 
   // 액션 구현
   openSheet: () => set({ isSheetOpen: true }),
@@ -46,12 +52,17 @@ export const useRegionStore = create<RegionState & RegionActions>((set) => ({
 
   selectDistrict: (district) => set({
     selectedDistrict: district,
-    isSheetOpen: false
+    isSheetOpen: false,
+    isLoadingData: true // 소분류 선택 시 로딩 시작
   }),
 
-  selectRegion: (province, district) => set({
-    selectedProvince: province,
+  selectRegion: (_province, district) => set({
+    selectedProvince: _province,
     selectedDistrict: district,
-    isSheetOpen: false
+    isSheetOpen: false,
+    isLoadingData: true // 지역 직접 선택 시 로딩 시작
   }),
+
+  setIsSearching: (isSearching) => set({ isSearching }),
+  setIsLoadingData: (isLoading) => set({ isLoadingData: isLoading }),
 }));

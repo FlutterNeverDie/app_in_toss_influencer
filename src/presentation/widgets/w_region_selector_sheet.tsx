@@ -26,11 +26,12 @@ export const RegionSelectorSheet = () => {
     closeSheet,
     selectProvince,
     selectDistrict,
-    selectRegion
+    selectRegion,
+    isSearching,
+    setIsSearching
   } = useRegionStore();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLUListElement>(null);
 
