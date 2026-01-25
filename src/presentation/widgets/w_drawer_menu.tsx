@@ -6,6 +6,7 @@ import { useAuthStore } from '../stores/auth_store';
 import { FAQ_DATA } from '../../data/constants/faq';
 import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/regions';
 import { generateHapticFeedback, openURL } from '@apps-in-toss/web-framework';
+import { Top } from '@toss/tds-mobile';
 import { MockLoginButton } from './w_mock_login';
 
 /**
@@ -110,27 +111,32 @@ export const DrawerMenu = () => {
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* 헤더 */}
-                        <div className="flex items-center justify-between p-6 border-b border-[var(--glass-border)]">
-                            <div className="flex items-center gap-3">
-                                {view === 'faq' && (
-                                    <button
-                                        onClick={() => { triggerHaptic("tickWeak"); setView('main'); }}
-                                        className="p-1 hover:bg-[var(--glass-border)] rounded-full transition-colors"
-                                    >
-                                        <ArrowLeft size={24} className="text-[var(--text-color)]" />
-                                    </button>
-                                )}
-                                <h2 className="text-[20px] font-bold text-[var(--text-color)]">
+                        <Top
+                            title={
+                                <Top.TitleParagraph color="var(--text-color)">
                                     {view === 'faq' ? '자주 묻는 질문' : '메뉴'}
-                                </h2>
-                            </div>
-                            <button
-                                onClick={closeDrawer}
-                                className="p-2 -mr-2 hover:bg-[var(--glass-border)] rounded-full transition-colors"
-                            >
-                                <X size={24} className="text-[var(--text-color)]" />
-                            </button>
-                        </div>
+                                </Top.TitleParagraph>
+                            }
+                            upper={
+                                view === 'faq' ? (
+                                    <Top.UpperAssetContent
+                                        content={
+                                            <button
+                                                onClick={() => { triggerHaptic("tickWeak"); setView('main'); }}
+                                                className="p-1 hover:bg-[var(--glass-border)] rounded-full transition-colors"
+                                            >
+                                                <ArrowLeft size={24} className="text-[var(--text-color)]" />
+                                            </button>
+                                        }
+                                    />
+                                ) : null
+                            }
+                            right={
+                                <Top.RightButton onClick={closeDrawer}>
+                                    <X size={24} />
+                                </Top.RightButton>
+                            }
+                        />
 
                         {/* 컨텐츠 (애니메이션 전환) */}
                         <div className="flex-1 overflow-hidden relative">

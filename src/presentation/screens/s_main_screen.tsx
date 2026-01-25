@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { generateHapticFeedback, openURL } from '@apps-in-toss/web-framework';
 import { motion } from 'framer-motion';
 import { Search, Heart } from 'lucide-react';
+import { Button, Top } from '@toss/tds-mobile';
 import { useRegionStore } from '../stores/region_store';
 import { useAuthStore } from '../stores/auth_store';
 import { KoreaMapWidget } from '../widgets/w_korea_map';
@@ -119,14 +120,15 @@ export const MainScreen = () => {
   useEffect(() => {
     const loadInfluencers = async () => {
       // 유저 요청: 소분류(selectedDistrict)가 선택되었을 때만 데이터 로드
-      if (!selectedDistrict) {
+      if (!selectedProvince || !selectedDistrict) {
         setInfluencers([]);
         return;
       }
 
       setIsLoading(true);
       try {
-        const data = await InfluencerService.fetchInfluencersByDistrict(selectedDistrict);
+        // [FIX] 기초 자치단체 ID가 중복될 수 있으므로 (예: '중구'), 광역 자치단체 ID와 함께 쿼리합니다.
+        const data = await InfluencerService.fetchInfluencersByRegion(selectedProvince, selectedDistrict);
 
         // 정렬 로직 적용: 좋아요 수(많은 순) -> 등록일(빠른 순)
         const sortedData = [...data].sort((a, b) => {
@@ -181,9 +183,7 @@ export const MainScreen = () => {
         transition={{ type: "spring", damping: 30, stiffness: 350 }}
         className="absolute left-0 top-1/2 z-50 pointer-events-none"
       >
-        <motion.button
-          whileTap={{ scale: 0.9, x: 0 }}
-          whileHover={{ x: 4 }}
+        <button
           onClick={() => { triggerHaptic("tickWeak"); openDrawer(); }}
           className="pointer-events-auto w-12 h-14 flex items-center justify-center liquid-glass rounded-r-[24px] border-l-0 active:scale-95 transition-all"
         >
@@ -192,7 +192,7 @@ export const MainScreen = () => {
             <div className="w-3.5 h-0.5 bg-[var(--text-color)] rounded-full" />
             <div className="w-5 h-0.5 bg-[var(--text-color)] rounded-full" />
           </div>
-        </motion.button>
+        </button>
       </motion.div>
 
       {/* 2. 지도 영역 */}
@@ -204,18 +204,23 @@ export const MainScreen = () => {
 
         {/* [NEW] 전체 지도 보기 버튼 (상세 진입 시 노출) */}
         {selectedProvince && (
-          <motion.button
+          <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            onClick={() => {
-              triggerHaptic("tickWeak");
-              selectProvince(null);
-            }}
-            className="absolute top-6 right-6 z-30 liquid-glass px-4 py-2.5 rounded-full flex items-center gap-2 group active:scale-95 transition-all"
+            className="absolute top-6 right-6 z-30"
           >
-            <div className="w-1.5 h-1.5 bg-[#3182F6] rounded-full" />
-            <span className="text-[14px] font-bold text-[var(--text-color)]">전체 지도</span>
-          </motion.button>
+            <Button
+              color="light"
+              size="small"
+              onClick={() => {
+                triggerHaptic("tickWeak");
+                selectProvince(null);
+              }}
+              style={{ borderRadius: '20px', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.08)' }}
+            >
+              전체 지도
+            </Button>
+          </motion.div>
         )}
 
         {/* 하단 패널 */}
@@ -228,25 +233,26 @@ export const MainScreen = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-[22px] font-bold text-[#191F28] dark:text-white tracking-tight leading-tight">
+                  <Top.TitleParagraph color="var(--text-color)">
                     {PROVINCE_DISPLAY_NAMES[selectedProvince!]}
                     {` ${REGION_DATA[selectedProvince!].find(d => d.id === selectedDistrict)?.name}`}
-                  </h2>
+                  </Top.TitleParagraph>
                   <p className="text-[#8B95A1] dark:text-[#ADB5BD] text-[14px] font-medium mt-1">
                     {isLoading ? '인플루언서를 찾고있습니다...' : `인플루언서 총 ${influencers.length}명을 찾았어요`}
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
+                  <Button
+                    color="light"
+                    size="small"
                     onClick={() => {
                       triggerHaptic("tickWeak");
                       selectProvince(null);
                     }}
-                    className="bg-[#F2F4F6] dark:bg-[#2C2E33] px-4 py-2.5 rounded-full text-[#4E5968] dark:text-[#ADB5BD] text-[14px] font-bold flex items-center gap-1.5"
+                    style={{ borderRadius: '20px' }}
                   >
                     처음으로
-                  </motion.button>
+                  </Button>
                 </div>
               </div>
 
@@ -299,9 +305,9 @@ export const MainScreen = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              <h2 className="text-[20px] font-bold text-[#191F28] dark:text-white tracking-tight">
+              <Top.TitleParagraph color="var(--text-color)">
                 어느 지역이 궁금하세요?
-              </h2>
+              </Top.TitleParagraph>
               <div
                 onClick={openSheet}
                 className="flex items-center gap-3 bg-[#F2F4F6] dark:bg-[#2C2E33] px-5 py-4 rounded-[20px] cursor-pointer hover:bg-[#E5E8EB] dark:hover:bg-[#3A3D43] transition-colors"

@@ -13,8 +13,8 @@ export default defineConfig({
             build: 'npm run build',
             dev: 'npm run dev', // --host option is already in package.json
         },
-        port: 5173,
-        host: '192.168.219.104',
+        port: 8081,
+        host: '192.168.219.100',
     },
     permissions: [],
     webViewProps: {

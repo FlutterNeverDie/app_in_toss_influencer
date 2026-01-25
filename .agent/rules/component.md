@@ -7,215 +7,69 @@ trigger: always_on
 ## 파일 구조 및 명명 규칙
 
 ### 컴포넌트 파일 위치
-- 모든 컴포넌트는 `source/src/components/` 디렉토리에 위치합니다.
-- 도메인별 컴포넌트는 해당 도메인 이름의 하위 폴더에 위치합니다. (예: `components/member/`)
-- 공통 컴포넌트는 `components/common/` 폴더에 위치합니다.
+- **위젯 (Widgets)**: 유저 인터랙션이나 데이터 로직을 포함하는 큰 단위는 `src/presentation/widgets/`에 위치합니다.
+- **공통 컴포넌트 (Common)**: 재사용 가능한 작은 UI 조각은 `src/presentation/components/`에 위치합니다.
 
 ### 파일 명명 규칙
-- 모든 컴포넌트 파일명은 파스칼 케이스(PascalCase)로 작성합니다.
-- 파일 확장자는 TypeScript 컴포넌트의 경우 `.tsx`, JavaScript 컴포넌트의 경우 `.js`를 사용합니다.
-- 예시: `Button.tsx`, `UserProfile.tsx`
+- 모든 컴포넌트 파일명은 파스칼 케이스(PascalCase)와 `w_` 또는 `c_` 접두사를 상황에 맞게 사용합니다. (예: `w_drawer_menu.tsx`, `w_registration_modal.tsx`)
+- 파일 확장자는 TypeScript 컴포넌트 필수이므로 `.tsx`를 사용합니다.
 
-### 컴포넌트 명명 규칙
-- 컴포넌트 이름은 파일명과 동일하게 파스칼 케이스로 작성합니다.
-- 이름은 명확하고 의미있게 작성하며, 역할을 잘 나타내야 합니다.
-- 예시: `Button`, `UserProfile`, `ProductList`
+## 컴포넌트 작성 패턴 (TDS v2 기반)
 
-## 컴포넌트 작성 패턴
+### TDS v2 서브 컴포넌트 구조 준수
+토스 디자인 시스템 v2를 사용할 때는 반드시 공식 서브 컴포넌트 패턴을 따릅니다.
+- **Top**: `Top.TitleParagraph`, `Top.RightButton`, `Top.UpperAssetContent` 등.
+- **BottomSheet**: `BottomSheet.Header`, `BottomSheet.HeaderDescription` 등.
+- **ListRow**: `ListRow.Texts` (type: `1RowTypeA`, `2RowTypeA` 등) 활용.
 
-### 함수형 컴포넌트 사용
-- 모든 새로운 컴포넌트는 함수형 컴포넌트로 작성합니다.
-- React Hooks를 활용하여 상태 및 생명주기 기능을 구현합니다.
+### 스타일링 규칙 (Tailwind CSS)
+- **CSS 변수 사용**: 다크모드 대응을 위해 하드코딩된 색상 대신 CSS 변수를 사용합니다.
+  - 텍스트: `var(--text-color)`
+  - 배경: `var(--bg-color)`
+  - 유리 질감: `.liquid-glass` 클래스 활용
+- **TDS 컴포넌트 색상**: `color="var(--text-color)"`를 명시하여 테마 호환성을 확보합니다.
 
 ### 타입스크립트 사용
-- 모든 컴포넌트는 TypeScript로 작성합니다.
-- props 인터페이스는 `I` 접두사를 사용하여 정의합니다.
-- 컴포넌트 내부에서 사용하는 타입은 `T` 접두사를 사용합니다.
+- 모든 Props는 인터페이스로 정의하며, `I` 접두사는 생략하거나 일관성 있게 사용합니다. (최근 프로젝트는 생략하는 추세)
 
-### 기본 컴포넌트 템플릿
+## 기본 컴포넌트 템플릿 (TDS v2 예시)
+
 ```tsx
-import React, { okRule } from 'react';
+import React from 'react';
+import { Top } from '@toss/tds-mobile';
+import { generateHapticFeedback } from '@apps-in-toss/web-framework';
 
-import classNames from 'classnames/bind';
-import styles from 'css/{component-name}.module.css';
-
-const cx = classNames.bind(styles);
-
-/**
- * ComponentName의 props 인터페이스
- */
-interface IComponentNameProps {
-  /** prop1에 대한 설명 */
-  prop1: string;
-  /** prop2에 대한 설명 */
-  prop2?: number;
-  /** children에 대한 설명 */
-  children?: React.ReactNode;
+interface ComponentProps {
+  title: string;
+  onClose: () => void;
 }
 
 /**
- * ComponentName 컴포넌트에 대한 설명
- * 
- * @param props - 컴포넌트 props
- * @returns React 컴포넌트
+ * 인플루언서 맵 표준 헤더 컴포넌트 예시
  */
-const ComponentName: React.FC<IComponentNameProps> = ({ prop1, prop2 = 0, children }) => {
-  // 상태 관리
-  const [state, setState] = React.useState<string>('');
-
-  // 이벤트 핸들러
-  const handleEvent = (): void => {
-    setState('new value');
+const StandardHeader: React.FC<ComponentProps> = ({ title, onClose }) => {
+  const handleClose = () => {
+    if (typeof generateHapticFeedback === 'function') {
+      generateHapticFeedback({ type: 'tickWeak' });
+    }
+    onClose();
   };
 
-  // 렌더링
   return (
-    <div className="component-name">
-      <h1>{prop1}</h1>
-      {prop2 > 0 && <p>Prop2: {prop2}</p>}
-      {children}
-    </div>
+    <Top
+      title={<Top.TitleParagraph color="var(--text-color)">{title}</Top.TitleParagraph>}
+      right={
+        <Top.RightButton onClick={handleClose}>
+          닫기
+        </Top.RightButton>
+      }
+    />
   );
 };
 
-export default ComponentName;
+export default StandardHeader;
 ```
-
-## 컴포넌트 구성 요소
-
-### Props 정의
-- 모든 props는 인터페이스로 정의합니다.
-- 인터페이스 이름은 `I컴포넌트명Props` 형식으로 작성합니다.
-- 각 prop에는 JSDoc 주석으로 설명을 추가합니다.
-- 선택적 props는 `?` 연산자를 사용하여 표시합니다.
-- 기본값이 필요한 props는 구조 분해 할당에서 기본값을 설정합니다.
-
-### 상태 관리
-- 컴포넌트 내부 상태는 `useState` 훅을 사용합니다.
-- 복잡한 상태 로직은 `useReducer` 훅을 사용합니다.
-- 전역 상태는 Context API 또는 상태 관리 라이브러리를 사용합니다.
-
-### 사이드 이펙트 처리
-- 사이드 이펙트는 `useEffect` 훅을 사용하여 처리합니다.
-- 의존성 배열을 명확히 지정하여 불필요한 리렌더링을 방지합니다.
-- 클린업 함수를 반환하여 메모리 누수를 방지합니다.
-
-### 성능 최적화
-- 불필요한 리렌더링을 방지하기 위해 `React.memo`를 사용합니다.
-- 콜백 함수는 `useCallback`으로 메모이제이션합니다.
-- 계산 비용이 큰 값은 `useMemo`로 메모이제이션합니다.
-
-## 스타일링 규칙
-
-### CSS 클래스 명명 규칙
-- 컴포넌트 최상위 요소의 클래스명은 컴포넌트 이름을 케밥 케이스(kebab-case)로 변환하여 사용합니다.
-- 예시: `ComponentName` -> `component-name`
-- BEM 방법론을 따라 하위 요소는 `component-name__element` 형식으로 작성합니다.
-- 상태에 따른 변형은 `component-name--state` 형식으로 작성합니다.
-
-### 스타일 파일 위치
-- 컴포넌트별 스타일은 `source/src/css/` 디렉토리에 위치합니다.
-- 파일명은 컴포넌트 이름과 동일하게 작성하되 소문자로 변환합니다.
-- 예시: `ComponentName.tsx` -> `source/src/css/componentname.module.css`
 
 ## 접근성 및 성능 고려사항
-
-### 접근성(A11y)
-- 모든 이미지에는 적절한 `alt` 속성을 제공합니다.
-- 폼 요소에는 적절한 `label`을 연결합니다.
-- 키보드 탐색이 가능하도록 적절한 포커스 관리를 구현합니다.
-- ARIA 속성을 적절히 사용하여 스크린 리더 지원을 강화합니다.
-
-### 성능
-- 큰 이미지는 최적화하여 사용합니다.
-- 불필요한 리렌더링을 방지하기 위한 최적화 기법을 적용합니다.
-- 코드 스플리팅을 활용하여 초기 로딩 시간을 단축합니다.
-- 지연 로딩(Lazy Loading)을 적용하여 필요한 시점에 컴포넌트를 로드합니다.
-
-## 테스트
-
-### 테스트 파일 위치
-- 컴포넌트 테스트 파일은 `source/tests/components/` 디렉토리에 위치합니다.
-- 테스트 파일명은 `컴포넌트명.test.tsx` 형식으로 작성합니다.
-
-### 테스트 작성 지침
-- 각 컴포넌트는 최소한 다음 테스트를 포함해야 합니다:
-  - 컴포넌트가 올바르게 렌더링되는지 확인
-  - props에 따라 UI가 올바르게 변경되는지 확인
-  - 사용자 상호작용에 올바르게 반응하는지 확인
-- 자세한 테스트 작성 방법은 `MyTestRule.mdc` 문서를 참조하세요.
-
-## 문서화
-
-### 컴포넌트 문서화
-- 모든 컴포넌트는 JSDoc 형식의 주석으로 문서화합니다.
-- 컴포넌트의 목적과 사용 방법을 명확히 설명합니다.
-- 모든 props에 대한 설명을 제공합니다.
-- 예시 코드를 포함하여 사용 방법을 보여줍니다.
-
-### 스토리북 스토리
-- 모든 컴포넌트는 스토리북 스토리를 작성합니다.
-- 스토리는 `source/src/nf-stories/` 디렉토리에 위치합니다.
-- 다양한 상태와 변형을 보여주는 스토리를 작성합니다.
-
-## 예시 컴포넌트
-
-### 기본 버튼 컴포넌트 예시
-```tsx
-// source/src/components/common/Button.tsx
-import React from 'react';
-
-/**
- * 버튼 컴포넌트의 props 인터페이스
- */
-interface IButtonProps {
-  /** 버튼에 표시될 텍스트 */
-  label: string;
-  /** 버튼 클릭 시 실행될 함수 */
-  onClick: () => void;
-  /** 버튼의 종류 (primary, secondary, danger) */
-  variant?: 'primary' | 'secondary' | 'danger';
-  /** 버튼 비활성화 여부 */
-  disabled?: boolean;
-  /** 버튼의 크기 */
-  size?: 'small' | 'medium' | 'large';
-}
-
-/**
- * 다양한 스타일과 크기를 지원하는 버튼 컴포넌트
- * 
- * @param props - 버튼 컴포넌트 props
- * @returns 버튼 컴포넌트
- */
-const Button: React.FC<IButtonProps> = ({
-  label,
-  onClick,
-  variant = 'primary',
-  disabled = false,
-  size = 'medium'
-}) => {
-  // 버튼 클래스 생성
-  const buttonClass = `button button--${variant} button--${size}`;
-  
-  // 클릭 이벤트 핸들러
-  const handleClick = (): void => {
-    if (!disabled) {
-      onClick();
-    }
-  };
-  
-  return (
-    <button
-      className={buttonClass}
-      onClick={handleClick}
-      disabled={disabled}
-      type="button"
-      aria-disabled={disabled}
-    >
-      {label}
-    </button>
-  );
-};
-
-export default Button;
-```
+- **Haptic Feedback**: 모든 유저 인터랙션에는 `triggerHaptic` 유틸리티를 적용합니다.
+- **Dark Mode**: `index.css`에 정의된 테마 변수들이 컴포넌트 내부에서 올바르게 적용되는지 상시 확인합니다.

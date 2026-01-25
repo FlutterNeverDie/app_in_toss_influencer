@@ -1,0 +1,5 @@
+회사 컴퓨터 설정 요약
+Node.js: v20 LTS로 맞추기 (Granite 호환성용)
+React: v18 사용 및 npm install --legacy-peer-deps로 설치
+IP 수정: granite.config.ts의 host 필드를 회사 Mac의 IP로 변경
+포트: 8081이 정상 작동하는 것을 확인했으므로 그대로 유지

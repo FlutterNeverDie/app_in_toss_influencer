@@ -1,23 +1,16 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Search as SearchIcon, ArrowLeft } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Check } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/regions';
 import { generateHapticFeedback } from '@apps-in-toss/web-framework';
+import { BottomSheet, TextField, ListRow } from '@toss/tds-mobile';
 
-/**
- * 햅틱 피드백 유틸리티
- */
 const triggerHaptic = (type: "tickWeak" | "tap" | "tickMedium" | "success" = "tickWeak") => {
   if (typeof generateHapticFeedback === 'function') {
     generateHapticFeedback({ type }).catch(() => { });
   }
 };
 
-/**
- * 지역 선택 바텀 시트 (Advanced Premium Version)
- * 사용자 요구사항 반영: 드래그 핸들링, 검색 UI 최적화, 내비게이션 추가
- */
 export const RegionSelectorSheet = () => {
   const {
     isSheetOpen,
@@ -30,52 +23,20 @@ export const RegionSelectorSheet = () => {
   } = useRegionStore();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<string>('seoul'); // [NEW] 로컬 탭 상태 (지도와 분리)
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLUListElement>(null);
+  const [activeTab, setActiveTab] = useState<string>('seoul');
 
-  // 시트가 열릴 때 상태 초기화
   useEffect(() => {
     if (isSheetOpen) {
-      // 1. 이미 글로벌에 선택된 지역이 있으면 그 탭을 보여줌
       if (selectedProvince) {
         setActiveTab(selectedProvince);
-      }
-      // 2. 선택된 게 없으면 '서울'을 보여줌 (지도 상태는 건드리지 않음!)
-      else {
+      } else {
         setActiveTab('seoul');
       }
-
-      // 검색 초기화
-      queueMicrotask(() => {
-        setSearchQuery('');
-        setIsSearching(false);
-      });
-
-      // 약간의 지연 후 선택된 지역으로 스크롤 (애니메이션 완료 시점 고려)
-      const timer = setTimeout(() => {
-        if (sidebarRef.current) {
-          const activeItem = sidebarRef.current.querySelector('[data-selected="true"]');
-          if (activeItem) {
-            activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        }
-      }, 300);
-      return () => clearTimeout(timer);
+      setSearchQuery('');
+      setIsSearching(false);
     }
   }, [isSheetOpen, setIsSearching, selectedProvince]);
 
-  // 탭 변경 시 스크롤 동기화
-  useEffect(() => {
-    if (isSheetOpen && sidebarRef.current) {
-      const activeItem = sidebarRef.current.querySelector('[data-selected="true"]');
-      if (activeItem) {
-        activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
-  }, [activeTab, isSheetOpen]);
-
-  // 전체 지역 데이터 플랫하게 변환 (검색 효율성을 위해)
   const allDistricts = useMemo(() => {
     const list: { provinceId: string; districtId: string; name: string; provinceName: string }[] = [];
     Object.keys(REGION_DATA).forEach((provKey) => {
@@ -91,7 +52,6 @@ export const RegionSelectorSheet = () => {
     return list;
   }, []);
 
-  // 검색 결과 필터링
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     return allDistricts.filter((dist) =>
@@ -99,7 +59,6 @@ export const RegionSelectorSheet = () => {
     );
   }, [searchQuery, allDistricts]);
 
-  // 검색 결과 클릭 핸들러
   const handleSearchResultClick = (provinceId: string, districtId: string) => {
     selectRegion(provinceId, districtId);
     setSearchQuery('');
@@ -107,221 +66,118 @@ export const RegionSelectorSheet = () => {
     closeSheet();
   };
 
-  // 드래그 종료 시 닫기 로직
-  const onDragEnd = (_: unknown, info: { offset: { y: number } }) => {
-    if (info.offset.y > 150) {
-      closeSheet();
-    }
-  };
-
   return (
-    <AnimatePresence>
-      {isSheetOpen && (
-        <>
-          {/* 배경 (Dimmed) */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={closeSheet}
-            className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-[2px]"
+    <BottomSheet open={isSheetOpen} onClose={closeSheet}>
+      <div className="bg-white dark:bg-[#1C1E22] rounded-t-[32px] overflow-hidden flex flex-col h-[85vh]">
+        <BottomSheet.Header>
+          <span style={{ color: 'var(--text-color)' }}>
+            {searchQuery || isSearching ? '지역 검색' : '어디로 갈까요?'}
+          </span>
+        </BottomSheet.Header>
+
+        <div className="px-6 pb-4">
+          <TextField
+            variant="box"
+            value={searchQuery}
+            onFocus={() => setIsSearching(true)}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="지역 이름을 검색해보세요"
+            label=""
           />
+        </div>
 
-          {/* 시트 본체 */}
-          <motion.div
-            ref={sheetRef}
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.5 }}
-            onDragEnd={onDragEnd}
-            className="fixed inset-x-0 bottom-0 z-[101] bg-white dark:bg-[var(--sheet-bg)] rounded-t-[32px] flex flex-col shadow-2xl h-[85vh] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* 시트 핸들 (Toss Style) - 이 영역을 잡고 끌어야 안정적임 */}
-            <div className="flex justify-center pt-3 pb-3 cursor-grab active:cursor-grabbing hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
-              <div className="w-10 h-1.5 bg-[#E5E8EB] dark:bg-[#3A3D43] rounded-full" />
-            </div>
-
-            {/* 헤더 섹션 */}
-            <div className="flex items-center px-6 py-4 min-h-[72px]">
-              {(searchQuery || isSearching) && (
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setIsSearching(false);
-                  }}
-                  className="mr-3 p-2 -ml-2 hover:bg-[#F2F4F6] dark:hover:bg-[#2C2E33] rounded-full transition-colors"
-                >
-                  <ArrowLeft size={24} className="text-[#191F28] dark:text-white" />
-                </button>
-              )}
-
-              <h3 className="text-[20px] font-bold text-[#191F28] dark:text-white flex-1">
-                {searchQuery || isSearching ? '지역 검색' : '어디로 갈까요?'}
-              </h3>
-
-              <button
-                onClick={closeSheet}
-                className="w-10 h-10 flex items-center justify-center bg-[#F2F4F6] dark:bg-[#2C2E33] hover:bg-[#E5E8EB] dark:hover:bg-[#3A3D43] rounded-full transition-colors"
-              >
-                <X size={20} className="text-[#4E5968] dark:text-[#8B95A1]" />
-              </button>
-            </div>
-
-            {/* 검색창 */}
-            <div className="px-6 pb-2">
-              <div className="flex items-center gap-2 bg-[#F2F4F6] dark:bg-[#2C2E33] px-4 py-3.5 rounded-[16px] focus-within:ring-2 focus-within:ring-[#3182F6] focus-within:bg-white dark:focus-within:bg-[#1C1E22] transition-all shadow-sm">
-                <SearchIcon size={20} className="text-[#8B95A1]" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onFocus={() => setIsSearching(true)}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="지역 이름을 검색해보세요"
-                  className="bg-transparent border-none outline-none text-[16px] w-full placeholder:text-[#ADB5BD] dark:placeholder:text-[#4E5968] text-[#191F28] dark:text-white font-medium"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="p-1 hover:bg-[#E5E8EB] dark:hover:bg-[#3A3D43] rounded-full transition-colors"
-                  >
-                    <X size={18} className="text-[#8B95A1] bg-[#E5E8EB] dark:bg-[#3A3D43] rounded-full p-0.5" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* 컨텐츠 영역 (높이 고정) */}
-            <div className="flex flex-1 overflow-hidden">
-              {(searchQuery || isSearching) ? (
-                /* 검색 결과 레이아웃 */
-                <div className="flex-1 overflow-y-auto px-5 py-3 bg-[#F9FAFB] dark:bg-[var(--sidebar-bg)]">
-                  {searchResults.length > 0 ? (
-                    <ul className="space-y-3 pb-10">
-                      {searchResults.map((result) => (
-                        <motion.li
-                          key={`${result.provinceId}-${result.districtId}`}
-                          onClick={() => handleSearchResultClick(result.provinceId, result.districtId)}
-                          whileTap={{ scale: 0.98 }}
-                          className="flex items-center justify-between px-6 py-4 bg-white dark:bg-[#2C2E33] rounded-[24px] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-[#F2F4F6] dark:border-[#3A3D43] transition-all active:bg-[#F2F4F6] dark:active:bg-[#3A3D43]"
-                        >
-                          <div className="flex flex-col">
-                            <span className="text-[16px] font-bold text-[#191F28] dark:text-white">
-                              {result.name}
-                            </span>
-                            <span className="text-[13px] text-[#8B95A1] mt-0.5">
-                              {result.provinceName}
-                            </span>
-                          </div>
-                        </motion.li>
-                      ))}
-                    </ul>
-                  ) : searchQuery ? (
-                    <div className="flex flex-col items-center justify-center h-full text-[#8B95A1] pb-20">
-                      <div className="bg-[#F2F4F6] dark:bg-[#2C2E33] p-4 rounded-full mb-4">
-                        <SearchIcon size={32} />
-                      </div>
-                      <span className="text-[15px] font-medium">검색 결과가 없어요</span>
-                    </div>
-                  ) : (
-                    /* 최근 검색어 또는 가이드 표시 가능 영역 */
-                    <div className="p-6 text-[#8B95A1] text-sm">
-                      검색어를 입력하여 지역을 빠르게 찾아보세요.
-                    </div>
-                  )}
+        <div className="flex flex-1 overflow-hidden">
+          {(searchQuery || isSearching) ? (
+            <div className="flex-1 overflow-y-auto px-1 pt-2">
+              {searchResults.length > 0 ? (
+                <ul className="pb-10">
+                  {searchResults.map((result) => (
+                    <ListRow
+                      key={`${result.provinceId}-${result.districtId}`}
+                      onClick={() => handleSearchResultClick(result.provinceId, result.districtId)}
+                      contents={
+                        <ListRow.Texts
+                          type="2RowTypeA"
+                          top={result.name}
+                          topProps={{ typography: 't5', fontWeight: 'bold', color: 'var(--text-color)' }}
+                          bottom={result.provinceName}
+                          bottomProps={{ typography: 't7', color: 'grey500' }}
+                        />
+                      }
+                    />
+                  ))}
+                </ul>
+              ) : searchQuery ? (
+                <div className="flex flex-col items-center justify-center h-full text-[#8B95A1] opacity-60">
+                  <span className="text-[15px] font-medium">검색 결과가 없어요</span>
                 </div>
               ) : (
-                /* 기본 2-Depth 레이아웃 */
-                <>
-                  {/* 왼쪽: 광역 리스트 */}
-                  <ul
-                    ref={sidebarRef}
-                    className="w-[125px] bg-[#F9FAFB] dark:bg-[var(--sidebar-bg)] overflow-y-auto scrollbar-hide py-2 border-r border-[#E5E8EB] dark:border-[#2C2E33]"
-                  >
-                    {Object.keys(REGION_DATA).map((provKey) => {
-                      const isSelected = activeTab === provKey; // [CHANGE] selectedProvince -> activeTab
-                      const displayName = PROVINCE_DISPLAY_NAMES[provKey];
-
-                      return (
-                        <li
-                          key={provKey}
-                          data-selected={isSelected}
-                          onClick={() => {
-                            triggerHaptic("tickWeak");
-                            setActiveTab(provKey); // [CHANGE] 지도 이동(selectProvince) 대신 로컬 탭 변경
-                          }}
-                          className={`
-                            relative px-6 py-6 text-[16px] cursor-pointer transition-all
-                            ${isSelected
-                              ? 'bg-white dark:bg-[var(--sheet-bg)] text-[#3182F6] font-bold'
-                              : 'text-[#8B95A1] hover:text-[#4E5968] dark:hover:text-white'}
-                          `}
-                        >
-                          {isSelected && (
-                            <motion.div
-                              layoutId="activeProvinceIndicator"
-                              className="absolute left-0 inset-y-0 w-1.5 bg-[#3182F6] rounded-r-full"
-                            />
-                          )}
-                          <span className="truncate">
-                            {displayName.replace('특별자치도', '').replace('특별시', '').replace('광역시', '').replace('특별자치시', '')}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-
-                  {/* 오른쪽: 기초 리스트 */}
-                  <div className="flex-1 overflow-y-auto bg-white dark:bg-[var(--sheet-bg)] px-5 py-2">
-
-                    <ul className="space-y-0 pb-10">
-                      {(activeTab ? REGION_DATA[activeTab] : []).map((dist: { id: string; name: string }) => {
-                        const isSelected = selectedProvince === activeTab && selectedDistrict === dist.id; // [CHANGE] 현재 탭이 실제 선택된 Province일 때만 체크 표시
-                        return (
-                          <motion.li
-                            key={dist.id}
-                            onClick={() => {
-                              triggerHaptic("tap");
-                              selectRegion(activeTab, dist.id); // [CHANGE] 이때 비로소 글로벌 상태 업데이트 (지도 이동)
-                              closeSheet();
-                            }}
-                            whileTap={{ scale: 0.98 }}
-                            className={`
-                              flex items-center justify-between px-6 py-6 cursor-pointer transition-all
-                              ${isSelected
-                                ? 'text-[#3182F6]'
-                                : 'text-[#333D4B] dark:text-[#D1D5DB] border-b border-[#F2F4F6] dark:border-[#2C2E33] active:bg-[#F2F4F6] dark:active:bg-[#2C2E33]'}
-                            `}
-                          >
-                            <span className={`text-[17px] ${isSelected ? 'font-bold' : 'font-medium'}`}>
-                              {dist.name}
-                            </span>
-                            {isSelected && (
-                              <motion.div
-                                initial={{ scale: 0.5, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                              >
-                                <Check size={20} strokeWidth={3} />
-                              </motion.div>
-                            )}
-                          </motion.li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                </>
+                <div className="p-4 text-[#8B95A1] text-sm opacity-60">
+                  지역 이름을 입력해주세요.
+                </div>
               )}
             </div>
+          ) : (
+            <>
+              <div className="w-[120px] bg-[#F9FAFB] dark:bg-[#181A1D] overflow-y-auto py-2 border-r border-[#E5E8EB] dark:border-[#2C2E33]">
+                {Object.keys(REGION_DATA).map((provKey) => {
+                  const isSelected = activeTab === provKey;
+                  const displayName = PROVINCE_DISPLAY_NAMES[provKey];
+                  return (
+                    <div
+                      key={provKey}
+                      onClick={() => {
+                        triggerHaptic("tickWeak");
+                        setActiveTab(provKey);
+                      }}
+                      className={`
+                        px-4 py-5 text-[15px] cursor-pointer transition-all relative
+                        ${isSelected ? 'bg-white dark:bg-[#1C1E22] text-[#3182F6] font-bold' : 'text-[#8B95A1] font-medium'}
+                      `}
+                    >
+                      {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#3182F6]" />}
+                      <span className="truncate">
+                        {displayName.replace('특별시', '').replace('광역시', '').replace('특별자치도', '').replace('특별자치시', '')}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
 
-            <div className="h-8 shrink-0 bg-white dark:bg-[var(--sheet-bg)]" />
-
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+              <div className="flex-1 overflow-y-auto px-1 pt-2">
+                <ul className="pb-10">
+                  {(activeTab ? REGION_DATA[activeTab] : []).map((dist: any) => {
+                    const isSelected = selectedProvince === activeTab && selectedDistrict === dist.id;
+                    return (
+                      <ListRow
+                        key={dist.id}
+                        onClick={() => {
+                          triggerHaptic("tap");
+                          selectRegion(activeTab, dist.id);
+                          closeSheet();
+                        }}
+                        right={isSelected ? <Check size={20} className="text-[#3182F6]" /> : null}
+                        contents={
+                          <ListRow.Texts
+                            type="1RowTypeA"
+                            top={dist.name}
+                            topProps={{
+                              typography: 't5',
+                              fontWeight: isSelected ? 'bold' : 'medium',
+                              color: isSelected ? 'blue500' : 'var(--text-color)'
+                            }}
+                          />
+                        }
+                      />
+                    );
+                  })}
+                </ul>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="h-8 shrink-0 bg-white dark:bg-[#1C1E22]" />
+      </div>
+    </BottomSheet>
   );
 };
