@@ -13,7 +13,7 @@ export default defineConfig({
             build: 'npm run build',
             dev: 'npm run dev', // --host option is already in package.json
         },
-        port: 8081,
+        port: 5173,
         host: '192.168.219.100',
     },
     permissions: [],

@@ -111,3 +111,13 @@
 .safe-area-mb {
     margin-bottom: var(--safe-area-bottom);
 }
+
+/* TDS TextField Dark Mode Fix */
+.dark .tds-search-input input {
+    color: var(--text-color) !important;
+}
+
+.dark .tds-search-input input::placeholder {
+    color: var(--text-color-secondary) !important;
+    opacity: 0.8;
+}

@@ -71,7 +71,7 @@ export const RegionSelectorSheet = () => {
       <div className="bg-white dark:bg-[#1C1E22] rounded-t-[32px] overflow-hidden flex flex-col h-[85vh]">
         <BottomSheet.Header>
           <span style={{ color: 'var(--text-color)' }}>
-            {searchQuery || isSearching ? '지역 검색' : '어디로 갈까요?'}
+            {searchQuery || isSearching ? '지역 검색' : ''}
           </span>
         </BottomSheet.Header>
 
@@ -83,6 +83,7 @@ export const RegionSelectorSheet = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="지역 이름을 검색해보세요"
             label=""
+            className="tds-search-input"
           />
         </div>
 

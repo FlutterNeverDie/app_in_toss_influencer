@@ -12,8 +12,6 @@ import { RegistrationModal } from '../widgets/w_registration_modal';
 import { PROVINCE_DISPLAY_NAMES, REGION_DATA } from '../../data/constants/regions';
 import { InfluencerService } from '../../data/services/influencer_service';
 import { MemberService } from '../../data/services/member_service';
-import type { Influencer } from '../../data/models/m_influencer';
-
 
 /**
  * 햅틱 피드백 유틸리티
@@ -28,9 +26,11 @@ const triggerHaptic = (type: "tickWeak" | "tap" | "tickMedium" | "success" = "ti
  * 인스타그램 ID 마스킹 (보안용)
  */
 const maskInstagramId = (id: string) => {
+  if (!id) return '';
   if (id.length <= 3) return id;
   return id.substring(0, 3) + '***';
 };
+import type { Influencer } from '../../data/models/m_influencer';
 
 /**
  * 인플루언서 맵 메인 화면
@@ -152,7 +152,7 @@ export const MainScreen = () => {
     };
 
     loadInfluencers();
-  }, [selectedDistrict, setIsLoadingData]);
+  }, [selectedProvince, selectedDistrict, setIsLoadingData]);
 
   // 인플루언서 클릭 시 인스타그램 이동
   const handleInfluencerClick = (instagramId: string) => {

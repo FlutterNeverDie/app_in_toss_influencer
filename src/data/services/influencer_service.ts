@@ -9,16 +9,38 @@ export const InfluencerService = {
      */
     async fetchInfluencersByRegion(provinceId: string, districtId: string): Promise<Influencer[]> {
         try {
-            const { data, error } = await supabase
+            console.log(`[InfluencerService] Fetching influencers for: ${provinceId}, ${districtId}`);
+            let { data, error } = await supabase
                 .from('influencer')
                 .select('*')
                 .eq('province_id', provinceId)
                 .eq('district_id', districtId)
                 .order('like_count', { ascending: false });
 
-            if (error) return [];
+            if (error) {
+                console.error(`[InfluencerService] Error fetching region ${provinceId}/${districtId}:`, error);
+                return [];
+            }
+
+            // [DEGUB] 성남시 등 특정 지역 데이터가 조회가 안 되는 경우를 위한 폴백 (ID 불일치 확인용)
+            if (data && data.length === 0 && (districtId === 'seongnam' || districtId.includes('성남'))) {
+                console.log(`[InfluencerService] No data for ${districtId}. Retrying with loose district_id match...`);
+                const { data: fallbackData } = await supabase
+                    .from('influencer')
+                    .select('*')
+                    .ilike('district_id', `%${districtId}%`)
+                    .order('like_count', { ascending: false });
+
+                if (fallbackData && fallbackData.length > 0) {
+                    console.log(`[InfluencerService] Found ${fallbackData.length} records with fallback match! Check DB IDs.`);
+                    data = fallbackData;
+                }
+            }
+
+            console.log(`[InfluencerService] Fetched ${data?.length || 0} influencers for ${districtId}`);
             return data as Influencer[];
-        } catch {
+        } catch (err) {
+            console.error('[InfluencerService] Unexpected error:', err);
             return [];
         }
     },
