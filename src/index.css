@@ -178,6 +178,39 @@
     color: #4E5968 !important;
 }
 
+/* Registration Modal UI Polish (v8) */
+@media (prefers-color-scheme: dark) {
+
+    .registration-input-wrapper div[class*='Container'],
+    .registration-input-wrapper div[class*='TextField'] {
+        background-color: #2C2E33 !important;
+        border-radius: 16px !important;
+        border: none !important;
+    }
+
+    .registration-modal-content {
+        /* Ensure scrolling doesn't feel cut off */
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        height: 100%;
+    }
+
+    /* Registration Modal UI Polish (v9) */
+    .registration-input-wrapper .registration-id-input input {
+        padding-left: 32px !important;
+        /* @ 기호 위치 확보 */
+    }
+
+    .registration-input-wrapper .registration-id-input input::placeholder {
+        padding-left: 0;
+    }
+}
+
+.dark .registration-input-wrapper div[class*='Container'] {
+    background-color: #2C2E33 !important;
+    border-radius: 16px !important;
+}
+
 /* 근본적인 텍스트 노출 문제 해결 */
 .dark input {
     color-scheme: dark;

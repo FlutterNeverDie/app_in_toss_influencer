@@ -125,7 +125,7 @@ export const RegistrationModal: React.FC<IRegistrationBottomSheetProps> = ({ isO
                     </span>
                 </BottomSheet.Header>
 
-                <div className="px-6 pb-12 overflow-y-auto flex-1 scrollbar-hide">
+                <div className="px-6 pb-32 overflow-y-auto flex-1 scrollbar-hide registration-modal-content">
                     {regInfo.status === 'pending' && step !== 3 ? (
                         <div className="flex flex-col items-center justify-center text-center space-y-8 pt-10">
                             <div className="w-24 h-24 bg-[#3182F6]/10 rounded-full flex items-center justify-center relative">
@@ -242,7 +242,7 @@ export const RegistrationModal: React.FC<IRegistrationBottomSheetProps> = ({ isO
                                             {imagePreview ? (
                                                 <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                                             ) : (
-                                                <Camera className="opacity-40" size={36} />
+                                                <Camera className="opacity-40 text-[#8B95A1] dark:text-[#FFFFFF]" size={36} />
                                             )}
                                         </div>
                                         <label className="absolute bottom-0 right-0 w-9 h-9 bg-[#3182F6] rounded-full flex items-center justify-center text-white cursor-pointer shadow-lg border-2 border-white dark:border-[#1C1E22]">
@@ -253,17 +253,32 @@ export const RegistrationModal: React.FC<IRegistrationBottomSheetProps> = ({ isO
                                     <span className="text-[13px] text-[#8B95A1]">본인 확인이 가능한 프로필 사진을 올려주세요</span>
                                 </div>
 
-                                <div className="space-y-4">
+                                <div className="space-y-4 registration-input-wrapper relative">
+                                    <div className="absolute left-[52px] top-[57px] z-10 text-[#8B95A1] dark:text-[#FFFFFF] font-medium pointer-events-none -translate-y-1/2">
+                                        @
+                                    </div>
                                     <TextField
                                         variant="box"
                                         label="인스타그램 아이디"
                                         value={instagramId}
-                                        onChange={(e) => setInstagramId(e.target.value)}
-                                        placeholder="@아이디 입력"
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace('@', '').trim();
+                                            setInstagramId(val);
+                                        }}
+                                        onBlur={() => {
+                                            // 모바일 웹뷰에서 키보드 다운 시 레이아웃 리프레시 및 스크롤 복구
+                                            window.scrollTo(0, 0);
+                                            setTimeout(() => {
+                                                const content = document.querySelector('.registration-modal-content');
+                                                if (content) content.scrollTop = content.scrollTop; // 리플로우 유도
+                                            }, 100);
+                                        }}
+                                        placeholder="아이디 입력"
                                         maxLength={30}
+                                        className="tds-search-input registration-id-input"
+                                        inputStyle={{ paddingLeft: '32px' }} // @ 공간 확보 (내부 패딩)
                                     />
                                 </div>
-
                                 <div className="bg-[#3182F6]/5 p-5 rounded-[24px] border border-[#3182F6]/10">
                                     <h4 className="text-[15px] font-bold text-[#3182F6] mb-2">등록 전 안내사항</h4>
                                     <ul className="text-[13px] opacity-70 space-y-2 leading-relaxed" style={{ color: 'var(--text-color)' }}>
