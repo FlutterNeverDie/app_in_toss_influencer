@@ -57,12 +57,17 @@ export const MainScreen = () => {
       // 이미 로그인되어 있다면 중단
       if (isLoggedIn) return;
 
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const hostname = window.location.hostname;
+      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('ngrok') || import.meta.env.DEV;
 
       try {
         // 1. 토스 앱 브릿지 환경인 경우 (appLogin 존재 시)
-        const tossWindow = window as Window & { appLogin?: unknown };
-        if (typeof tossWindow.appLogin === 'function' || (!isLocal && typeof tossWindow.appLogin !== 'undefined')) {
+        // 브릿지는 토스 앱 안에서만 주입됩니다.
+        const tossWindow = window as any;
+        const hasTossBridge = typeof tossWindow.appLogin === 'function' ||
+          (typeof tossWindow.toss !== 'undefined');
+
+        if (hasTossBridge && !isLocal) {
           const { appLogin } = await import('@apps-in-toss/web-framework');
           const authData = await appLogin() as { authorizationCode: string };
 

@@ -10,8 +10,9 @@ export const MockLoginButton: React.FC = () => {
     const mockLogin = useAuthStore(state => state.mockLogin);
     const isLoggedIn = useAuthStore(state => state.isLoggedIn);
 
-    // 로컬 개발 환경이 아니면 렌더링하지 않음
-    if (!import.meta.env.DEV) return null;
+    // 로컬 개발 환경(localhost)이 아니면 렌더링하지 않음 (외부 접속 시 Mock 로그인 차단)
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (!import.meta.env.DEV || !isLocalhost) return null;
 
     const handleMockLogin = async () => {
         // 햅틱 피드백 (있는 경우만)
