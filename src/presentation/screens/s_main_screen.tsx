@@ -47,7 +47,7 @@ export const MainScreen = () => {
     setIsLoadingData
   } = useRegionStore();
 
-  const { isLoggedIn, toggleLike, isLiked, login } = useAuthStore();
+  const { isLoggedIn, toggleLike, isLiked, login, member } = useAuthStore();
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -128,8 +128,14 @@ export const MainScreen = () => {
         // [FIX] 기초 자치단체 ID가 중복될 수 있으므로 (예: '중구'), 광역 자치단체 ID와 함께 쿼리합니다.
         const data = await InfluencerService.fetchInfluencersByRegion(selectedProvince, selectedDistrict);
 
-        // 정렬 로직 적용: 좋아요 수(많은 순) -> 등록일(빠른 순)
+        // 정렬 로직 적용: 본인 우선 -> 좋아요 수(많은 순) -> 등록일(빠른 순)
         const sortedData = [...data].sort((a, b) => {
+          // 0. 본인 우선 (member_id 기준)
+          const isAMe = a.member_id === useAuthStore.getState().member?.id;
+          const isBMe = b.member_id === useAuthStore.getState().member?.id;
+          if (isAMe && !isBMe) return -1;
+          if (!isAMe && isBMe) return 1;
+
           // 1. 좋아요 수 내림차순
           if (b.like_count !== a.like_count) {
             return b.like_count - a.like_count;
@@ -235,9 +241,11 @@ export const MainScreen = () => {
                     {PROVINCE_DISPLAY_NAMES[selectedProvince!]}
                     {` ${REGION_DATA[selectedProvince!].find(d => d.id === selectedDistrict)?.name}`}
                   </Top.TitleParagraph>
-                  <p className="text-[#8B95A1] dark:text-[#ADB5BD] text-[14px] font-medium mt-1">
-                    {isLoading ? '인플루언서를 찾고있습니다...' : `인플루언서 총 ${influencers.length}명을 찾았어요`}
-                  </p>
+                  {(isLoading || influencers.length > 0) && (
+                    <p className="text-[#8B95A1] dark:text-[#ADB5BD] text-[14px] font-medium mt-1">
+                      {isLoading ? '인플루언서를 찾고있습니다...' : `인플루언서 총 ${influencers.length}명을 찾았어요`}
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -274,17 +282,23 @@ export const MainScreen = () => {
                           alt={inf.instagram_id}
                           className="w-20 h-20 rounded-full object-cover border-2 border-white dark:border-[#3A3D43] shadow-md font-bold text-[10px]"
                         />
-                        <motion.button
-                          whileTap={{ scale: 0.9 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            triggerHaptic("tap");
-                            toggleLike(inf.id);
-                          }}
-                          className={`absolute -top-1 -right-1 w-8 h-8 flex items-center justify-center rounded-full shadow-lg transition-all z-10 focus:outline-none outline-none ${isLiked(inf.id) ? 'bg-[#FF80AB] text-white' : 'bg-white dark:bg-[#2C2E33] text-[#ADB5BD] border border-[#F2F4F6] dark:border-[#3A3D43]'}`}
-                        >
-                          <Heart size={16} fill={isLiked(inf.id) ? "currentColor" : "none"} strokeWidth={2.5} />
-                        </motion.button>
+                        {inf.member_id === member?.id ? (
+                          <div className="absolute -top-1 -right-1 bg-[#191F28] dark:bg-white text-white dark:text-[#191F28] px-2 py-0.5 rounded-full text-[11px] font-bold shadow-lg z-10 border border-white dark:border-[#191F28]">
+                            Me
+                          </div>
+                        ) : (
+                          <motion.button
+                            whileTap={{ scale: 0.9 }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              triggerHaptic("tap");
+                              toggleLike(inf.id);
+                            }}
+                            className={`absolute -top-1 -right-1 w-8 h-8 flex items-center justify-center rounded-full shadow-lg transition-all z-10 focus:outline-none outline-none ${isLiked(inf.id) ? 'bg-[#FF80AB] text-white' : 'bg-white dark:bg-[#2C2E33] text-[#ADB5BD] border border-[#F2F4F6] dark:border-[#3A3D43]'}`}
+                          >
+                            <Heart size={16} fill={isLiked(inf.id) ? "currentColor" : "none"} strokeWidth={2.5} />
+                          </motion.button>
+                        )}
                       </div>
                       <div className="space-y-0.5 mt-1">
                         <div className="text-[14px] font-bold text-[#191F28] dark:text-white truncate max-w-[110px]">
