@@ -102,13 +102,13 @@ const LikedInfluencerList = () => {
                                                 dragConstraints={{ left: -64, right: 0 }}
                                                 dragElastic={0.02}
                                                 // items의 배경색과 border를 명확히 하여 하단 레이어를 가림
-                                                className="relative bg-[var(--bg-color)] border border-[var(--glass-border)] rounded-[20px] overflow-hidden active:scale-[0.98] transition-shadow cursor-grab active:cursor-grabbing z-10"
+                                                className="relative bg-[var(--bg-color)] border border-black/[0.08] dark:border-white/10 rounded-[20px] overflow-hidden active:scale-[0.98] transition-shadow cursor-grab active:cursor-grabbing z-10"
                                             >
                                                 <div className="flex items-center gap-3 p-4">
                                                     <img
                                                         src={inf.image_url}
                                                         alt={inf.instagram_id}
-                                                        className="w-11 h-11 rounded-full object-cover border border-[var(--glass-border)] flex-shrink-0"
+                                                        className="w-11 h-11 rounded-full object-cover border border-black/[0.05] dark:border-white/10 flex-shrink-0"
                                                     />
                                                     <div className="flex flex-col gap-0.5 min-w-0">
                                                         <span className="text-[16px] font-bold text-[var(--text-color)] dark:text-white truncate">
@@ -370,7 +370,7 @@ export const DrawerMenu = () => {
                                                     <div key={index} className="liquid-glass rounded-[20px] overflow-hidden">
                                                         <button
                                                             onClick={() => toggleFAQ(index)}
-                                                            className="w-full flex items-center justify-between p-5 text-left active:bg-[var(--glass-border)] transition-colors"
+                                                            className="w-full flex items-center justify-between p-5 text-left active:bg-white/5 outline-none focus:ring-0 select-none transition-colors"
                                                         >
                                                             <span className="text-[15px] font-bold text-[var(--text-color)] pr-4 leading-snug">
                                                                 {item.question}
@@ -385,7 +385,7 @@ export const DrawerMenu = () => {
                                                                     exit={{ height: 0, opacity: 0 }}
                                                                     className="overflow-hidden"
                                                                 >
-                                                                    <div className="p-5 pt-0 text-[14px] font-medium text-[var(--text-color)] opacity-80 leading-relaxed border-t border-[var(--glass-border)] border-dashed mt-0.5">
+                                                                    <div className="p-5 pt-0 text-[14px] font-medium text-[var(--text-color)] opacity-80 leading-relaxed border-t border-black/[0.05] dark:border-white/5 border-dashed mt-0.5">
                                                                         <div className="pt-4">{renderAnswer(item.answer)}</div>
                                                                     </div>
                                                                 </motion.div>
