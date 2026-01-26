@@ -8,6 +8,7 @@ import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/region
 import { generateHapticFeedback, openURL } from '@apps-in-toss/web-framework';
 import { Top } from '@toss/tds-mobile';
 import { MockLoginButton } from './w_mock_login';
+import { LogOut } from 'lucide-react';
 
 /**
  * 인스타그램 ID 마스킹 (보안용)
@@ -274,22 +275,53 @@ export const DrawerMenu = () => {
                                     >
                                         {/* 프로필 섹션 */}
                                         <section>
-                                            <div className="flex items-center gap-4 mb-4 liquid-glass p-5 rounded-[24px]">
-                                                <div className="w-16 h-16 bg-[var(--bg-color)] rounded-full flex items-center justify-center text-[var(--text-color)] opacity-60 shadow-sm border border-[var(--glass-border)]">
-                                                    <User size={36} />
-                                                </div>
-                                                <div className="flex flex-col gap-0.5">
-                                                    <h3 className="text-[19px] font-bold text-[var(--text-color)] leading-tight">
-                                                        {member?.name}
-                                                    </h3>
-                                                    <p className="text-[14px] font-medium text-[var(--text-color)] opacity-70 mb-2">
-                                                        반가워요!
-                                                    </p>
-                                                    {/* 로컬 개발용 Mock 로그인 버튼 */}
-                                                    <div className="mt-1">
-                                                        <MockLoginButton />
+                                            <div className="liquid-glass rounded-[24px] p-6 space-y-5">
+                                                {member ? (
+                                                    // 로그인 상태
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-14 h-14 bg-[var(--bg-color)] rounded-full flex items-center justify-center text-[var(--text-color)] opacity-60 shadow-sm border border-[var(--glass-border)]">
+                                                                <User size={30} />
+                                                            </div>
+                                                            <div className="flex flex-col gap-0.5 min-w-0">
+                                                                <h3 className="text-[18px] font-bold text-[var(--text-color)] leading-tight truncate">
+                                                                    {member.name}
+                                                                </h3>
+                                                                <p className="text-[13px] font-medium text-[var(--text-color)] opacity-60">
+                                                                    반가워요!
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* 로그아웃 버튼 (작게) */}
+                                                        <button
+                                                            onClick={() => {
+                                                                triggerHaptic("tickWeak");
+                                                                useAuthStore.getState().logout();
+                                                            }}
+                                                            className="flex items-center gap-1.5 text-[12px] font-bold text-[var(--text-color)] opacity-30 hover:opacity-100 transition-opacity ml-auto px-2 py-1"
+                                                        >
+                                                            <LogOut size={14} />
+                                                            로그아웃
+                                                        </button>
                                                     </div>
-                                                </div>
+                                                ) : (
+                                                    // 비로그인 상태 (자동 로그인 실패 시)
+                                                    <div className="space-y-4">
+                                                        <div className="flex flex-col gap-1">
+                                                            <h3 className="text-[18px] font-bold text-[var(--text-color)]">
+                                                                확인이 필요해요
+                                                            </h3>
+                                                            <p className="text-[13px] font-medium text-[var(--text-color)] opacity-60 leading-relaxed">
+                                                                토스 인증 정보를 가져오지 못했습니다. <br />앱을 다시 실행해 주세요.
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="pt-2 border-t border-[var(--glass-border)] border-dashed">
+                                                            <MockLoginButton />
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </section>
 

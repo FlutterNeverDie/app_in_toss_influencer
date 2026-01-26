@@ -24,6 +24,8 @@ serve(async (req) => {
 
         const CLIENT_ID = Deno.env.get("TOSS_CLIENT_ID");
         const CLIENT_SECRET = Deno.env.get("TOSS_CLIENT_SECRET");
+        const DECRYPT_KEY = Deno.env.get("TOSS_DECRYPT_KEY"); // Base64 encoded AES key
+        const AAD = Deno.env.get("TOSS_AAD") || "TOSS"; // Default to TOSS if not set
 
         if (!CLIENT_ID || !CLIENT_SECRET) {
             throw new Error("Toss Client ID/Secret configuration missing");
@@ -70,31 +72,36 @@ serve(async (req) => {
 
         const userInfo = userData.success;
 
-        // 3. Sync to Supabase Database (Upsert)
-        // Supabase Admin Client 생성 (Service Role Key 필수)
+        // 3. Decrypt User Info (Name, Birthday, Gender, Phone etc.)
+        let realName = '토스 사용자';
+        let realBirthday = null;
+        let realGender = null;
+        let realPhone = null;
+
+        if (DECRYPT_KEY) {
+            try {
+                if (userInfo.name) realName = await decryptTossData(userInfo.name, DECRYPT_KEY, AAD);
+                if (userInfo.birthday) realBirthday = await decryptTossData(userInfo.birthday, DECRYPT_KEY, AAD);
+                if (userInfo.gender) realGender = await decryptTossData(userInfo.gender, DECRYPT_KEY, AAD);
+                if (userInfo.phone) realPhone = await decryptTossData(userInfo.phone, DECRYPT_KEY, AAD);
+            } catch (e) {
+                console.error("Decryption failed:", e);
+                // Fallback or keep default
+            }
+        }
+
+        // 4. Sync to Supabase Database (Upsert)
         const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
         const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
         const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
         const upsertData = {
-            toss_id: userInfo.userKey ? String(userInfo.userKey) : `toss_${Math.random().toString(36).substring(2)}`, // userKey가 숫자일 수 있으므로 문자변환
-            name: userInfo.name || '토스 사용자', // 암호화된 값이거나 실제 값
-            // profile_image: '', // Toss API에서 프로필 이미지를 준다면 여기에 매핑
+            toss_id: String(userInfo.userKey),
+            name: realName,
+            birthday: realBirthday,
+            gender: realGender,
+            phone: realPhone,
         };
-
-        // toss_id로 기존 유저 확인
-        const { data: existingUser } = await supabaseAdmin
-            .from('member')
-            .select('id')
-            .eq('toss_id', upsertData.toss_id)
-            .maybeSingle();
-
-        if (!existingUser) {
-            // 신규 유저라면 UUID 생성 필요 (member 테이블 id가 uuid 타입 가정)
-            // member 테이블 id 컬럼이 default gen_random_uuid()라면 생략 가능하지만,
-            // 명시적으로 필요한 경우 여기서 처리. 보통은 DB default 로직에 맡김.
-            // (member_service.ts 로직 참고하여 id 생략 시 자동 생성 기대)
-        }
 
         const { data: savedMember, error: dbError } = await supabaseAdmin
             .from('member')
@@ -125,3 +132,44 @@ serve(async (req) => {
         );
     }
 });
+
+/**
+ * AES-256-GCM Decryption for Toss User Info
+ */
+async function decryptTossData(encryptedText: string, base64Key: string, aad: string): Promise<string> {
+    const IV_LENGTH = 12;
+    const TAG_LENGTH = 16;
+
+    // Decode base64 inputs
+    const encryptedBuffer = Uint8Array.from(atob(encryptedText), c => c.charCodeAt(0));
+    const keyBuffer = Uint8Array.from(atob(base64Key), c => c.charCodeAt(0));
+    const aadBuffer = new TextEncoder().encode(aad);
+
+    // Extract IV, Ciphertext, and Auth Tag
+    const iv = encryptedBuffer.slice(0, IV_LENGTH);
+    const data = encryptedBuffer.slice(IV_LENGTH);
+
+    // Import Key
+    const cryptoKey = await crypto.subtle.importKey(
+        "raw",
+        keyBuffer,
+        { name: "AES-GCM" },
+        false,
+        ["decrypt"]
+    );
+
+    // Decrypt
+    const decryptedBuffer = await crypto.subtle.decrypt(
+        {
+            name: "AES-GCM",
+            iv: iv,
+            additionalData: aadBuffer,
+            tagLength: TAG_LENGTH * 8
+        },
+        cryptoKey,
+        data
+    );
+
+    return new TextDecoder().decode(decryptedBuffer);
+}
+

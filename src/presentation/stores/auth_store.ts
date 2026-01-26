@@ -22,6 +22,8 @@ interface AuthState {
 
 interface AuthActions {
     login: (member: Member) => void;
+    autoLogin: () => Promise<boolean>; // 앱 시작 시 자동 로그인 시도
+    loginWithToss: () => Promise<boolean>; // 토스 로그인 수동 호출
     mockLogin: (memberId?: string) => Promise<boolean>; // 로컬용 mock 로그인
     logout: () => void;
     setUser: (member: Member) => void;
@@ -47,6 +49,50 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 set({ isLoggedIn: true, member });
                 get().refreshInfluencerStatus(); // 로그인 시 상태 확인
                 get().syncLikedInfluencers(); // 좋아요 내역 동기화
+            },
+
+            autoLogin: async () => {
+                // 이미 로그인된 상태라면 스킵
+                if (get().isLoggedIn && get().member) {
+                    await get().refreshInfluencerStatus();
+                    await get().syncLikedInfluencers();
+                    return true;
+                }
+
+                // 토스 브릿지를 통해 현재 세션의 인가 코드 획득 시도
+                return get().loginWithToss();
+            },
+
+            loginWithToss: async () => {
+                try {
+                    // 1. 토스 브릿지 호출하여 인가 코드 획득
+                    if (typeof (window as any).appLogin !== 'function') {
+                        console.error('appLogin function not found in bridge.');
+                        return false;
+                    }
+
+                    const response = await (window as any).appLogin();
+                    const authCode = response?.authorizationCode;
+
+                    if (!authCode) {
+                        console.error('Failed to get authorizationCode from Toss');
+                        return false;
+                    }
+
+                    // 2. 서버(Edge Function)를 통해 로그인 처리
+                    const member = await MemberService.loginWithToss(authCode);
+
+                    if (member) {
+                        set({ isLoggedIn: true, member });
+                        await get().refreshInfluencerStatus();
+                        await get().syncLikedInfluencers();
+                        return true;
+                    }
+                    return false;
+                } catch (error) {
+                    console.error('Error during Toss Login:', error);
+                    return false;
+                }
             },
 
             mockLogin: async (memberId?: string) => {
