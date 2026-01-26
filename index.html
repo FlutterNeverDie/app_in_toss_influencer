@@ -18,38 +18,23 @@
       if (isPreview) {
         const mockUA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) Toss/5.33.0';
 
-        // 1. 브라우저 정보 모킹
+        // 1. User-Agent 모킹
         try {
-          const define = (obj, prop, val) => {
-            try { Object.defineProperty(obj, prop, { get: () => val, configurable: true }); } catch (e) { }
-          };
-          define(navigator, 'userAgent', mockUA);
-          define(navigator, 'appVersion', mockUA);
-          define(navigator, 'platform', 'iPhone');
-          define(navigator, 'vendor', 'Apple Computer, Inc.');
+          Object.defineProperty(navigator, 'userAgent', {
+            get: function () { return mockUA; },
+            configurable: true
+          });
+          // platform도 가끔 체크하므로 iPhone으로 모킹
+          Object.defineProperty(navigator, 'platform', {
+            get: function () { return 'iPhone'; },
+            configurable: true
+          });
+        } catch (e) {
+          console.error('Failed to mock environment:', e);
+        }
 
-          // 모바일 터치 환경인 척 하기
-          define(navigator, 'maxTouchPoints', 5);
-        } catch (e) { }
-
-        // 2. 토스 브릿지 객체 모킹 (TDS가 체크하는 핵심 포인트)
-        window.toss = window.toss || {
-          postMessage: function () { },
-          callback: function () { },
-          appLogin: function () { return Promise.resolve({ authorizationCode: 'mock_code' }); }
-        };
-
-        window.webkit = window.webkit || {
-          messageHandlers: {
-            toss: {
-              postMessage: function () { }
-            }
-          }
-        };
-
-        // 3. 추가 환경 플래그
-        window.__TOSS_APP__ = true;
-        window.isTossApp = true;
+        // 2. 토스 앱 내부인 것처럼 브릿지 객체 존재 여부만 흉내
+        window.toss = window.toss || {};
       }
     })();
   </script>
