@@ -68,14 +68,9 @@ export const RegionSelectorSheet = () => {
 
   return (
     <BottomSheet open={isSheetOpen} onClose={closeSheet}>
-      <div className="bg-white dark:bg-[#1C1E22] rounded-t-[32px] overflow-hidden flex flex-col h-[85vh]">
-        <BottomSheet.Header>
-          <span style={{ color: 'var(--text-color)' }}>
-            {searchQuery || isSearching ? '지역 검색' : ''}
-          </span>
-        </BottomSheet.Header>
-
-        <div className="px-6 pb-4">
+      <div className="bg-white dark:bg-[var(--sheet-bg)] rounded-t-[32px] overflow-hidden flex flex-col h-[85vh]">
+        <BottomSheet.Header children={null} />
+        <div className="px-6 pb-4 tds-search-input-wrapper">
           <TextField
             variant="box"
             value={searchQuery}

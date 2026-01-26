@@ -36,9 +36,6 @@ import type { Influencer } from '../../data/models/m_influencer';
  * 인플루언서 맵 메인 화면
  */
 export const MainScreen = () => {
-  // Debug log to verify component mounting
-  console.log('MainScreen mounted');
-
   const {
     selectedProvince,
     selectedDistrict,
@@ -97,14 +94,15 @@ export const MainScreen = () => {
 
   // 다크모드 시스템 설정 동기화
   useEffect(() => {
-    const root = window.document.documentElement;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const updateTheme = (isDark: boolean) => {
       if (isDark) {
-        root.classList.add('dark');
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
       } else {
-        root.classList.remove('dark');
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark');
       }
     };
 
@@ -310,7 +308,7 @@ export const MainScreen = () => {
               </Top.TitleParagraph>
               <div
                 onClick={openSheet}
-                className="flex items-center gap-3 bg-[#F2F4F6] dark:bg-[#2C2E33] px-5 py-4 rounded-[20px] cursor-pointer hover:bg-[#E5E8EB] dark:hover:bg-[#3A3D43] transition-colors"
+                className="flex items-center gap-3 bg-[#F2F4F6] dark:bg-[var(--input-bg)] px-5 py-4 rounded-[20px] cursor-pointer hover:bg-[#E5E8EB] dark:hover:bg-[#3A3D43] transition-colors"
               >
                 <Search size={20} className="text-[#8B95A1]" />
                 <span className="text-[#ADB5BD] dark:text-[#4E5968] text-[16px] font-medium">지역 이름을 검색해보세요</span>

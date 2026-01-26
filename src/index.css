@@ -59,8 +59,8 @@
         --glass-border: rgba(255, 255, 255, 0.15);
         --map-fill: #1C1E22;
         --map-stroke: #3A3D43;
-        --input-bg: rgba(255, 255, 255, 0.05);
-        --sheet-bg: #191f28;
+        --input-bg: #2C2E33;
+        --sheet-bg: #1C1E22;
         --sidebar-bg: #14171d;
     }
 }
@@ -73,8 +73,8 @@
     --glass-border: rgba(255, 255, 255, 0.15);
     --map-fill: #1C1E22;
     --map-stroke: #3A3D43;
-    --input-bg: rgba(255, 255, 255, 0.05);
-    --sheet-bg: #191f28;
+    --input-bg: #2C2E33;
+    --sheet-bg: #1C1E22;
     --sidebar-bg: #14171d;
 }
 
@@ -112,12 +112,73 @@
     margin-bottom: var(--safe-area-bottom);
 }
 
-/* TDS TextField Dark Mode Fix */
-.dark .tds-search-input input {
-    color: var(--text-color) !important;
+/* TDS TextField Dark Mode Fix - Perfect Sync (v7 UI Polish) */
+@media (prefers-color-scheme: dark) {
+
+    /* 1. 인풋 자체 글자색 */
+    input.tds-search-input {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        background-color: transparent !important;
+    }
+
+    /* 2. '뚜껑' 현상 해결: 상단 전체가 아닌 필드 내부 매스만 어둡게 */
+    .tds-search-input-wrapper div[class*='Container'],
+    .tds-search-input-wrapper div[class*='TextField'],
+    div:has(> .tds-search-input) {
+        background-color: #2C2E33 !important;
+        border-radius: 16px !important;
+        border: none !important;
+    }
+
+    /* 3. 아이콘 및 플레이스홀더 */
+    .tds-search-input-wrapper svg {
+        color: #8B95A1 !important;
+        fill: none !important;
+    }
+
+    input.tds-search-input::placeholder {
+        color: #4E5968 !important;
+        opacity: 1 !important;
+    }
 }
 
-.dark .tds-search-input input::placeholder {
-    color: var(--text-color-secondary) !important;
-    opacity: 0.8;
+/* 다크모드 전용 스크롤바 최적화 (이쁘게 수정) */
+.dark ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #3A3D43;
+    border-radius: 10px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #4E5968;
+}
+
+/* 클래스 기반 중복 정의 (v7) */
+.dark input.tds-search-input {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.dark .tds-search-input-wrapper div[class*='Container'],
+.dark div:has(> .tds-search-input) {
+    background-color: #2C2E33 !important;
+    border-radius: 16px !important;
+}
+
+.dark .tds-search-input::placeholder {
+    color: #4E5968 !important;
+}
+
+/* 근본적인 텍스트 노출 문제 해결 */
+.dark input {
+    color-scheme: dark;
 }
