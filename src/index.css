@@ -195,14 +195,18 @@
         height: 100%;
     }
 
-    /* Registration Modal UI Polish (v9) */
-    .registration-input-wrapper .registration-id-input input {
-        padding-left: 32px !important;
-        /* @ 기호 위치 확보 */
+    /* Registration Modal UI Polish (v11) */
+    .registration-input-wrapper div[class*='Container'],
+    .registration-input-wrapper div[class*='TextField'] {
+        background-color: #2C2E33 !important;
+        border-radius: 16px !important;
+        border: none !important;
     }
 
-    .registration-input-wrapper .registration-id-input input::placeholder {
-        padding-left: 0;
+    /* TDS TextField Native Left Slot (@) */
+    .registration-input-wrapper span {
+        color: #FFFFFF !important;
+        font-weight: 500;
     }
 }
 

@@ -253,30 +253,27 @@ export const RegistrationModal: React.FC<IRegistrationBottomSheetProps> = ({ isO
                                     <span className="text-[13px] text-[#8B95A1]">본인 확인이 가능한 프로필 사진을 올려주세요</span>
                                 </div>
 
-                                <div className="space-y-4 registration-input-wrapper relative">
-                                    <div className="absolute left-[52px] top-[57px] z-10 text-[#8B95A1] dark:text-[#FFFFFF] font-medium pointer-events-none -translate-y-1/2">
-                                        @
-                                    </div>
+                                <div className="space-y-4 registration-input-wrapper">
                                     <TextField
                                         variant="box"
                                         label="인스타그램 아이디"
                                         value={instagramId}
+                                        /* @ts-ignore: TDS TextField supports left/right slots */
+                                        left={<span className="text-[#8B95A1] dark:text-[#FFFFFF] ml-3">@</span>}
                                         onChange={(e) => {
                                             const val = e.target.value.replace('@', '').trim();
                                             setInstagramId(val);
                                         }}
                                         onBlur={() => {
-                                            // 모바일 웹뷰에서 키보드 다운 시 레이아웃 리프레시 및 스크롤 복구
                                             window.scrollTo(0, 0);
                                             setTimeout(() => {
                                                 const content = document.querySelector('.registration-modal-content');
-                                                if (content) content.scrollTop = content.scrollTop; // 리플로우 유도
+                                                if (content) content.scrollTop = content.scrollTop;
                                             }, 100);
                                         }}
                                         placeholder="아이디 입력"
                                         maxLength={30}
                                         className="tds-search-input registration-id-input"
-                                        inputStyle={{ paddingLeft: '32px' }} // @ 공간 확보 (내부 패딩)
                                     />
                                 </div>
                                 <div className="bg-[#3182F6]/5 p-5 rounded-[24px] border border-[#3182F6]/10">
