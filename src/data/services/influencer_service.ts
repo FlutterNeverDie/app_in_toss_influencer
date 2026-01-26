@@ -15,6 +15,7 @@ export const InfluencerService = {
                 .select('*')
                 .eq('province_id', provinceId)
                 .eq('district_id', districtId)
+                .eq('is_deleted', false)
                 .order('like_count', { ascending: false });
 
             if (error) {
@@ -29,6 +30,7 @@ export const InfluencerService = {
                     .from('influencer')
                     .select('*')
                     .ilike('district_id', `%${districtId}%`)
+                    .eq('is_deleted', false)
                     .order('like_count', { ascending: false });
 
                 if (fallbackData && fallbackData.length > 0) {
@@ -54,6 +56,7 @@ export const InfluencerService = {
                 .from('influencer')
                 .select('*')
                 .eq('province_id', provinceId)
+                .eq('is_deleted', false)
                 .order('like_count', { ascending: false });
 
             if (error) return [];
@@ -72,6 +75,7 @@ export const InfluencerService = {
                 .from('influencer')
                 .select('*')
                 .eq('district_id', districtId)
+                .eq('is_deleted', false)
                 .order('like_count', { ascending: false });
 
             if (error) {
@@ -93,7 +97,7 @@ export const InfluencerService = {
         const { data, error } = await supabase
             .from('influencer')
             .select('*')
-            // .eq('status', 'approved')
+            .eq('is_deleted', false)
             .order('like_count', { ascending: false })
             .limit(20);
 

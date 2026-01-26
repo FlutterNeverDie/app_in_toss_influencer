@@ -28,8 +28,8 @@ export interface Influencer {
     // 등록한 유저 ID
     readonly member_id?: string;
 
-    // 승인 상태 (pending, approved, rejected)
-    readonly status: 'pending' | 'approved' | 'rejected';
+    // 삭제 여부 (비공개 처리)
+    readonly is_deleted: boolean;
 
     // 생성일 (정렬용)
     readonly created_at?: string;

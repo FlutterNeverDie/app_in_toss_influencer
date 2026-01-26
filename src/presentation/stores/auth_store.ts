@@ -140,6 +140,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 member: state.member,
                 likedInfluencerIds: state.likedInfluencerIds,
             }),
+            onRehydrateStorage: () => (state) => {
+                // 저장된 member ID가 유효한 UUID가 아니면 로그아웃 처리 (Legacy 데이터 클린업)
+                if (state?.member?.id) {
+                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                    if (!uuidRegex.test(state.member.id)) {
+                        console.warn('[AuthStore] Invalid Legacy ID detected. Logging out...', state.member.id);
+                        state.logout();
+                    }
+                }
+            }
         }
     )
 );

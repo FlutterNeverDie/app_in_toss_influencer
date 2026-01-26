@@ -280,7 +280,7 @@ export const DrawerMenu = () => {
                                                 </div>
                                                 <div className="flex flex-col gap-0.5">
                                                     <h3 className="text-[19px] font-bold text-[var(--text-color)] leading-tight">
-                                                        {member?.name || '토스 사용자'}
+                                                        {member?.name}
                                                     </h3>
                                                     <p className="text-[14px] font-medium text-[var(--text-color)] opacity-70 mb-2">
                                                         반가워요!
