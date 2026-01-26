@@ -44,6 +44,7 @@
 :root {
     --bg-color: #F2F4F6;
     --text-color: #191F28;
+    --text-color-secondary: #8B95A1;
     --panel-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(255, 255, 255, 0.4);
     --map-fill: #FFFFFF;
@@ -76,6 +77,16 @@
     --input-bg: #2C2E33;
     --sheet-bg: #1C1E22;
     --sidebar-bg: #14171d;
+}
+
+/* TDS ListRow Dark Mode Text Fix */
+.dark div[class*='ListRow'] span[class*='Top'],
+.dark div[class*='ListRow'] span[class*='Bottom'] {
+    color: var(--text-color) !important;
+}
+
+.dark div[class*='ListRow'] span[class*='Bottom'] {
+    color: var(--text-color-secondary) !important;
 }
 
 .liquid-glass {

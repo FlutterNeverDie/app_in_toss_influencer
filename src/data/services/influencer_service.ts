@@ -312,5 +312,36 @@ export const InfluencerService = {
             console.error('[InfluencerService] getLikedInfluencerIds error:', e);
             return [];
         }
+    },
+
+    /**
+     * 사용자가 좋아요를 누른 인플루언서들의 상세 목록을 가져옵니다.
+     */
+    async fetchLikedInfluencers(memberId: string): Promise<Influencer[]> {
+        try {
+            // 1. 좋아요 테이블에서 인플루언서 ID 목록 가져오기
+            const { data: likes, error: likesError } = await supabase
+                .from('influencer_likes')
+                .select('influencer_id')
+                .eq('member_id', memberId);
+
+            if (likesError) throw likesError;
+            if (!likes || likes.length === 0) return [];
+
+            const influencerIds = likes.map(l => l.influencer_id);
+
+            // 2. 해당 ID를 가진 인플루언서 상세 정보 가져오기
+            const { data, error } = await supabase
+                .from('influencer')
+                .select('*')
+                .in('id', influencerIds)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            return data as Influencer[];
+        } catch (e) {
+            console.error('[InfluencerService] fetchLikedInfluencers error:', e);
+            return [];
+        }
     }
 };

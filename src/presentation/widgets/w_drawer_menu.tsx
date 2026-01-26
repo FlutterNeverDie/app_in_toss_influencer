@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, HelpCircle, UserPlus, ChevronDown, ChevronUp, User, ArrowLeft } from 'lucide-react';
+import { X, HelpCircle, UserPlus, ChevronDown, ChevronUp, User, ArrowLeft, Heart } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { useAuthStore } from '../stores/auth_store';
 import { FAQ_DATA } from '../../data/constants/faq';
@@ -8,6 +8,129 @@ import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/region
 import { generateHapticFeedback, openURL } from '@apps-in-toss/web-framework';
 import { Top } from '@toss/tds-mobile';
 import { MockLoginButton } from './w_mock_login';
+
+/**
+ * 인스타그램 ID 마스킹 (보안용)
+ */
+const maskInstagramId = (id: string) => {
+    if (!id) return '';
+    if (id.length <= 3) return id;
+    return id.substring(0, 3) + '***';
+};
+
+/**
+ * 내가 좋아요한 인플루언서 목록 컴포넌트
+ */
+const LikedInfluencerList = () => {
+    const { likedInfluencers, toggleLike, syncLikedInfluencers, member } = useAuthStore();
+    const [isInitialLoaded, setIsInitialLoaded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    useEffect(() => {
+        if (member?.id && !isInitialLoaded) {
+            syncLikedInfluencers().then(() => setIsInitialLoaded(true));
+        }
+    }, [member?.id, syncLikedInfluencers, isInitialLoaded]);
+
+    const handleUnlike = (id: string) => {
+        triggerHaptic("tickMedium");
+        toggleLike(id);
+    };
+
+    if (likedInfluencers.length === 0) return null;
+
+    return (
+        <section className="space-y-4">
+            {/* 토글 버튼 */}
+            <button
+                onClick={() => { triggerHaptic("tickWeak"); setIsExpanded(!isExpanded); }}
+                className="w-full flex items-center justify-between p-4 hover:bg-[var(--glass-border)] rounded-[16px] transition-colors group"
+            >
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[var(--glass-border)] rounded-full flex items-center justify-center text-[#FF80AB] group-hover:bg-[var(--bg-color)] transition-colors border border-transparent">
+                        <Heart size={20} fill="#FF80AB" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-[16px] font-bold text-[var(--text-color)] opacity-90">좋아요</span>
+                        <span className="text-[12px] font-bold text-[#FF80AB] bg-[#FF80AB]/10 px-2 py-0.5 rounded-full">
+                            {likedInfluencers.length}
+                        </span>
+                    </div>
+                </div>
+                {isExpanded ? <ChevronUp size={18} className="text-[var(--text-color)] opacity-30" /> : <ChevronDown size={18} className="text-[var(--text-color)] opacity-30" />}
+            </button>
+
+            {/* 펼쳐지는 리스트 */}
+            <AnimatePresence>
+                {isExpanded && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="space-y-2 pb-2">
+                            <AnimatePresence mode="popLayout">
+                                {likedInfluencers.map((inf) => (
+                                    <motion.div
+                                        key={inf.id}
+                                        layout
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, x: -100 }}
+                                        className="relative group"
+                                    >
+                                        {/* 스와이프를 감싸는 최상위 컨테이너 */}
+                                        <div className="relative overflow-hidden rounded-[20px] bg-[var(--bg-color)]">
+                                            {/* 삭제 배경 (비침을 방지하기 위해 우측에 약간의 여백(inset)을 주거나 z-index 조정) */}
+                                            <div className="absolute inset-y-[1px] right-[1px] w-16 overflow-hidden pointer-events-none">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleUnlike(inf.id);
+                                                    }}
+                                                    className="w-full h-full flex flex-col items-center justify-center bg-[#FF80AB] text-white active:opacity-80 pointer-events-auto rounded-r-[20px]"
+                                                >
+                                                    <Heart size={20} fill="white" />
+                                                    <span className="text-[10px] font-bold mt-0.5">취소</span>
+                                                </button>
+                                            </div>
+
+                                            {/* 리스트 아이템 (스와이프 가능) */}
+                                            <motion.div
+                                                drag="x"
+                                                dragConstraints={{ left: -64, right: 0 }}
+                                                dragElastic={0.02}
+                                                // items의 배경색과 border를 명확히 하여 하단 레이어를 가림
+                                                className="relative bg-[var(--bg-color)] border border-[var(--glass-border)] rounded-[20px] overflow-hidden active:scale-[0.98] transition-shadow cursor-grab active:cursor-grabbing z-10"
+                                            >
+                                                <div className="flex items-center gap-3 p-4">
+                                                    <img
+                                                        src={inf.image_url}
+                                                        alt={inf.instagram_id}
+                                                        className="w-11 h-11 rounded-full object-cover border border-[var(--glass-border)] flex-shrink-0"
+                                                    />
+                                                    <div className="flex flex-col gap-0.5 min-w-0">
+                                                        <span className="text-[16px] font-bold text-[var(--text-color)] dark:text-white truncate">
+                                                            {maskInstagramId(inf.instagram_id)}
+                                                        </span>
+                                                        <span className="text-[13px] font-medium text-[var(--text-color)] dark:text-[#A1A1A1] opacity-60 truncate">
+                                                            {`${PROVINCE_DISPLAY_NAMES[inf.province_id as keyof typeof PROVINCE_DISPLAY_NAMES] || ''} ${REGION_DATA[inf.province_id as keyof typeof REGION_DATA]?.find(d => d.id === inf.district_id)?.name || ''}`}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </section>
+    );
+};
 
 /**
  * 햅틱 피드백 유틸리티
@@ -213,6 +336,9 @@ export const DrawerMenu = () => {
                                             </div>
                                         </section>
 
+                                        {/* 좋아요 리스트 (순서 상단으로 이동) */}
+                                        <LikedInfluencerList />
+
                                         {/* 서비스 메뉴 리스트 (2-Depth) */}
                                         <section className="space-y-1">
                                             <button
@@ -228,7 +354,6 @@ export const DrawerMenu = () => {
                                                 <ArrowLeft size={18} className="text-[var(--text-color)] opacity-30 rotate-180" />
                                             </button>
                                         </section>
-
                                     </motion.div>
                                 ) : (
                                     <motion.div

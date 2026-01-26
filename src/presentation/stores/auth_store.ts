@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 import type { Member } from '../../data/models/m_member';
 import { MemberService } from '../../data/services/member_service';
 import { InfluencerService } from '../../data/services/influencer_service';
+import type { Influencer } from '../../data/models/m_influencer';
 
 export interface InfluencerStatus {
     status: 'pending' | 'approved' | 'rejected' | null;
@@ -15,6 +16,7 @@ interface AuthState {
     isLoggedIn: boolean;
     member: Member | null; // 현재 로그인한 사용자 정보
     likedInfluencerIds: string[]; // 사용자가 좋아요를 누른 인플루언서 ID 목록
+    likedInfluencers: Influencer[]; // 좋아요한 인플루언서 상세 정보 목록
     influencerStatus: InfluencerStatus; // 인플루언서 등록 상태
 }
 
@@ -38,6 +40,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             isLoggedIn: false,
             member: null,
             likedInfluencerIds: [],
+            likedInfluencers: [],
             influencerStatus: { status: null },
 
             login: (member) => {
@@ -64,7 +67,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             setUser: (member) => set({ member }),
 
             toggleLike: (influencerId: string) => {
-                const { isLoggedIn, member, likedInfluencerIds } = get();
+                const { isLoggedIn, member, likedInfluencerIds, likedInfluencers } = get();
                 if (!isLoggedIn || !member) return false;
 
                 const isCurrentlyLiked = likedInfluencerIds.includes(influencerId);
@@ -72,11 +75,15 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 // 1. UI 즉시 반영 (Optimistic UI)
                 if (isCurrentlyLiked) {
                     set({
-                        likedInfluencerIds: likedInfluencerIds.filter(id => id !== influencerId)
+                        likedInfluencerIds: likedInfluencerIds.filter(id => id !== influencerId),
+                        likedInfluencers: likedInfluencers.filter(inf => inf.id !== influencerId)
                     });
                 } else {
                     set({
                         likedInfluencerIds: [...likedInfluencerIds, influencerId]
+                        // Note: influencer 객체 정보는 DB 반영 후나 목록 새로고침 시 채워지거나, 
+                        // 메인에서 toggle 시 인플루언서 정보를 찾을 수 있는 경우에만 추가 가능.
+                        // 일단 ID 위주로 업데이트 후 sync 호출 유도 가능.
                     });
                 }
 
@@ -84,7 +91,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 InfluencerService.toggleLike(influencerId, member.id).then(res => {
                     if (!res.success) {
                         // 실패 시 롤백
-                        set({ likedInfluencerIds });
+                        set({ likedInfluencerIds, likedInfluencers });
+                    } else {
+                        // 성공 시 상세 목록 동기화 (새로운 좋아요 시 객체 정보를 모르므로 전체 다시 불러오기 권장)
+                        get().syncLikedInfluencers();
                     }
                 });
 
@@ -99,8 +109,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 const { member } = get();
                 if (!member?.id) return;
 
-                const likedIds = await InfluencerService.getLikedInfluencerIds(member.id);
-                set({ likedInfluencerIds: likedIds });
+                // ID 목록과 함께 상세 정보도 함께 가져오기
+                const influencers = await InfluencerService.fetchLikedInfluencers(member.id);
+                set({
+                    likedInfluencerIds: influencers.map(inf => inf.id),
+                    likedInfluencers: influencers
+                });
             },
 
             refreshInfluencerStatus: async () => {
