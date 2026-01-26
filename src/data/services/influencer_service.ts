@@ -254,5 +254,63 @@ export const InfluencerService = {
                 };
             };
         });
+    },
+
+    /**
+     * 좋아요 토글 (DB 반영)
+     */
+    async toggleLike(influencerId: string, memberId: string): Promise<{ success: boolean; isLiked: boolean }> {
+        try {
+            // 1. 현재 좋아요 상태 확인
+            const { data: existingLike } = await supabase
+                .from('influencer_likes')
+                .select('id')
+                .eq('member_id', memberId)
+                .eq('influencer_id', influencerId)
+                .maybeSingle();
+
+            if (existingLike) {
+                // 2. 이미 좋아요 상태라면 제거
+                const { error } = await supabase
+                    .from('influencer_likes')
+                    .delete()
+                    .eq('id', existingLike.id);
+
+                if (error) throw error;
+                return { success: true, isLiked: false };
+            } else {
+                // 3. 좋아요 상태가 아니라면 추가
+                const { error } = await supabase
+                    .from('influencer_likes')
+                    .insert({
+                        member_id: memberId,
+                        influencer_id: influencerId
+                    });
+
+                if (error) throw error;
+                return { success: true, isLiked: true };
+            }
+        } catch (e) {
+            console.error('[InfluencerService] toggleLike error:', e);
+            return { success: false, isLiked: false };
+        }
+    },
+
+    /**
+     * 사용자가 좋아요를 누른 인플루언서 ID 목록을 가져옵니다.
+     */
+    async getLikedInfluencerIds(memberId: string): Promise<string[]> {
+        try {
+            const { data, error } = await supabase
+                .from('influencer_likes')
+                .select('influencer_id')
+                .eq('member_id', memberId);
+
+            if (error) throw error;
+            return data?.map(item => item.influencer_id) || [];
+        } catch (e) {
+            console.error('[InfluencerService] getLikedInfluencerIds error:', e);
+            return [];
+        }
     }
 };

@@ -281,7 +281,7 @@ export const MainScreen = () => {
                             triggerHaptic("tap");
                             toggleLike(inf.id);
                           }}
-                          className={`absolute -top-1 -right-1 w-8 h-8 flex items-center justify-center rounded-full shadow-lg transition-all z-10 ${isLiked(inf.id) ? 'bg-[#FF80AB] text-white' : 'bg-white dark:bg-[#2C2E33] text-[#ADB5BD] border border-[#F2F4F6] dark:border-[#3A3D43]'}`}
+                          className={`absolute -top-1 -right-1 w-8 h-8 flex items-center justify-center rounded-full shadow-lg transition-all z-10 focus:outline-none outline-none ${isLiked(inf.id) ? 'bg-[#FF80AB] text-white' : 'bg-white dark:bg-[#2C2E33] text-[#ADB5BD] border border-[#F2F4F6] dark:border-[#3A3D43]'}`}
                         >
                           <Heart size={16} fill={isLiked(inf.id) ? "currentColor" : "none"} strokeWidth={2.5} />
                         </motion.button>

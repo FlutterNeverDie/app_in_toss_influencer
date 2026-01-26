@@ -25,6 +25,7 @@ interface AuthActions {
     setUser: (member: Member) => void;
     toggleLike: (influencerId: string) => boolean; // 좋아요 토글 (성공 여부 반환)
     isLiked: (influencerId: string) => boolean; // 좋아요 여부 확인
+    syncLikedInfluencers: () => Promise<void>; // 좋아요 내역 동기화
     refreshInfluencerStatus: () => Promise<void>; // 인플루언서 상태 새로고침
 }
 
@@ -42,6 +43,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             login: (member) => {
                 set({ isLoggedIn: true, member });
                 get().refreshInfluencerStatus(); // 로그인 시 상태 확인
+                get().syncLikedInfluencers(); // 좋아요 내역 동기화
             },
 
             mockLogin: async (memberId?: string) => {
@@ -52,6 +54,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 if (member) {
                     set({ isLoggedIn: true, member });
                     await get().refreshInfluencerStatus(); // Mock 로그인 시에도 상태 확인
+                    await get().syncLikedInfluencers(); // Mock 로그인 시에도 좋아요 내역 동기화
                     return true;
                 }
                 return false;
@@ -61,25 +64,43 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             setUser: (member) => set({ member }),
 
             toggleLike: (influencerId: string) => {
-                const { isLoggedIn, likedInfluencerIds } = get();
-                if (!isLoggedIn) return false;
+                const { isLoggedIn, member, likedInfluencerIds } = get();
+                if (!isLoggedIn || !member) return false;
 
-                if (likedInfluencerIds.includes(influencerId)) {
-                    // 이미 좋아요를 눌렀다면 제거 (취소)
+                const isCurrentlyLiked = likedInfluencerIds.includes(influencerId);
+
+                // 1. UI 즉시 반영 (Optimistic UI)
+                if (isCurrentlyLiked) {
                     set({
                         likedInfluencerIds: likedInfluencerIds.filter(id => id !== influencerId)
                     });
                 } else {
-                    // 새로 좋아요 추가
                     set({
                         likedInfluencerIds: [...likedInfluencerIds, influencerId]
                     });
                 }
+
+                // 2. DB 반영 (비동기)
+                InfluencerService.toggleLike(influencerId, member.id).then(res => {
+                    if (!res.success) {
+                        // 실패 시 롤백
+                        set({ likedInfluencerIds });
+                    }
+                });
+
                 return true;
             },
 
             isLiked: (influencerId: string) => {
                 return get().likedInfluencerIds.includes(influencerId);
+            },
+
+            syncLikedInfluencers: async () => {
+                const { member } = get();
+                if (!member?.id) return;
+
+                const likedIds = await InfluencerService.getLikedInfluencerIds(member.id);
+                set({ likedInfluencerIds: likedIds });
             },
 
             refreshInfluencerStatus: async () => {
