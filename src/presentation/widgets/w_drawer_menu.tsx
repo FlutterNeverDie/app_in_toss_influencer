@@ -146,7 +146,7 @@ const triggerHaptic = (type: "tickWeak" | "tap" | "tickMedium" | "success" = "ti
  * 고객센터, FAQ, 인플루언서 등록 기능을 제공합니다. 
  */
 export const DrawerMenu = () => {
-    const { isDrawerOpen, closeDrawer } = useRegionStore();
+    const { isDrawerOpen, closeDrawer, selectRegion } = useRegionStore();
     const [view, setView] = useState<'main' | 'faq'>('main');
     const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
 
@@ -302,7 +302,16 @@ export const DrawerMenu = () => {
                                                         {regInfo.status === 'approved' ? '인플루언서 활동 중' : '인플루언서 등록하기'}
                                                     </h3>
                                                 </div>
-                                                <div className="text-[14px] font-medium text-[var(--text-color)] opacity-80 mb-1 leading-relaxed">
+                                                <div
+                                                    className={`text-[14px] font-medium text-[var(--text-color)] opacity-80 mb-1 leading-relaxed ${regInfo.status === 'approved' ? 'cursor-pointer active:opacity-60 transition-opacity' : ''}`}
+                                                    onClick={() => {
+                                                        if (regInfo.status === 'approved' && regInfo.province_id && regInfo.district_id) {
+                                                            triggerHaptic("tap");
+                                                            selectRegion(regInfo.province_id, regInfo.district_id);
+                                                            closeDrawer();
+                                                        }
+                                                    }}
+                                                >
                                                     {regInfo.status === 'approved'
                                                         ? (
                                                             <div className="flex flex-col gap-1">
@@ -311,6 +320,7 @@ export const DrawerMenu = () => {
                                                                     <div className="w-1.5 h-1.5 rounded-full bg-[#00D082] animate-pulse" />
                                                                     {getRegionName()}
                                                                 </div>
+                                                                <p className="text-[11px] opacity-40 mt-1">클릭하면 지도로 이동해요</p>
                                                             </div>
                                                         )
                                                         : regInfo.status === 'pending'
