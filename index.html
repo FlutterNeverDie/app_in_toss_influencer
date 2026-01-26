@@ -3,41 +3,6 @@
 
 <head>
   <meta charset="UTF-8" />
-  <script>
-    /**
-     * TDS 라이브러리의 환경 체크를 우회하기 위한 전역 모킹 스크립트
-     * 라이브러리가 로드되기 전(최상단)에 실행되어야 합니다.
-     */
-    (function () {
-      const hostname = window.location.hostname;
-      const isPreview = hostname.includes('vercel.app') ||
-        hostname.includes('ngrok') ||
-        hostname === 'localhost' ||
-        hostname === '127.0.0.1';
-
-      if (isPreview) {
-        const mockUA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) Toss/5.33.0';
-
-        // 1. User-Agent 모킹
-        try {
-          Object.defineProperty(navigator, 'userAgent', {
-            get: function () { return mockUA; },
-            configurable: true
-          });
-          // platform도 가끔 체크하므로 iPhone으로 모킹
-          Object.defineProperty(navigator, 'platform', {
-            get: function () { return 'iPhone'; },
-            configurable: true
-          });
-        } catch (e) {
-          console.error('Failed to mock environment:', e);
-        }
-
-        // 2. 토스 앱 내부인 것처럼 브릿지 객체 존재 여부만 흉내
-        window.toss = window.toss || {};
-      }
-    })();
-  </script>
   <link rel="icon" type="image/svg+xml" href="/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>influencer-map</title>
