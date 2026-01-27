@@ -31,12 +31,31 @@ serve(async (req) => {
             throw new Error("Toss Client ID/Secret configuration missing");
         }
 
+        // 0. mTLS용 HttpClient 구성 (권장: Supabase Secrets에 PEM 형식으로 저장)
+        const TOSS_CERT = Deno.env.get("TOSS_CERT");
+        const TOSS_KEY = Deno.env.get("TOSS_KEY");
+
+        let client: Deno.HttpClient | undefined;
+        if (TOSS_CERT && TOSS_KEY) {
+            try {
+                // @ts-ignore: Deno.createHttpClient는 Supabase Edge Functions 최신 런타임에서 지원됨
+                client = Deno.createHttpClient({
+                    certChain: TOSS_CERT,
+                    privateKey: TOSS_KEY,
+                });
+            } catch (e) {
+                console.warn("Failed to create mTLS client, falling back to default fetch:", e);
+            }
+        }
+
         // 1. Authorization Code -> Access Token
         const tokenRes = await fetch(`${TOSS_API_HOST}/api-partner/v1/apps-in-toss/user/oauth2/generate-token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
+            // @ts-ignore
+            client: client,
             body: JSON.stringify({
                 grantType: "AUTHORIZATION_CODE",
                 clientId: CLIENT_ID,

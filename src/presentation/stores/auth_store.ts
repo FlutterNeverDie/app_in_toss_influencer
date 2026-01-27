@@ -59,19 +59,38 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                     return true;
                 }
 
+                // 환경 감지
+                const hostname = window.location.hostname;
+                const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('ngrok') || import.meta.env.DEV;
+
+                if (isLocal) {
+                    return get().mockLogin();
+                }
+
                 // 토스 브릿지를 통해 현재 세션의 인가 코드 획득 시도
                 return get().loginWithToss();
             },
 
             loginWithToss: async () => {
                 try {
-                    // 1. 토스 브릿지 호출하여 인가 코드 획득
-                    if (typeof (window as any).appLogin !== 'function') {
-                        console.error('appLogin function not found in bridge.');
+                    // 1. 토스 환경 감지 (브릿지 객체 + User Agent)
+                    const tossWindow = window as any;
+                    const ua = navigator.userAgent.toLowerCase();
+                    const isTossApp = ua.includes('toss') || ua.includes('toss-bridge');
+
+                    const hasTossBridge =
+                        typeof tossWindow.appLogin === 'function' ||
+                        typeof tossWindow.toss !== 'undefined' ||
+                        typeof tossWindow.TOSSB !== 'undefined' ||
+                        isTossApp;
+
+                    if (!hasTossBridge) {
+                        console.warn('Toss bridge not detected. (If you are in browser, use mock login)');
                         return false;
                     }
 
-                    const response = await (window as any).appLogin();
+                    const { appLogin } = await import('@apps-in-toss/web-framework');
+                    const response = await appLogin() as { authorizationCode: string };
                     const authCode = response?.authorizationCode;
 
                     if (!authCode) {

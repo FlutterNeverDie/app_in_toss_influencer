@@ -11,7 +11,6 @@ import { DrawerMenu } from '../widgets/w_drawer_menu';
 import { RegistrationModal } from '../widgets/w_registration_modal';
 import { PROVINCE_DISPLAY_NAMES, REGION_DATA } from '../../data/constants/regions';
 import { InfluencerService } from '../../data/services/influencer_service';
-import { MemberService } from '../../data/services/member_service';
 
 /**
  * 햅틱 피드백 유틸리티
@@ -47,7 +46,7 @@ export const MainScreen = () => {
     setIsLoadingData
   } = useRegionStore();
 
-  const { isLoggedIn, toggleLike, isLiked, login, member } = useAuthStore();
+  const { isLoggedIn, toggleLike, isLiked, member } = useAuthStore();
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,38 +56,15 @@ export const MainScreen = () => {
       // 이미 로그인되어 있다면 중단
       if (isLoggedIn) return;
 
-      const hostname = window.location.hostname;
-      const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('ngrok') || import.meta.env.DEV;
-
       try {
-        // 1. 토스 앱 브릿지 환경인 경우 (appLogin 존재 시)
-        // 브릿지는 토스 앱 안에서만 주입됩니다.
-        const tossWindow = window as any;
-        const hasTossBridge = typeof tossWindow.appLogin === 'function' ||
-          (typeof tossWindow.toss !== 'undefined');
-
-        if (hasTossBridge && !isLocal) {
-          const { appLogin } = await import('@apps-in-toss/web-framework');
-          const authData = await appLogin() as { authorizationCode: string };
-
-          if (authData?.authorizationCode) {
-            const member = await MemberService.loginWithToss(authData.authorizationCode);
-            if (member) {
-              login(member);
-            }
-          }
-        }
-        // 2. 로컬 개발 환경인 경우 (Mock 로그인)
-        else if (isLocal) {
-          await useAuthStore.getState().mockLogin();
-        }
+        await useAuthStore.getState().autoLogin();
       } catch (error) {
         console.error('Auto login failed:', error);
       }
     };
 
     handleAutoLogin();
-  }, [isLoggedIn, login]);
+  }, [isLoggedIn]);
 
   // [중요] 앱 시작 시 또는 로그인 상태 변경 시 인플루언서 상태 동기화
   useEffect(() => {
