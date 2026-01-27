@@ -22,23 +22,17 @@ serve(async (req) => {
             ? "https://sandbox-api-partner.toss.im"
             : "https://api-partner.toss.im";
 
-        const CLIENT_ID = Deno.env.get("TOSS_CLIENT_ID");
-        const CLIENT_SECRET = Deno.env.get("TOSS_CLIENT_SECRET");
-        const DECRYPT_KEY = Deno.env.get("TOSS_DECRYPT_KEY"); // Base64 encoded AES key
-        const AAD = Deno.env.get("TOSS_AAD") || "TOSS"; // Default to TOSS if not set
+        const DECRYPT_KEY = Deno.env.get("TOSS_DECRYPT_KEY");
+        const AAD = Deno.env.get("TOSS_AAD") || "TOSS";
 
-        if (!CLIENT_ID || !CLIENT_SECRET) {
-            throw new Error("Toss Client ID/Secret configuration missing");
-        }
-
-        // 0. mTLS용 HttpClient 구성 (권장: Supabase Secrets에 PEM 형식으로 저장)
+        // 0. mTLS용 HttpClient 구성
         const TOSS_CERT = Deno.env.get("TOSS_CERT");
         const TOSS_KEY = Deno.env.get("TOSS_KEY");
 
         let client: Deno.HttpClient | undefined;
         if (TOSS_CERT && TOSS_KEY) {
             try {
-                // @ts-ignore: Deno.createHttpClient는 Supabase Edge Functions 최신 런타임에서 지원됨
+                // @ts-ignore
                 client = Deno.createHttpClient({
                     certChain: TOSS_CERT,
                     privateKey: TOSS_KEY,
@@ -49,6 +43,7 @@ serve(async (req) => {
         }
 
         // 1. Authorization Code -> Access Token
+        // 참조: https://partners.toss.im/docs/apps-in-toss/api/user/generate-token
         const tokenRes = await fetch(`${TOSS_API_HOST}/api-partner/v1/apps-in-toss/user/oauth2/generate-token`, {
             method: "POST",
             headers: {
@@ -57,10 +52,8 @@ serve(async (req) => {
             // @ts-ignore
             client: client,
             body: JSON.stringify({
-                grantType: "AUTHORIZATION_CODE",
-                clientId: CLIENT_ID,
-                clientSecret: CLIENT_SECRET,
-                code: code,
+                authorizationCode: code,
+                referrer: "influencer-map"
             }),
         });
 

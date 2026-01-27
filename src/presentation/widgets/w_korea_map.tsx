@@ -316,14 +316,14 @@ export const KoreaMapWidget = ({ onDistrictClick, hasResults = false, isSearchin
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={(e) => { e.stopPropagation(); triggerHaptic("tickWeak"); transformRef.current?.zoomIn(); }}
-                    className="w-10 h-10 flex items-center justify-center liquid-glass rounded-xl text-[var(--text-color)] active:scale-95"
+                    className="w-10 h-10 flex items-center justify-center liquid-glass rounded-xl text-[var(--text-color)] active:scale-95 outline-none focus:outline-none ring-0 focus:ring-0"
                   >
                     <Plus size={20} />
                   </motion.button>
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={(e) => { e.stopPropagation(); triggerHaptic("tickWeak"); transformRef.current?.zoomOut(); }}
-                    className="w-10 h-10 flex items-center justify-center liquid-glass rounded-xl text-[var(--text-color)] dark:text-white active:scale-95"
+                    className="w-10 h-10 flex items-center justify-center liquid-glass rounded-xl text-[var(--text-color)] dark:text-white active:scale-95 outline-none focus:outline-none ring-0 focus:ring-0"
                   >
                     <Minus size={20} />
                   </motion.button>

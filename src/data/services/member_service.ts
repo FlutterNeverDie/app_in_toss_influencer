@@ -15,12 +15,12 @@ export const MemberService = {
 
             if (error) {
                 console.error('Edge Function Error:', error);
-                return null;
+                throw new Error(`Edge Function Error: ${error.message || JSON.stringify(error)}`);
             }
 
             if (!data.success || !data.member) {
                 console.error('Login Failed:', data.error);
-                return null;
+                throw new Error(`서버 로그인 실패: ${data.error || '알 수 없는 오류'}`);
             }
 
             return data.member as Member;

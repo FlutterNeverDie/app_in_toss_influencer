@@ -9,6 +9,7 @@ import { KoreaMapWidget } from '../widgets/w_korea_map';
 import { RegionSelectorSheet } from '../widgets/w_region_selector_sheet';
 import { DrawerMenu } from '../widgets/w_drawer_menu';
 import { RegistrationModal } from '../widgets/w_registration_modal';
+import { IntroScreen } from '../widgets/w_intro_screen'; // [NEW]
 import { PROVINCE_DISPLAY_NAMES, REGION_DATA } from '../../data/constants/regions';
 import { InfluencerService } from '../../data/services/influencer_service';
 
@@ -50,24 +51,9 @@ export const MainScreen = () => {
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // [Toss Integration] 자동 로그인 및 초기화 로직
+  // [Toss Integration] 중요: 자동 로그인은 제거하고 인트로에서 명시적 로그인을 유도합니다. (가이드라인 준수)
   useEffect(() => {
-    const handleAutoLogin = async () => {
-      // 이미 로그인되어 있다면 중단
-      if (isLoggedIn) return;
-
-      try {
-        await useAuthStore.getState().autoLogin();
-      } catch (error) {
-        console.error('Auto login failed:', error);
-      }
-    };
-
-    handleAutoLogin();
-  }, [isLoggedIn]);
-
-  // [중요] 앱 시작 시 또는 로그인 상태 변경 시 인플루언서 상태 동기화
-  useEffect(() => {
+    // 이미 로그인된 사용자의 세션 갱신만 수행
     if (isLoggedIn) {
       useAuthStore.getState().refreshInfluencerStatus();
     }
@@ -94,6 +80,11 @@ export const MainScreen = () => {
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
+  // 비로그인 상태일 경우 인트로 화면 노출
+  if (!isLoggedIn) {
+    console.log('[MainScreen] Not logged in, showing Intro');
+    return <IntroScreen />;
+  }
 
   // 데이터 페칭 로직
   useEffect(() => {

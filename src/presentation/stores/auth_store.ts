@@ -94,6 +94,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                     const authCode = response?.authorizationCode;
 
                     if (!authCode) {
+                        alert('인가 코드를 받지 못했습니다.');
                         console.error('Failed to get authorizationCode from Toss');
                         return false;
                     }
@@ -108,7 +109,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                         return true;
                     }
                     return false;
-                } catch (error) {
+                } catch (error: any) {
+                    // 구체적인 에러 메시지 사용자에게 노출
+                    const msg = error?.message || '알 수 없는 오류가 발생했습니다.';
+                    alert(`로그인 실패: ${msg}\n(관리자에게 문의해주세요)`);
                     console.error('Error during Toss Login:', error);
                     return false;
                 }

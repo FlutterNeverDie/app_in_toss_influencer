@@ -310,30 +310,14 @@ export const DrawerMenu = () => {
                                                     <div className="space-y-4">
                                                         <div className="flex flex-col gap-1">
                                                             <h3 className="text-[18px] font-bold text-[var(--text-color)]">
-                                                                확인이 필요해요
+                                                                로그인 후 이용해주세요
                                                             </h3>
                                                             <p className="text-[13px] font-medium text-[var(--text-color)] opacity-60 leading-relaxed">
-                                                                {((window as any).appLogin || (window as any).toss || (window as any).TOSSB || navigator.userAgent.toLowerCase().includes('toss')) ? (
-                                                                    <>토스 인증 정보를 가져오지 못했습니다. <br />아래 버튼을 눌러 다시 시도해 주세요.</>
-                                                                ) : (
-                                                                    <>토스 앱 환경이 아닙니다. <br />로컬 테스트용 로그인을 사용해 주세요.</>
-                                                                )}
+                                                                인플루언서 맵 서비스를 이용하려면<br />로그인이 필요합니다.
                                                             </p>
                                                         </div>
 
                                                         <div className="space-y-2 pt-2 border-t border-[var(--glass-border)] border-dashed">
-                                                            {((window as any).appLogin || (window as any).toss || (window as any).TOSSB || navigator.userAgent.toLowerCase().includes('toss')) && (
-                                                                <motion.button
-                                                                    whileTap={{ scale: 0.96 }}
-                                                                    onClick={() => {
-                                                                        triggerHaptic("tickMedium");
-                                                                        useAuthStore.getState().loginWithToss();
-                                                                    }}
-                                                                    className="w-full py-3.5 bg-[#3182F6] text-white rounded-[14px] font-bold text-[15px] shadow-lg shadow-[#3182F6]/20"
-                                                                >
-                                                                    토스 로그인 시도
-                                                                </motion.button>
-                                                            )}
                                                             <MockLoginButton />
                                                         </div>
                                                     </div>
