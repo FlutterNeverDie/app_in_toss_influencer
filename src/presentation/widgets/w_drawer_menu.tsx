@@ -70,6 +70,11 @@ const LikedInfluencerList = () => {
                         className="overflow-hidden"
                     >
                         <div className="space-y-2 pb-2">
+                            <div className="flex justify-start px-1 mb-1">
+                                <span className="text-[11px] font-medium text-[var(--text-color)] opacity-30">
+                                    왼쪽으로 밀어서 삭제
+                                </span>
+                            </div>
                             <AnimatePresence mode="popLayout">
                                 {likedInfluencers.map((inf) => (
                                     <motion.div
@@ -278,31 +283,19 @@ export const DrawerMenu = () => {
                                                 {member ? (
                                                     // 로그인 상태
                                                     <div className="space-y-4">
-                                                        <div className="flex items-center justify-between gap-2">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-14 h-14 bg-[var(--bg-color)] rounded-full flex items-center justify-center text-[var(--text-color)] opacity-60 shadow-sm border border-[var(--glass-border)]">
-                                                                    <User size={30} />
-                                                                </div>
-                                                                <div className="flex flex-col gap-0.5 min-w-0">
-                                                                    <h3 className="text-[18px] font-bold text-[var(--text-color)] leading-tight truncate">
-                                                                        {member.name}
-                                                                    </h3>
-                                                                    <p className="text-[13px] font-medium text-[var(--text-color)] opacity-60">
-                                                                        반가워요!
-                                                                    </p>
-                                                                </div>
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-14 h-14 bg-[var(--bg-color)] rounded-full flex items-center justify-center text-[var(--text-color)] opacity-60 shadow-sm border border-[var(--glass-border)]">
+                                                                <User size={30} />
                                                             </div>
-                                                            <button
-                                                                onClick={() => {
-                                                                    triggerHaptic("tickWeak");
-                                                                    useAuthStore.getState().logout();
-                                                                }}
-                                                                className="px-3 py-1.5 rounded-full bg-[var(--bg-color)]/50 border border-[var(--glass-border)] text-[11px] font-bold text-[var(--text-color)] opacity-50 hover:opacity-100 transition-all active:scale-95"
-                                                            >
-                                                                로그아웃
-                                                            </button>
+                                                            <div className="flex flex-col gap-0.5 min-w-0">
+                                                                <h3 className="text-[18px] font-bold text-[var(--text-color)] leading-tight truncate">
+                                                                    {member.name}
+                                                                </h3>
+                                                                <p className="text-[13px] font-medium text-[var(--text-color)] opacity-60">
+                                                                    반가워요!
+                                                                </p>
+                                                            </div>
                                                         </div>
-
                                                     </div>
                                                 ) : (
                                                     // 비로그인 상태 (자동 로그인 실패 시)

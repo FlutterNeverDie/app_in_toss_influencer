@@ -121,43 +121,48 @@ export const RegistrationModal: React.FC<IRegistrationBottomSheetProps> = ({ isO
             <div className="bg-white dark:bg-[#1C1E22] h-[85vh] rounded-t-[32px] overflow-hidden flex flex-col">
                 <BottomSheet.Header>
                     <span style={{ color: 'var(--text-color)' }}>
-                        {step === 3 ? '신청 완료' : (regInfo.status === 'pending' ? '신청 현황' : '')}
+                        {step === 3 || regInfo.status === 'pending' ? '' : ''}
                     </span>
                 </BottomSheet.Header>
 
-                <div className="px-6 pb-32 overflow-y-auto flex-1 scrollbar-hide registration-modal-content">
+                <div className="px-6 pb-40 overflow-y-auto flex-1 scrollbar-hide registration-modal-content">
                     {regInfo.status === 'pending' && step !== 3 ? (
-                        <div className="flex flex-col items-center justify-center text-center space-y-8 pt-10">
-                            <div className="w-24 h-24 bg-[#3182F6]/10 rounded-full flex items-center justify-center relative">
-                                <CheckCircle2 size={48} className="text-[#3182F6]" />
+                        <div className="flex flex-col items-center justify-center text-center pt-14 pb-10">
+                            <div className="w-20 h-20 bg-[#3182F6]/10 rounded-full flex items-center justify-center mb-10">
+                                <CheckCircle2 size={42} className="text-[#3182F6]" />
                             </div>
 
-                            <div className="space-y-3">
-                                <h3 className="text-[24px] font-bold" style={{ color: 'var(--text-color)' }}>꼼꼼하게 검토하고 있어요!</h3>
-                                <Paragraph color="grey600" typography="t6">
-                                    제출해주신 정보를 확인하고 있습니다.<br />
-                                    조금만 기다려주시면 알림을 보내드릴게요.
-                                </Paragraph>
-                            </div>
-
-                            <div className="w-full bg-[#f9fafb] dark:bg-[#2C2E33] rounded-[24px] p-6 text-left space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-[#8B95A1] text-[15px]">신청 지역</span>
-                                    <span className="font-bold" style={{ color: 'var(--text-color)' }}>
+                            <div className="space-y-4 mb-12">
+                                <h3 className="text-[26px] font-bold" style={{ color: 'var(--text-color)' }}>검토 중이에요!</h3>
+                                <Paragraph typography="t6" style={{ color: 'var(--text-color)', opacity: 0.8 }}>
+                                    <span className="text-[#3182F6] font-bold">
                                         {regInfo.province_id && PROVINCE_DISPLAY_NAMES[regInfo.province_id]}
                                         {' '}
                                         {regInfo.province_id && regInfo.district_id && REGION_DATA[regInfo.province_id]?.find((d: any) => d.id === regInfo.district_id)?.name}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-[#8B95A1] text-[15px]">상태</span>
-                                    <span className="font-bold text-[#3182F6]">검수 대기 중</span>
-                                </div>
+                                    </span> 지역 신청을 확인하고 있습니다.<br />
+                                    본인 인증을 위해 아래 버튼을 눌러 관리자에게<br />
+                                    <span className="text-[#3182F6] font-bold">"등록 신청했습니다"</span>라고 DM을 보내주세요.
+                                </Paragraph>
                             </div>
 
-                            <Button size="large" color="light" display="block" onClick={handleClose} style={{ borderRadius: '24px' }}>
-                                닫기
-                            </Button>
+                            <div className="w-full space-y-3">
+                                <Button
+                                    color="dark"
+                                    size="large"
+                                    display="block"
+                                    onClick={() => {
+                                        triggerHaptic("tickMedium");
+                                        window.open('https://www.instagram.com/influer_map', '_blank');
+                                    }}
+                                    style={{ borderRadius: '24px' }}
+                                >
+                                    <Instagram size={20} className="mr-2 inline" />
+                                    관리자에게 DM 보내기
+                                </Button>
+                                <Button size="large" color="light" display="block" onClick={handleClose} style={{ borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
+                                    나중에 하기
+                                </Button>
+                            </div>
                         </div>
                     ) : step === 1 && (
                         <div className="space-y-6 pt-2">
@@ -264,13 +269,6 @@ export const RegistrationModal: React.FC<IRegistrationBottomSheetProps> = ({ isO
                                             const val = e.target.value.replace('@', '').trim();
                                             setInstagramId(val);
                                         }}
-                                        onBlur={() => {
-                                            window.scrollTo(0, 0);
-                                            setTimeout(() => {
-                                                const content = document.querySelector('.registration-modal-content');
-                                                if (content) content.scrollTop = content.scrollTop;
-                                            }, 100);
-                                        }}
                                         placeholder="아이디 입력"
                                         maxLength={30}
                                         className="tds-search-input registration-id-input"
@@ -313,7 +311,7 @@ export const RegistrationModal: React.FC<IRegistrationBottomSheetProps> = ({ isO
                             </div>
                             <div>
                                 <h3 className="text-[24px] font-bold mb-3" style={{ color: 'var(--text-color)' }}>신청이 완료되었어요!</h3>
-                                <Paragraph color="grey600" typography="t6">
+                                <Paragraph typography="t6" style={{ color: 'var(--text-color)', opacity: 0.7 }}>
                                     마지막 단계로 아래 버튼을 눌러<br />
                                     관리자에게 <span className="text-[#3182F6] font-bold">"등록 신청했습니다"</span>라고<br />
                                     DM을 보내주시면 가장 빠르게 승인됩니다.
@@ -327,7 +325,7 @@ export const RegistrationModal: React.FC<IRegistrationBottomSheetProps> = ({ isO
                                     display="block"
                                     onClick={() => {
                                         triggerHaptic("tickMedium");
-                                        window.open('https://www.instagram.com/influencer_map', '_blank');
+                                        window.open('https://www.instagram.com/influer_map', '_blank');
                                     }}
                                     style={{ borderRadius: '24px' }}
                                 >
@@ -342,6 +340,6 @@ export const RegistrationModal: React.FC<IRegistrationBottomSheetProps> = ({ isO
                     )}
                 </div>
             </div>
-        </BottomSheet>
+        </BottomSheet >
     );
 };

@@ -8,8 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "toss": "granite dev",
-    "deploy": "granite build && ait deploy"
+    "toss": "npx granite dev",
+    "deploy": "npx granite build && npx ait deploy"
   },
   "dependencies": {
     "@apps-in-toss/web-framework": "^1.8.0",

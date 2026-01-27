@@ -203,7 +203,6 @@
         /* Ensure scrolling doesn't feel cut off */
         -webkit-overflow-scrolling: touch;
         scroll-behavior: smooth;
-        height: 100%;
     }
 
     /* Registration Modal UI Polish (v11) */

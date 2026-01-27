@@ -202,7 +202,12 @@ export const InfluencerService = {
                 });
 
             if (error) {
-                console.error('Storage Upload Error:', error);
+                console.error('[InfluencerService] Storage Upload Error Detail:', {
+                    message: error.message,
+                    name: error.name,
+                    status: (error as any).status,
+                    error
+                });
                 return null;
             }
 
