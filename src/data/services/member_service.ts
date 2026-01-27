@@ -9,9 +9,12 @@ export const MemberService = {
      */
     async loginWithToss(authCode: string): Promise<Member | null> {
         try {
+            console.log(`[MemberService] Calling toss-login with code: ${authCode.substring(0, 10)}...`);
             const { data, error } = await supabase.functions.invoke('toss-login', {
                 body: { code: authCode }
             });
+
+            console.log('[MemberService] Edge Function Raw Result:', { data, error });
 
             if (error) {
                 console.error('Edge Function Error:', error);
@@ -113,5 +116,33 @@ export const MemberService = {
 
         if (error) return null;
         return data as Member;
+    },
+
+    /**
+     * 회원 탈퇴 (서비스 연결 해제)
+     * 1. Toss API를 통해 연결 해제
+     * 2. DB에서 유저 데이터 삭제
+     */
+    async withdraw(tossId: string): Promise<boolean> {
+        try {
+            const { data, error } = await supabase.functions.invoke('toss-unlink', {
+                body: { toss_id: tossId }
+            });
+
+            if (error) {
+                console.error('Edge Function Error:', error);
+                throw new Error(error.message);
+            }
+
+            if (!data.success) {
+                console.error('Withdraw Failed:', data.error);
+                throw new Error(data.error);
+            }
+
+            return true;
+        } catch (e) {
+            console.error('Withdraw Error:', e);
+            throw e;
+        }
     }
 };

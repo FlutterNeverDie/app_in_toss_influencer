@@ -8,7 +8,6 @@ import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/region
 import { generateHapticFeedback, openURL } from '@apps-in-toss/web-framework';
 import { Top } from '@toss/tds-mobile';
 import { MockLoginButton } from './w_mock_login';
-import { LogOut } from 'lucide-react';
 
 /**
  * 인스타그램 ID 마스킹 (보안용)
@@ -279,31 +278,31 @@ export const DrawerMenu = () => {
                                                 {member ? (
                                                     // 로그인 상태
                                                     <div className="space-y-4">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="w-14 h-14 bg-[var(--bg-color)] rounded-full flex items-center justify-center text-[var(--text-color)] opacity-60 shadow-sm border border-[var(--glass-border)]">
-                                                                <User size={30} />
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-14 h-14 bg-[var(--bg-color)] rounded-full flex items-center justify-center text-[var(--text-color)] opacity-60 shadow-sm border border-[var(--glass-border)]">
+                                                                    <User size={30} />
+                                                                </div>
+                                                                <div className="flex flex-col gap-0.5 min-w-0">
+                                                                    <h3 className="text-[18px] font-bold text-[var(--text-color)] leading-tight truncate">
+                                                                        {member.name}
+                                                                    </h3>
+                                                                    <p className="text-[13px] font-medium text-[var(--text-color)] opacity-60">
+                                                                        반가워요!
+                                                                    </p>
+                                                                </div>
                                                             </div>
-                                                            <div className="flex flex-col gap-0.5 min-w-0">
-                                                                <h3 className="text-[18px] font-bold text-[var(--text-color)] leading-tight truncate">
-                                                                    {member.name}
-                                                                </h3>
-                                                                <p className="text-[13px] font-medium text-[var(--text-color)] opacity-60">
-                                                                    반가워요!
-                                                                </p>
-                                                            </div>
+                                                            <button
+                                                                onClick={() => {
+                                                                    triggerHaptic("tickWeak");
+                                                                    useAuthStore.getState().logout();
+                                                                }}
+                                                                className="px-3 py-1.5 rounded-full bg-[var(--bg-color)]/50 border border-[var(--glass-border)] text-[11px] font-bold text-[var(--text-color)] opacity-50 hover:opacity-100 transition-all active:scale-95"
+                                                            >
+                                                                로그아웃
+                                                            </button>
                                                         </div>
 
-                                                        {/* 로그아웃 버튼 (작게) */}
-                                                        <button
-                                                            onClick={() => {
-                                                                triggerHaptic("tickWeak");
-                                                                useAuthStore.getState().logout();
-                                                            }}
-                                                            className="flex items-center gap-1.5 text-[12px] font-bold text-[var(--text-color)] opacity-30 hover:opacity-100 transition-opacity ml-auto px-2 py-1"
-                                                        >
-                                                            <LogOut size={14} />
-                                                            로그아웃
-                                                        </button>
                                                     </div>
                                                 ) : (
                                                     // 비로그인 상태 (자동 로그인 실패 시)
@@ -443,7 +442,19 @@ export const DrawerMenu = () => {
                         </div>
 
                         {/* 푸터 */}
-                        <div className="p-6 border-t border-[var(--glass-border)]">
+                        <div className="p-6 border-t border-[var(--glass-border)] flex flex-col items-center gap-4">
+                            {/* member && (
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm('정말로 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.')) {
+                                            useAuthStore.getState().withdraw();
+                                        }
+                                    }}
+                                    className="text-[12px] font-medium text-[#FF3B30] opacity-60 hover:opacity-100 transition-opacity underline"
+                                >
+                                    회원 탈퇴
+                                </button>
+                            ) */}
                             <p className="text-[12px] text-[var(--text-color)] opacity-40 text-center">
                                 © 2026 Influencer Map. All rights reserved.
                             </p>

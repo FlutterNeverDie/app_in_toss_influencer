@@ -25,8 +25,8 @@ export const IntroScreen = () => {
 
     return (
         <div className="fixed inset-0 z-[100] flex flex-col bg-[var(--bg-color)] font-toss overflow-hidden">
-            {/* 1. 상단 그래픽 영역 (60%) */}
-            <div className="flex-1 relative flex items-center justify-center p-8 overflow-hidden">
+            {/* 1. 상단 그래픽 영역 (55%) */}
+            <div className="flex-1 relative flex items-center justify-center p-8 overflow-hidden bg-white dark:bg-[#191F28]">
                 {/* 배경 그라데이션 원 */}
                 <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
@@ -48,21 +48,20 @@ export const IntroScreen = () => {
                 </motion.div>
             </div>
 
-            {/* 2. 하단 텍스트 및 버튼 영역 (40%) */}
-            <div className="relative z-20 bg-white dark:bg-[#191F28] rounded-t-[32px] p-8 pb-safe shadow-[0_-8px_40px_rgba(0,0,0,0.08)] flex flex-col gap-8">
+            {/* 2. 하단 텍스트 및 버튼 영역 (45%) */}
+            <div className="relative z-20 bg-white dark:bg-[#191F28] p-8 pb-safe flex flex-col gap-8">
                 <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="space-y-4 text-center"
+                    className="space-y-4 text-center mt-auto"
                 >
                     <h1 className="text-[26px] font-bold text-[#191F28] dark:text-white leading-[1.3]">
                         내 주변 인플루언서를<br />
                         <span className="text-[#3182F6]">지도에서 확인해보세요</span>
                     </h1>
                     <p className="text-[15px] font-medium text-[#8B95A1] dark:text-[#8B95A1] leading-relaxed">
-                        내가 사는 동네의 유명인을 찾고<br />
-                        나도 인플루언서가 되어보세요.
+                        내가 사는 동네의 유명인을 찾아보세요.
                     </p>
                 </motion.div>
 
@@ -70,10 +69,13 @@ export const IntroScreen = () => {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.6 }}
-                    className="space-y-3"
+                    className="space-y-3 mb-6"
                 >
                     <button
-                        onClick={handleLogin}
+                        onClick={() => {
+                            console.log('[Intro] Login button clicked');
+                            handleLogin();
+                        }}
                         className="w-full py-4 bg-[#3182F6] hover:bg-[#296DCE] active:scale-[0.98] text-white rounded-[16px] font-bold text-[16px] shadow-lg shadow-[#3182F6]/25 transition-all flex items-center justify-center gap-2"
                     >
                         토스로 계속하기

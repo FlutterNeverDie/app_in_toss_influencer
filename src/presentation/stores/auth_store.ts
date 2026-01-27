@@ -31,6 +31,7 @@ interface AuthActions {
     isLiked: (influencerId: string) => boolean; // 좋아요 여부 확인
     syncLikedInfluencers: () => Promise<void>; // 좋아요 내역 동기화
     refreshInfluencerStatus: () => Promise<void>; // 인플루언서 상태 새로고침
+    withdraw: () => Promise<boolean>; // 회원 탈퇴
 }
 
 /**
@@ -85,6 +86,15 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                         isTossApp;
 
                     if (!hasTossBridge) {
+                        // 로컬 개발 환경인 경우 Mock 로그인 시도
+                        const hostname = window.location.hostname;
+                        const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('ngrok') || import.meta.env.DEV;
+
+                        if (isLocal) {
+                            console.log('Local environment detected. Switching to Mock Login.');
+                            return get().mockLogin();
+                        }
+
                         console.warn('Toss bridge not detected. (If you are in browser, use mock login)');
                         return false;
                     }
@@ -198,6 +208,23 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                     set({ influencerStatus: status });
                 } catch (error) {
                     console.error('Failed to refresh influencer status:', error);
+                }
+            },
+
+            withdraw: async () => {
+                const { member, logout } = get();
+                if (!member?.toss_id) {
+                    alert('로그인 정보가 올바르지 않습니다.');
+                    return false;
+                }
+
+                try {
+                    await MemberService.withdraw(member.toss_id);
+                    logout(); // 로그아웃 처리 (로컬 스토리지 클리어)
+                    return true;
+                } catch (error: any) {
+                    alert(`탈퇴 처리에 실패했습니다: ${error.message}`);
+                    return false;
                 }
             },
         }),
