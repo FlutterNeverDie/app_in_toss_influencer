@@ -43,7 +43,7 @@ export const IntroScreen = () => {
                     className="relative z-10 flex flex-col items-center gap-6"
                 >
                     <div className="w-24 h-24 bg-white dark:bg-[#2C2E33] rounded-[32px] shadow-2xl flex items-center justify-center overflow-hidden">
-                        <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+                        <img src="./logo.png" alt="Logo" className="w-full h-full object-cover" />
                     </div>
                 </motion.div>
             </div>
