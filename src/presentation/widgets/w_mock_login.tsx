@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuthStore } from '../stores/auth_store';
+import { useOverlayStore } from '../stores/overlay_store';
 import { generateHapticFeedback } from '@apps-in-toss/web-framework';
 
 /**
@@ -22,9 +23,9 @@ export const MockLoginButton: React.FC = () => {
 
         const success = await mockLogin();
         if (success) {
-            alert('개발용 Mock 로그인 성공!');
+            useOverlayStore.getState().showAlert('성공', '개발용 Mock 로그인 성공!');
         } else {
-            alert('Mock 로그인 실패 (로컬 환경 여부 확인)');
+            useOverlayStore.getState().showAlert('실패', 'Mock 로그인 실패 (로컬 환경 여부 확인)');
         }
     };
 

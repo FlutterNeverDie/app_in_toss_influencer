@@ -1,5 +1,6 @@
 import React from 'react'
 import { MainScreen } from './presentation/screens/s_main_screen'
+import { GlobalOverlay } from './presentation/widgets/w_global_overlay';
 import './index.css'
 import { TDSMobileProvider, PortalProvider } from '@toss/tds-mobile';
 import { BrowserRouter } from 'react-router-dom';
@@ -14,6 +15,7 @@ const App = () => {
     <TDSMobileProvider userAgent={userAgent as any}>
       <PortalProvider>
         <MainScreen />
+        <GlobalOverlay />
       </PortalProvider>
     </TDSMobileProvider>
   );

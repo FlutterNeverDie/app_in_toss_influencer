@@ -5,6 +5,7 @@ import type { Member } from '../../data/models/m_member';
 import { MemberService } from '../../data/services/member_service';
 import { InfluencerService } from '../../data/services/influencer_service';
 import type { Influencer } from '../../data/models/m_influencer';
+import { useOverlayStore } from './overlay_store';
 
 export interface InfluencerStatus {
     status: 'pending' | 'approved' | 'rejected' | null;
@@ -104,7 +105,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                     const authCode = response?.authorizationCode;
 
                     if (!authCode) {
-                        alert('인가 코드를 받지 못했습니다.');
+                        useOverlayStore.getState().showAlert('로그인 오류', '인가 코드를 받지 못했습니다.');
                         console.error('Failed to get authorizationCode from Toss');
                         return false;
                     }
@@ -122,7 +123,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 } catch (error: any) {
                     // 구체적인 에러 메시지 사용자에게 노출
                     const msg = error?.message || '알 수 없는 오류가 발생했습니다.';
-                    alert(`로그인 실패: ${msg}\n(관리자에게 문의해주세요)`);
+                    useOverlayStore.getState().showAlert('로그인 실패', `${msg}\n(관리자에게 문의해주세요)`);
                     console.error('Error during Toss Login:', error);
                     return false;
                 }
@@ -214,7 +215,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             withdraw: async () => {
                 const { member, logout } = get();
                 if (!member?.toss_id) {
-                    alert('로그인 정보가 올바르지 않습니다.');
+                    useOverlayStore.getState().showAlert('오류', '로그인 정보가 올바르지 않습니다.');
                     return false;
                 }
 
@@ -223,7 +224,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                     logout(); // 로그아웃 처리 (로컬 스토리지 클리어)
                     return true;
                 } catch (error: any) {
-                    alert(`탈퇴 처리에 실패했습니다: ${error.message}`);
+                    useOverlayStore.getState().showAlert('탈퇴 실패', `탈퇴 처리에 실패했습니다: ${error.message}`);
                     return false;
                 }
             },

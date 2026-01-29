@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, HelpCircle, UserPlus, ChevronDown, ChevronUp, User, ArrowLeft, Heart } from 'lucide-react';
 import { useRegionStore } from '../stores/region_store';
 import { useAuthStore } from '../stores/auth_store';
+import { useOverlayStore } from '../stores/overlay_store';
 import { FAQ_DATA } from '../../data/constants/faq';
 import { REGION_DATA, PROVINCE_DISPLAY_NAMES } from '../../data/constants/regions';
 import { generateHapticFeedback, openURL } from '@apps-in-toss/web-framework';
@@ -438,9 +439,18 @@ export const DrawerMenu = () => {
                         <div className="p-6 border-t border-[var(--glass-border)] flex flex-col items-center gap-4">
                             {/* member && (
                                 <button
-                                    onClick={() => {
-                                        if (window.confirm('정말로 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.')) {
-                                            useAuthStore.getState().withdraw();
+                                    onClick={async () => {
+                                        const confirmed = await useOverlayStore.getState().showConfirm(
+                                            '정말로 탈퇴하시겠습니까?',
+                                            '모든 데이터가 삭제되며 복구할 수 없습니다.',
+                                            '탈퇴하기',
+                                            '취소'
+                                        );
+                                        if (confirmed) {
+                                            const success = await useAuthStore.getState().withdraw();
+                                            if (success) {
+                                                useOverlayStore.getState().showAlert('탈퇴 완료', '성공적으로 탈퇴 처리되었습니다.');
+                                            }
                                         }
                                     }}
                                     className="text-[12px] font-medium text-[#FF3B30] opacity-60 hover:opacity-100 transition-opacity underline"
