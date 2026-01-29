@@ -48,6 +48,7 @@ export const MainScreen = () => {
   } = useRegionStore();
 
   const { isLoggedIn, toggleLike, isLiked, member } = useAuthStore();
+
   const [influencers, setInfluencers] = useState<Influencer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -80,14 +81,10 @@ export const MainScreen = () => {
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
-  // 비로그인 상태일 경우 인트로 화면 노출
-  if (!isLoggedIn) {
-    console.log('[MainScreen] Not logged in, showing Intro');
-    return <IntroScreen />;
-  }
-
   // 데이터 페칭 로직
   useEffect(() => {
+    if (!isLoggedIn) return; // 로그인 전에는 데이터 로드 스킵
+
     const loadInfluencers = async () => {
       // 유저 요청: 소분류(selectedDistrict)가 선택되었을 때만 데이터 로드
       if (!selectedProvince || !selectedDistrict) {
@@ -128,7 +125,12 @@ export const MainScreen = () => {
     };
 
     loadInfluencers();
-  }, [selectedProvince, selectedDistrict, setIsLoadingData]);
+  }, [selectedProvince, selectedDistrict, setIsLoadingData, isLoggedIn]);
+
+  // 비로그인 상태일 경우 인트로 화면 노출
+  if (!isLoggedIn) {
+    return <IntroScreen />;
+  }
 
   // 인플루언서 클릭 시 인스타그램 이동
   const handleInfluencerClick = (instagramId: string) => {
