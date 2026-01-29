@@ -24,7 +24,7 @@ interface AuthState {
 interface AuthActions {
     login: (member: Member) => void;
     autoLogin: () => Promise<boolean>; // 앱 시작 시 자동 로그인 시도
-    loginWithToss: () => Promise<boolean>; // 토스 로그인 수동 호출
+    loginWithToss: (silent?: boolean) => Promise<boolean>; // 토스 로그인 수동 호출 (silent: 에러 알림 숨김)
     mockLogin: (memberId?: string) => Promise<boolean>; // 로컬용 mock 로그인
     logout: () => void;
     setUser: (member: Member) => void;
@@ -54,26 +54,28 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             },
 
             autoLogin: async () => {
-                // 이미 로그인된 상태라면 스킵
-                if (get().isLoggedIn && get().member) {
-                    await get().refreshInfluencerStatus();
-                    await get().syncLikedInfluencers();
-                    return true;
-                }
+                // [수정] 토스 연동 해제 시 로그아웃 처리를 위해 항상 appLogin을 호출하여 검증
+                // 이미 로그인된 상태여도 세션 유효성을 확인합니다.
 
                 // 환경 감지
                 const hostname = window.location.hostname;
                 const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('ngrok') || import.meta.env.DEV;
 
                 if (isLocal) {
+                    // 로컬에서는 기존 로직 유지 (mockLogin은 상태 유지)
+                    if (get().isLoggedIn && get().member) {
+                        return true;
+                    }
                     return get().mockLogin();
                 }
 
-                // 토스 브릿지를 통해 현재 세션의 인가 코드 획득 시도
-                return get().loginWithToss();
+                // 토스 브릿지를 통해 현재 세션의 인가 코드 획득 시도 (Silent 모드)
+                // 성공 시: 로그인 유지 / 갱신
+                // 실패 시(연동 해제 등): 로그아웃 처리됨
+                return get().loginWithToss(true);
             },
 
-            loginWithToss: async () => {
+            loginWithToss: async (silent = false) => {
                 try {
                     // 1. 토스 환경 감지 (브릿지 객체 + User Agent)
                     const tossWindow = window as any;
@@ -96,17 +98,24 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                             return get().mockLogin();
                         }
 
-                        console.warn('Toss bridge not detected. (If you are in browser, use mock login)');
+                        if (!silent) console.warn('Toss bridge not detected. (If you are in browser, use mock login)');
                         return false;
                     }
 
                     const { appLogin } = await import('@apps-in-toss/web-framework');
+
+                    // appLogin 호출:
+                    // - 연동된 상태: 바로 code 반환
+                    // - 미연동 상태: 약관 동의 BottomSheet 뜸 -> 동의 시 code 반환, 취소 시 에러/null
                     const response = await appLogin() as { authorizationCode: string };
                     const authCode = response?.authorizationCode;
 
                     if (!authCode) {
-                        useOverlayStore.getState().showAlert('로그인 오류', '인가 코드를 받지 못했습니다.');
+                        if (!silent) {
+                            useOverlayStore.getState().showAlert('로그인 오류', '인가 코드를 받지 못했습니다.');
+                        }
                         console.error('Failed to get authorizationCode from Toss');
+                        get().logout(); // 코드를 못 받으면 로그아웃 처리
                         return false;
                     }
 
@@ -119,12 +128,17 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                         await get().syncLikedInfluencers();
                         return true;
                     }
+
+                    get().logout(); // 서버 로그인 실패 시 로그아웃
                     return false;
                 } catch (error: any) {
-                    // 구체적인 에러 메시지 사용자에게 노출
-                    const msg = error?.message || '알 수 없는 오류가 발생했습니다.';
-                    useOverlayStore.getState().showAlert('로그인 실패', `${msg}\n(관리자에게 문의해주세요)`);
+                    // silent 모드가 아닐 때만 에러 노출
+                    if (!silent) {
+                        const msg = error?.message || '알 수 없는 오류가 발생했습니다.';
+                        useOverlayStore.getState().showAlert('로그인 실패', `${msg}\n(관리자에게 문의해주세요)`);
+                    }
                     console.error('Error during Toss Login:', error);
+                    get().logout(); // 에러 발생 시 로그아웃 (안전 장치)
                     return false;
                 }
             },
